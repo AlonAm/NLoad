@@ -35,6 +35,8 @@ namespace NLoad
 
         public LoadTestResult Run()
         {
+            var stopWatch = Stopwatch.StartNew();
+
             var threads = CreateThreads();
 
             StartThreads(threads);
@@ -43,9 +45,12 @@ namespace NLoad
 
             ShutdownThreads(threads);
 
+            stopWatch.Stop();
+
             var result = new LoadTestResult
             {
-                TotalTestRuns = _counter
+                TotalTestRuns = _counter,
+                TotalRuntime = stopWatch.Elapsed
             };
 
             return result;

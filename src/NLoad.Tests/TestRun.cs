@@ -4,19 +4,19 @@ namespace NLoad.Tests
 {
     public class TestRun : ITestRun
     {
-        private static int _counter;
+        private static int _threadCounter;
 
-        public static int Counter
+        public static int ThreadCounter
         {
             get
             {
-                return _counter;
+                return _threadCounter;
             }
         }
 
         public void Initialize()
         {
-            Interlocked.Increment(ref _counter);
+            Interlocked.Increment(ref _threadCounter);
         }
 
         public void Execute()

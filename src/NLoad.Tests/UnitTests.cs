@@ -42,9 +42,9 @@ namespace NLoad.Tests
 
             var result = loadTest.Run();
 
-            Assert.AreEqual(numberOfThreads, TestRun.Counter);
+            Assert.AreEqual(numberOfThreads, TestRun.ThreadCounter);
             Assert.IsTrue(result.TotalTestRuns > 0);
-            //Assert.IsTrue(result.TotalRuntime > TimeSpan.Zero);
+            Assert.IsTrue(result.TotalRuntime > TimeSpan.Zero);
         }
 
         [TestMethod]
