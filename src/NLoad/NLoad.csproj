@@ -43,6 +43,7 @@
     <Compile Include="LoadTest.cs" />
     <Compile Include="LoadTestBuilder.cs" />
     <Compile Include="LoadTestConfiguration.cs" />
+    <Compile Include="LoadTestException.cs" />
     <Compile Include="LoadTestResult.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

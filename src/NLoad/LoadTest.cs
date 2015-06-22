@@ -37,21 +37,29 @@ namespace NLoad
         {
             var stopWatch = Stopwatch.StartNew();
 
-            var threads = CreateThreads();
+            var result = new LoadTestResult();
 
-            StartThreads(threads);
-
-            Monitor();
-
-            ShutdownThreads(threads);
-
-            stopWatch.Stop();
-
-            var result = new LoadTestResult
+            try
             {
-                TotalTestRuns = _counter,
-                TotalRuntime = stopWatch.Elapsed
-            };
+                var threads = CreateThreads();
+
+                StartThreads(threads);
+
+                Monitor();
+                
+                ShutdownThreads(threads);
+                
+                result.TotalTestRuns = _counter;
+                result.TotalRuntime = stopWatch.Elapsed;
+            }
+            catch (Exception e)
+            {
+                throw new LoadTestException("An error occurred while load testing. See inner exception for details.", e);
+            }
+            finally
+            {
+                stopWatch.Stop();
+            }
 
             return result;
         }
