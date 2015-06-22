@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace NLoad.Tests
@@ -64,29 +63,6 @@ namespace NLoad.Tests
             loadTest.Run();
 
             Assert.IsTrue(currentThroughputEventFired);
-        }
-    }
-
-    public class TestRun : ITestRun
-    {
-        private static int _counter;
-
-        public static int Counter
-        {
-            get
-            {
-                return _counter;
-            }
-        }
-
-        public void Initialize()
-        {
-            Interlocked.Increment(ref _counter);
-        }
-
-        public void Execute()
-        {
-            Thread.Sleep(1);
         }
     }
 }
