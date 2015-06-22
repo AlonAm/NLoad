@@ -8,10 +8,11 @@ namespace NLoad
 {
     public class LoadTest<T> where T : ITestRun, new()
     {
-        private readonly LoadTestConfiguration _configuration;
-
-        private readonly ManualResetEvent _quitEvent = new ManualResetEvent(false);
         private long _counter;
+        private readonly LoadTestConfiguration _configuration;
+        private readonly ManualResetEvent _quitEvent = new ManualResetEvent(false);
+
+        public event EventHandler<double> CurrentThroughput;
 
         [ExcludeFromCodeCoverage]
         public LoadTest(LoadTestConfiguration configuration)
@@ -66,8 +67,7 @@ namespace NLoad
 
                 var counter = Interlocked.Read(ref _counter);
 
-                //todo: convert to event
-                Debug.WriteLine("\rThroughput: {0}", counter / delta.TotalSeconds);
+                OnCurrentThroughput(counter / delta.TotalSeconds);
 
                 if (delta >= _configuration.Duration)
                 {
@@ -126,6 +126,13 @@ namespace NLoad
             {
                 t.Join();
             }
+        }
+
+        protected virtual void OnCurrentThroughput(double throughput)
+        {
+            var handler = CurrentThroughput;
+
+            if (handler != null) handler(this, throughput);
         }
     }
 }

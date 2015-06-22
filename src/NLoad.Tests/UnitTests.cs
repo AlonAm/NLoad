@@ -1,10 +1,9 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace NLoad.Tests
 {
-    using System;
-
     [TestClass]
     public class UnitTests
     {
@@ -15,7 +14,7 @@ namespace NLoad.Tests
             var duration = TimeSpan.FromSeconds(1);
             var delayBetweenThreadStart = TimeSpan.FromMilliseconds(100);
 
-            var loadTestBuilder = new LoadTestBuilder<MockTestRun>();
+            var loadTestBuilder = new LoadTestBuilder<TestRun>();
 
             var loadTest = loadTestBuilder
                             .WithNumberOfThreads(numberOfThreads)
@@ -30,47 +29,64 @@ namespace NLoad.Tests
         }
 
         [TestMethod]
-        public void RunLoadTest()
+        public void RunMultithreadedLoadTest()
         {
-            var loadTestBuilder = new LoadTestBuilder<MockTestRun>();
+            const int numberOfThreads = 10;
+
+            var loadTestBuilder = new LoadTestBuilder<TestRun>();
 
             var loadTest = loadTestBuilder
-                            .WithNumberOfThreads(1)
-                            .WithDurationOf(TimeSpan.FromMilliseconds(100))
+                            .WithNumberOfThreads(numberOfThreads)
+                            .WithDurationOf(TimeSpan.Zero)
                             .WithDeleyBetweenThreadStart(TimeSpan.Zero)
                             .Build();
 
             var result = loadTest.Run();
 
+            Assert.AreEqual(numberOfThreads, TestRun.Counter);
             Assert.IsTrue(result.TotalTestRuns > 0);
+            //Assert.IsTrue(result.TotalRuntime > TimeSpan.Zero);
         }
 
         [TestMethod]
-        public void RunMultithreadedLoadTest()
+        public void ShouldFireCurrentThroughputEvent()
         {
-            var loadTestBuilder = new LoadTestBuilder<MockTestRun>();
+            var currentThroughputEventFired = false;
+
+            var loadTestBuilder = new LoadTestBuilder<TestRun>();
 
             var loadTest = loadTestBuilder
-                            .WithNumberOfThreads(10)
-                            .WithDurationOf(TimeSpan.FromMilliseconds(100))
+                            .WithDurationOf(TimeSpan.FromSeconds(1))
                             .WithDeleyBetweenThreadStart(TimeSpan.Zero)
+                            .OnCurrentThroughput((sender, throughput) => currentThroughputEventFired = true)
                             .Build();
 
-            var result = loadTest.Run();
+            loadTest.Run();
 
-            //todo: assert number of threads
+            Assert.IsTrue(currentThroughputEventFired);
         }
     }
 
-    public class MockTestRun : ITestRun
+    public class TestRun : ITestRun
     {
+        private static int _counter;
+
+        public static int Counter
+        {
+            get
+            {
+                return _counter;
+            }
+        }
+
         public void Initialize()
         {
+            Interlocked.Increment(ref _counter);
         }
 
         public void Execute()
         {
-            Thread.Sleep(100);
+            Thread.Sleep(1);
         }
     }
 }

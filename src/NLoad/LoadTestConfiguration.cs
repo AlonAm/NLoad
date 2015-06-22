@@ -4,6 +4,13 @@ namespace NLoad
 {
     public class LoadTestConfiguration
     {
+        public LoadTestConfiguration()
+        {
+            NumberOfThreads = 1;
+            Duration = TimeSpan.Zero;
+            DelayBetweenThreadStart = TimeSpan.Zero;
+        }
+
         public int NumberOfThreads { get; set; }
         
         public TimeSpan Duration { get; set; }

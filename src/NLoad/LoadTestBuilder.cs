@@ -4,30 +4,37 @@ namespace NLoad
 
     public class LoadTestBuilder<T> where T : ITestRun, new()
     {
-        readonly LoadTestConfiguration _loadTestConfiguration = new LoadTestConfiguration();
+        private readonly LoadTest<T> _loadTest = new LoadTest<T>(new LoadTestConfiguration());
 
         public LoadTest<T> Build()
         {
-            return new LoadTest<T>(_loadTestConfiguration);
+            return _loadTest;
         }
 
         public LoadTestBuilder<T> WithNumberOfThreads(int numberOfThreads)
         {
-            _loadTestConfiguration.NumberOfThreads = numberOfThreads;
+            _loadTest.Configuration.NumberOfThreads = numberOfThreads;
 
             return this;
         }
 
         public LoadTestBuilder<T> WithDurationOf(TimeSpan duration)
         {
-            _loadTestConfiguration.Duration = duration;
+            _loadTest.Configuration.Duration = duration;
 
             return this;
         }
 
         public LoadTestBuilder<T> WithDeleyBetweenThreadStart(TimeSpan delay)
         {
-            _loadTestConfiguration.DelayBetweenThreadStart = delay;
+            _loadTest.Configuration.DelayBetweenThreadStart = delay;
+
+            return this;
+        }
+
+        public LoadTestBuilder<T> OnCurrentThroughput(EventHandler<double> handler)
+        {
+            _loadTest.CurrentThroughput += handler;
 
             return this;
         }
