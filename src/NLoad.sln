@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NLoad", "NLoad.csproj", "{F0DAD423-3AA7-434A-A7C4-72B54300E541}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NLoad", "NLoad\NLoad.csproj", "{F0DAD423-3AA7-434A-A7C4-72B54300E541}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NLoad.Tests", "..\NLoad.Tests\NLoad.Tests.csproj", "{6E85D810-DE64-42EB-96E1-E5D4EB8F40AC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NLoad.Tests", "NLoad.Tests\NLoad.Tests.csproj", "{6E85D810-DE64-42EB-96E1-E5D4EB8F40AC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
