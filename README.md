@@ -19,7 +19,7 @@ public class TestRun : ITestRun
   
   public void Execute()
   {
-    // Your code here
+    // Your test code here (For example, invoke a WCF service)
   }
 }
 ```
