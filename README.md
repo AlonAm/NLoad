@@ -1,6 +1,8 @@
 # NLoad
 Simple load testing framework
 
+[![NuGet downloads](https://img.shields.io/nuget/dt/NLog.svg)](https://www.nuget.org/packages/NLoad)
+
 ## Installing NLoad
 NLoad can be installed via [NuGet](http://www.nuget.org/packages/NLoad)
 ```
