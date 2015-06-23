@@ -2,7 +2,7 @@
 
 namespace NLoad
 {
-    public class HeartbeatEventArgs : EventArgs
+    public class Heartbeat : EventArgs
     {
         public double Throughput { get; set; }
     }

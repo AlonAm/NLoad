@@ -11,6 +11,6 @@ namespace NLoad
         
         public TimeSpan Runtime { get; set; }
         
-        public List<HeartbeatEventArgs> Heartbeats { get; set; }
+        public List<Heartbeat> Heartbeats { get; set; }
     }
 }

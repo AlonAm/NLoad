@@ -32,7 +32,7 @@ namespace NLoad
             return this;
         }
 
-        public LoadTestBuilder<T> OnHeartbeat(EventHandler<HeartbeatEventArgs> handler)
+        public LoadTestBuilder<T> OnHeartbeat(EventHandler<Heartbeat> handler)
         {
             _loadTest.Heartbeat += handler;
 

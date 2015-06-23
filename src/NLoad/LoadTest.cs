@@ -12,9 +12,9 @@ namespace NLoad
         private readonly LoadTestConfiguration _configuration;
         private readonly ManualResetEvent _quitEvent = new ManualResetEvent(false);
         private readonly List<TestResult> _testResults = new List<TestResult>();
-        private readonly List<HeartbeatEventArgs> _heartbeats = new List<HeartbeatEventArgs>();
+        private readonly List<Heartbeat> _heartbeats = new List<Heartbeat>();
 
-        public event EventHandler<HeartbeatEventArgs> Heartbeat;
+        public event EventHandler<Heartbeat> Heartbeat;
 
         [ExcludeFromCodeCoverage]
         public LoadTest(LoadTestConfiguration configuration)
@@ -162,7 +162,7 @@ namespace NLoad
 
         protected virtual void OnHeartbeat(double throughput)
         {
-            var heartbeat = new HeartbeatEventArgs
+            var heartbeat = new Heartbeat
             {
                 Throughput = throughput
             };
