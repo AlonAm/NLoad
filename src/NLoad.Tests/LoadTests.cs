@@ -12,9 +12,9 @@ namespace NLoad.Tests
             const int numberOfThreads = 10;
 
             var loadTest = NLoad.Test<TestMock>()
-                                    .WithNumberOfThreads(numberOfThreads)
-                                    .WithDurationOf(TimeSpan.Zero)
-                                    .WithDeleyBetweenThreadStart(TimeSpan.Zero)
+                                .WithNumberOfThreads(numberOfThreads)
+                                .WithDurationOf(TimeSpan.Zero)
+                                .WithDeleyBetweenThreadStart(TimeSpan.Zero)
                                 .Build();
 
             var result = loadTest.Run();
@@ -32,10 +32,10 @@ namespace NLoad.Tests
 
             var loadTest = NLoad.Test<TestMock>()
                                     .WithDurationOf(TimeSpan.FromSeconds(1))
-                                    .OnCurrentThroughput((s, t) =>
+                                    .OnHeartbeat((s, args) =>
                                     {
                                         eventFired = true;
-                                        throughput = t;
+                                        throughput = args.Throughput;
                                     })
                                 .Build();
 

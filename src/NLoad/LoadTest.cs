@@ -11,8 +11,7 @@ namespace NLoad
         private long _counter;
         private readonly LoadTestConfiguration _configuration;
         private readonly ManualResetEvent _quitEvent = new ManualResetEvent(false);
-
-        public event EventHandler<double> CurrentThroughput;
+        public event EventHandler<HeartbeatEventArgs> Heartbeat;
 
         [ExcludeFromCodeCoverage]
         public LoadTest(LoadTestConfiguration configuration)
@@ -46,9 +45,9 @@ namespace NLoad
                 StartThreads(threads);
 
                 Monitor();
-                
+
                 ShutdownThreads(threads);
-                
+
                 result.TotalTestRuns = _counter;
                 result.TotalRuntime = stopWatch.Elapsed;
             }
@@ -80,7 +79,7 @@ namespace NLoad
 
                 var counter = Interlocked.Read(ref _counter);
 
-                OnCurrentThroughput(counter / delta.TotalSeconds);
+                OnHeartbeat(counter / delta.TotalSeconds);
 
                 if (delta >= _configuration.Duration)
                 {
@@ -141,11 +140,16 @@ namespace NLoad
             }
         }
 
-        protected virtual void OnCurrentThroughput(double throughput)
+        protected virtual void OnHeartbeat(double throughput)
         {
-            var handler = CurrentThroughput;
+            var handler = Heartbeat;
 
-            if (handler != null) handler(this, throughput);
+            var args = new HeartbeatEventArgs
+            {
+                Throughput = throughput
+            };
+
+            if (handler != null) handler(this, args);
         }
     }
 }

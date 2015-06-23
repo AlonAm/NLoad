@@ -32,9 +32,9 @@ namespace NLoad
             return this;
         }
 
-        public LoadTestBuilder<T> OnCurrentThroughput(EventHandler<double> handler)
+        public LoadTestBuilder<T> OnHeartbeat(EventHandler<HeartbeatEventArgs> handler)
         {
-            _loadTest.CurrentThroughput += handler;
+            _loadTest.Heartbeat += handler;
 
             return this;
         }

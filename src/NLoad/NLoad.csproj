@@ -39,6 +39,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="HeartbeatEventArgs.cs" />
     <Compile Include="ITest.cs" />
     <Compile Include="LoadTest.cs" />
     <Compile Include="LoadTestBuilder.cs" />
