@@ -14,14 +14,12 @@ public class MyTest : ITest
 {
   public void Initialize()
   {
-    // Your test initialization code here.
     // Create WCF clients, load files, etc.
   }
   
   public void Execute()
   {
-    // Your test here.
-    // Send http requests, Invoke WCF services or whatever you want to load test.
+    // Send an http request, invoke a WCF service, whatever you want to load test.
   }
 }
 ```
