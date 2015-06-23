@@ -11,6 +11,6 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
     <copyright>Copyright 2015 Alon Amsalem</copyright>
-    <tags>load testing unit test tdd performance health analysis</tags>
+    <tags>load testing loadtest unit test tdd performance health analysis</tags>
   </metadata>
 </package>
