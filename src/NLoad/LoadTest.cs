@@ -11,6 +11,9 @@ namespace NLoad
         private long _counter;
         private readonly LoadTestConfiguration _configuration;
         private readonly ManualResetEvent _quitEvent = new ManualResetEvent(false);
+        private readonly List<TestResult> _testResults = new List<TestResult>();
+        private readonly List<HeartbeatEventArgs> _heartbeats = new List<HeartbeatEventArgs>();
+
         public event EventHandler<HeartbeatEventArgs> Heartbeat;
 
         [ExcludeFromCodeCoverage]
@@ -48,8 +51,10 @@ namespace NLoad
 
                 ShutdownThreads(threads);
 
-                result.TotalTestRuns = _counter;
-                result.TotalRuntime = stopWatch.Elapsed;
+                result.Iterations = _counter;
+                result.Runtime = stopWatch.Elapsed;
+                result.TestsResults = _testResults;
+                result.Heartbeats = _heartbeats;
             }
             catch (Exception e)
             {
@@ -98,11 +103,26 @@ namespace NLoad
 
             test.Initialize();
 
+            var results = new List<TestResult>();
+
             while (!_quitEvent.WaitOne(0))
             {
+                var result = new TestResult(startTime: DateTime.Now);
+
                 test.Execute();
 
                 Interlocked.Increment(ref _counter);
+
+                result.EndTime = DateTime.Now;
+
+                result.Passed = true;
+
+                results.Add(result);
+            }
+
+            lock (_testResults)
+            {
+                _testResults.AddRange(results);
             }
         }
 
@@ -142,14 +162,16 @@ namespace NLoad
 
         protected virtual void OnHeartbeat(double throughput)
         {
-            var handler = Heartbeat;
-
-            var args = new HeartbeatEventArgs
+            var heartbeat = new HeartbeatEventArgs
             {
                 Throughput = throughput
             };
 
-            if (handler != null) handler(this, args);
+            _heartbeats.Add(heartbeat);
+
+            var handler = Heartbeat;
+
+            if (handler != null) handler(this, heartbeat);
         }
     }
 }

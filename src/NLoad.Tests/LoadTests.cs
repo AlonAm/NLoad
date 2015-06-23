@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace NLoad.Tests
@@ -20,8 +21,10 @@ namespace NLoad.Tests
             var result = loadTest.Run();
 
             Assert.AreEqual(numberOfThreads, TestMock.ThreadCounter);
-            Assert.IsTrue(result.TotalTestRuns > 0);
-            Assert.IsTrue(result.TotalRuntime > TimeSpan.Zero);
+            Assert.IsTrue(result.Iterations > 0);
+            Assert.IsTrue(result.Runtime > TimeSpan.Zero);
+            Assert.IsTrue(result.TestsResults.Any());
+            Assert.IsTrue(result.Heartbeats.Any());
         }
 
         [TestMethod]
