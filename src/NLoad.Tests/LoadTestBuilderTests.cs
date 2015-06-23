@@ -7,7 +7,7 @@ namespace NLoad.Tests
     public class LoadTestBuilderTests
     {
         [TestMethod]
-        public void BuildLoadTest()
+        public void VerifyLoadTestConfiguration()
         {
             const int numberOfThreads = 1;
             var duration = TimeSpan.FromSeconds(1);
@@ -18,7 +18,6 @@ namespace NLoad.Tests
                             .WithDurationOf(duration)
                             .WithDeleyBetweenThreadStart(delayBetweenThreadStart)
                             .Build();
-
 
             var configuration = loadTest.Configuration;
 

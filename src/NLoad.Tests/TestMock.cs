@@ -6,13 +6,7 @@ namespace NLoad.Tests
     {
         private static int _threadCounter;
 
-        public static int ThreadCounter
-        {
-            get
-            {
-                return _threadCounter;
-            }
-        }
+        public static int ThreadCounter { get { return _threadCounter; } }
 
         public void Initialize()
         {
