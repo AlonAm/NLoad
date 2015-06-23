@@ -5,6 +5,35 @@ A simple and friendly load testing framework for .NET
 [![Version](https://img.shields.io/nuget/v/NLoad.svg)](https://www.nuget.org/packages/NLoad) 
 [![AppVeyor](https://img.shields.io/appveyor/ci/AlonAmsalem/nload/master.svg)](https://ci.appveyor.com/project/AlonAmsalem/nload/branch/master)
 
+## Usage
+
+Implement a test class
+
+```csharp
+public class TestRun : ITestRun
+{
+  public void Initialize()
+  {
+    // Your test initialization code here (For example, create a WCF client)
+  }
+  
+  public void Execute()
+  {
+    // Your code here
+  }
+}
+```
+Create and run a load test
+```csharp
+var loadTest = loadTestBuilder
+                  .WithNumberOfThreads(numberOfThreads)
+                  .WithDurationOf(TimeSpan.Zero)
+                  .WithDeleyBetweenThreadStart(TimeSpan.Zero)
+                  .Build();
+
+var result = loadTest.Run();
+```
+
 ## Installing NLoad
 NLoad can be installed via [NuGet](http://www.nuget.org/packages/NLoad)
 ```
