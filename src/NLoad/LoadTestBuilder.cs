@@ -2,7 +2,7 @@ namespace NLoad
 {
     using System;
 
-    public class LoadTestBuilder<T> where T : ITestRun, new()
+    public class LoadTestBuilder<T> where T : ITest, new()
     {
         private readonly LoadTest<T> _loadTest = new LoadTest<T>(new LoadTestConfiguration());
 

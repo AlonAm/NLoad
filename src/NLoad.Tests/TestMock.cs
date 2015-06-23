@@ -2,7 +2,7 @@ using System.Threading;
 
 namespace NLoad.Tests
 {
-    public class TestRun : ITestRun
+    public class TestMock : ITest
     {
         private static int _threadCounter;
 

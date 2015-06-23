@@ -1,6 +1,6 @@
 ﻿namespace NLoad
 {
-    public interface ITestRun
+    public interface ITest
     {
         void Initialize();
 

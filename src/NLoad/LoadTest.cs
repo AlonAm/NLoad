@@ -6,7 +6,7 @@ using System.Threading;
 
 namespace NLoad
 {
-    public class LoadTest<T> where T : ITestRun, new()
+    public class LoadTest<T> where T : ITest, new()
     {
         private long _counter;
         private readonly LoadTestConfiguration _configuration;
