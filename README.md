@@ -10,29 +10,28 @@ A simple and friendly load testing framework for .NET
 Implement a test class:
 
 ```csharp
-public class TestRun : ITestRun
+public class MyTest : ITest
 {
   public void Initialize()
   {
-    // Your test initialization code here (For example, create a WCF client)
+    // Your test initialization code here (Create WCF clients, load files, etc.)
   }
   
   public void Execute()
   {
-    // Your test code here (For example, invoke a WCF service)
+    // Your test code here.
+    // Send http requests, Invoke WCF services or whatever you want to load test.
   }
 }
 ```
 Create and run a load test:
 ```csharp
-var loadTestBuilder = new LoadTestBuilder<TestRun>();
-
-var loadTest = loadTestBuilder
-                  .WithNumberOfThreads(100)
-                  .WithDurationOf(TimeSpan.FromMinutes(5))
-                  .WithDeleyBetweenThreadStart(TimeSpan.FromMilliseconds(100))
-                  .OnCurrentThroughput((sender, throughput) => Console.WriteLine(throughput))
-                  .Build();
+var loadTest = NLoad.Test<MyTest>()
+                      .WithNumberOfThreads(500)
+                      .WithDurationOf(TimeSpan.FromMinutes(5))
+                      .WithDeleyBetweenThreadStart(TimeSpan.FromMilliseconds(100))
+                      .OnCurrentThroughput((sender, throughput) => Console.WriteLine(throughput))
+                    .Build();
 
 var result = loadTest.Run();
 ```
