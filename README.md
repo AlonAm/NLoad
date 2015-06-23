@@ -38,7 +38,7 @@ var result = loadTest.Run();
 ```
 
 ## Installing NLoad
-Install NLoad via [NuGet](http://www.nuget.org/packages/NLoad)
+NLoad can be installed via [NuGet](http://www.nuget.org/packages/NLoad)
 ```
 Install-Package NLoad
 ```
