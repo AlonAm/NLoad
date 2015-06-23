@@ -19,11 +19,11 @@ public class MyTest : ITest
   
   public void Execute()
   {
-    // Send an http request, invoke a WCF service, whatever you want to load test.
+    // Send http request, invoke a WCF service or whatever you want to load test.
   }
 }
 ```
-Create and run a load test:
+Create, configure and run your load test:
 ```csharp
 var loadTest = NLoad.Test<MyTest>()
                       .WithNumberOfThreads(500)
