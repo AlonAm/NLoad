@@ -20,9 +20,7 @@ namespace NLoad.Tests
             var result = loadTest.Run();
 
             Assert.AreEqual(numberOfThreads, TestMock.ThreadCounter);
-
             Assert.IsTrue(result.TotalTestRuns > 0);
-
             Assert.IsTrue(result.TotalRuntime > TimeSpan.Zero);
         }
 
