@@ -29,6 +29,7 @@ var loadTest = loadTestBuilder
                   .WithNumberOfThreads(numberOfThreads)
                   .WithDurationOf(TimeSpan.Zero)
                   .WithDeleyBetweenThreadStart(TimeSpan.Zero)
+                  .OnCurrentThroughput((sender, throughput) => Console.WriteLine(throughput))
                   .Build();
 
 var result = loadTest.Run();
