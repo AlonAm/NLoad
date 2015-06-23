@@ -28,9 +28,9 @@ Create and run a load test:
 var loadTestBuilder = new LoadTestBuilder<TestRun>();
 
 var loadTest = loadTestBuilder
-                  .WithNumberOfThreads(numberOfThreads)
-                  .WithDurationOf(TimeSpan.Zero)
-                  .WithDeleyBetweenThreadStart(TimeSpan.Zero)
+                  .WithNumberOfThreads(100)
+                  .WithDurationOf(TimeSpan.FromSeconds(300))
+                  .WithDeleyBetweenThreadStart(TimeSpan.FromMilliseconds(100))
                   .OnCurrentThroughput((sender, throughput) => Console.WriteLine(throughput))
                   .Build();
 
@@ -38,7 +38,7 @@ var result = loadTest.Run();
 ```
 
 ## Installing NLoad
-NLoad can be installed via [NuGet](http://www.nuget.org/packages/NLoad)
+Install NLoad via [NuGet](http://www.nuget.org/packages/NLoad)
 ```
 Install-Package NLoad
 ```
