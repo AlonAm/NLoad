@@ -7,7 +7,7 @@ A simple and friendly load testing framework for .NET
 
 ## Usage
 
-Implement a test class
+Implement a test class:
 
 ```csharp
 public class TestRun : ITestRun
@@ -23,8 +23,10 @@ public class TestRun : ITestRun
   }
 }
 ```
-Create and run a load test
+Create and run a load test:
 ```csharp
+var loadTestBuilder = new LoadTestBuilder<TestRun>();
+
 var loadTest = loadTestBuilder
                   .WithNumberOfThreads(numberOfThreads)
                   .WithDurationOf(TimeSpan.Zero)
