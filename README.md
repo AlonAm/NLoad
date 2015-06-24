@@ -6,9 +6,7 @@ A simple and friendly load testing framework for .NET
 [![AppVeyor](https://img.shields.io/appveyor/ci/AlonAmsalem/nload/master.svg)](https://ci.appveyor.com/project/AlonAmsalem/nload/branch/master)
 
 ## Usage
-
-Implement a test class:
-
+Implement a test class
 ```csharp
 public class MyTest : ITest
 {
@@ -23,7 +21,7 @@ public class MyTest : ITest
   }
 }
 ```
-Create, configure and run your load test:
+Create, configure and run your load test
 ```csharp
 var loadTest = NLoad.Test<MyTest>()
                       .WithNumberOfThreads(500)
