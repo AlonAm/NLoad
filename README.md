@@ -36,10 +36,10 @@ var result = loadTest.Run();
 ```
 
 ## Installation
-NLoad can be installed via [NuGet](http://www.nuget.org/packages/NLoad)
+To install NLoad via [NuGet](http://www.nuget.org/packages/NLoad), run the following command in the Package Manager Console
 ```
 Install-Package NLoad
 ```
 
 ## License
-NLoad is licensed under [MIT](http://www.opensource.org/licenses/mit-license.php "Read more about the MIT license form"). Refer to license.txt for more information.
+NLoad is licensed under [MIT](http://www.opensource.org/licenses/mit-license.php "Read more about the MIT license form"). Refer to license file for more information.
