@@ -50,6 +50,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="ThreadCounter.cs" />
     <Compile Include="TestMock.cs" />
     <Compile Include="LoadTestBuilderTests.cs" />
     <Compile Include="LoadTests.cs" />
