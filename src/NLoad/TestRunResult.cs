@@ -10,7 +10,7 @@ namespace NLoad
 
         public DateTime EndTime { get; set; }
 
-        public TimeSpan Duration
+        public TimeSpan ResponseTime
         {
             get
             {

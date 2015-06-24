@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Threading;
 
 namespace NLoad
@@ -11,7 +12,7 @@ namespace NLoad
         private long _counter;
         private readonly LoadTestConfiguration _configuration;
         private readonly ManualResetEvent _quitEvent = new ManualResetEvent(false);
-        private readonly List<TestRunResult> _testResults = new List<TestRunResult>();
+        private readonly List<TestRunResult> _testRunResults = new List<TestRunResult>();
         private readonly List<Heartbeat> _heartbeats = new List<Heartbeat>();
 
         public event EventHandler<Heartbeat> Heartbeat;
@@ -39,8 +40,6 @@ namespace NLoad
         {
             var stopWatch = Stopwatch.StartNew();
 
-            var result = new LoadTestResult();
-
             try
             {
                 var threads = CreateThreads();
@@ -51,21 +50,30 @@ namespace NLoad
 
                 ShutdownThreads(threads);
 
-                result.Iterations = _counter;
-                result.Runtime = stopWatch.Elapsed;
-                result.TestRuns = _testResults;
-                result.Heartbeats = _heartbeats;
+                var result = new LoadTestResult
+                {
+                    Iterations = _counter,
+                    Runtime = stopWatch.Elapsed,
+                    TestRuns = _testRunResults,
+                    Heartbeats = _heartbeats,
+                    MinThroughput = _heartbeats.Min(k => k.Throughput),
+                    MaxThroughput = _heartbeats.Max(k => k.Throughput),
+                    AverageThroughput = _heartbeats.Average(k => k.Throughput),
+                    MinResponseTime = _testRunResults.Min(k => k.ResponseTime),
+                    MaxResponseTime = _testRunResults.Max(k => k.ResponseTime),
+                    AverageResponseTime = new TimeSpan(Convert.ToInt64(_testRunResults.Average(k => k.ResponseTime.Ticks)))
+                };
+
+                return result;
             }
             catch (Exception e)
             {
-                throw new LoadTestException("An error occurred while load testing. See inner exception for details.", e);
+                throw new LoadTestException("An error occurred while running load test. See inner exception for details.", e);
             }
             finally
             {
                 stopWatch.Stop();
             }
-
-            return result;
         }
 
         private void Monitor()
@@ -126,9 +134,9 @@ namespace NLoad
                 results.Add(result);
             }
 
-            lock (_testResults)
+            lock (_testRunResults)
             {
-                _testResults.AddRange(results);
+                _testRunResults.AddRange(results);
             }
         }
 

@@ -22,6 +22,14 @@ namespace NLoad.Tests
             Assert.IsTrue(result.Runtime > TimeSpan.Zero);
             Assert.IsTrue(result.TestRuns.Any());
             Assert.IsTrue(result.Heartbeats.Any());
+
+            Assert.IsTrue(result.MinThroughput > 0);
+            Assert.IsTrue(result.MaxThroughput > 0);
+            Assert.IsTrue(result.AverageThroughput > 0);
+
+            Assert.IsTrue(result.MinResponseTime > TimeSpan.Zero);
+            Assert.IsTrue(result.MaxResponseTime > TimeSpan.Zero);
+            Assert.IsTrue(result.AverageResponseTime > TimeSpan.Zero);
         }
 
         [TestMethod]
