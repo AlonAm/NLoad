@@ -12,5 +12,13 @@ namespace NLoad
         public TimeSpan Runtime { get; set; }
         
         public List<Heartbeat> Heartbeats { get; set; }
+
+        public double MinThroughput { get; set; }
+        public double MaxThroughput { get; set; }
+        public double AverageThroughput { get; set; }
+
+        public TimeSpan MinResponseTime { get; set; }
+        public TimeSpan MaxResponseTime { get; set; }
+        public TimeSpan AverageResponseTime { get; set; }
     }
 }

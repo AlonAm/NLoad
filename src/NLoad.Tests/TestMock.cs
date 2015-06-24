@@ -8,11 +8,14 @@ namespace NLoad.Tests
         {
         }
 
-        public bool Execute()
+        public TestResult Execute()
         {
             Thread.Sleep(1);
 
-            return true;
+            return new TestResult
+            {
+                Passed = true
+            };
         }
     }
 }

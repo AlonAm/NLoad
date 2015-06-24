@@ -4,6 +4,6 @@
     {
         void Initialize();
 
-        bool Execute();
+        TestResult Execute();
     }
 }

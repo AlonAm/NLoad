@@ -97,9 +97,13 @@ namespace NLoad
             }
         }
 
-        //todo: move to another class
         private void ThreadProc()
         {
+            //todo: move to another class
+            //public class ThreadProc
+            //{
+            //}
+
             var test = new T();
 
             test.Initialize();
@@ -110,13 +114,13 @@ namespace NLoad
             {
                 var result = new TestRunResult(startTime: DateTime.Now);
 
-                test.Execute();
+                result.TestResult = test.Execute();
 
                 Interlocked.Increment(ref _counter);
 
                 result.EndTime = DateTime.Now;
 
-                result.Passed = true;
+                //result.Passed = true;
 
                 results.Add(result);
             }
@@ -174,10 +178,5 @@ namespace NLoad
 
             if (handler != null) handler(this, heartbeat);
         }
-    }
-
-    public class ThreadProc
-    {
-
     }
 }

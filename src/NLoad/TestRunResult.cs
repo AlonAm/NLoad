@@ -9,7 +9,7 @@ namespace NLoad
             StartTime = startTime;
         }
 
-        public bool Passed { get; set; }
+        public TestResult TestResult { get; set; }
 
         public DateTime StartTime { get; set; }
 
@@ -22,5 +22,12 @@ namespace NLoad
                 return EndTime - StartTime;
             }
         }
+    }
+
+    public class TestResult
+    {
+        public bool Passed { get; set; }
+
+        public string ErrorMessage { get; set; }
     }
 }
