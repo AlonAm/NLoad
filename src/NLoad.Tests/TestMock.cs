@@ -13,7 +13,8 @@ namespace NLoad.Tests
 
         public TestResult Execute()
         {
-            Thread.Sleep(_random.Next(1000));
+            Thread.Sleep(_random.Next(1, 500));
+            //Thread.Sleep(500);
 
             return new TestResult(true);
         }

@@ -37,12 +37,13 @@ namespace NLoad.Tests
         {
             const int numberOfThreads = 10;
 
-            NLoad.Test<ThreadCounter>()
+            var loadTest = NLoad.Test<ThreadCounter>()
                     .WithNumberOfThreads(numberOfThreads)
                     .WithDurationOf(TimeSpan.Zero)
                     .WithDeleyBetweenThreadStart(TimeSpan.Zero)
-                        .Build()
-                            .Run();
+                        .Build();
+
+            loadTest.Run();
 
             Assert.AreEqual(numberOfThreads, ThreadCounter.Count);
         }
