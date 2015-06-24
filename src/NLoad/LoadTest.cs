@@ -112,15 +112,16 @@ namespace NLoad
 
             while (!_quitEvent.WaitOne(0))
             {
-                var result = new TestRunResult(startTime: DateTime.Now);
+                var result = new TestRunResult
+                {
+                    StartTime = DateTime.Now,
 
-                result.TestResult = test.Execute();
+                    TestResult = test.Execute(),
+
+                    EndTime = DateTime.Now
+                };
 
                 Interlocked.Increment(ref _counter);
-
-                result.EndTime = DateTime.Now;
-
-                //result.Passed = true;
 
                 results.Add(result);
             }
