@@ -5,7 +5,7 @@ namespace NLoad
 {
     public class LoadTestResult
     {
-        public List<TestResult> TestsResults { get; set; }
+        public List<TestRunResult> TestRuns { get; set; }
 
         public long Iterations { get; set; }
         

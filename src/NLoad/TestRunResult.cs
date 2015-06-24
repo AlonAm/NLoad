@@ -2,9 +2,9 @@
 
 namespace NLoad
 {
-    public class TestResult
+    public class TestRunResult
     {
-        public TestResult(DateTime startTime)
+        public TestRunResult(DateTime startTime)
         {
             StartTime = startTime;
         }

@@ -20,7 +20,7 @@ namespace NLoad.Tests
 
             Assert.IsTrue(result.Iterations > 0);
             Assert.IsTrue(result.Runtime > TimeSpan.Zero);
-            Assert.IsTrue(result.TestsResults.Any());
+            Assert.IsTrue(result.TestRuns.Any());
             Assert.IsTrue(result.Heartbeats.Any());
         }
 

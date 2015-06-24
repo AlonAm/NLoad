@@ -11,7 +11,7 @@ namespace NLoad
         private long _counter;
         private readonly LoadTestConfiguration _configuration;
         private readonly ManualResetEvent _quitEvent = new ManualResetEvent(false);
-        private readonly List<TestResult> _testResults = new List<TestResult>();
+        private readonly List<TestRunResult> _testResults = new List<TestRunResult>();
         private readonly List<Heartbeat> _heartbeats = new List<Heartbeat>();
 
         public event EventHandler<Heartbeat> Heartbeat;
@@ -53,7 +53,7 @@ namespace NLoad
 
                 result.Iterations = _counter;
                 result.Runtime = stopWatch.Elapsed;
-                result.TestsResults = _testResults;
+                result.TestRuns = _testResults;
                 result.Heartbeats = _heartbeats;
             }
             catch (Exception e)
@@ -84,7 +84,7 @@ namespace NLoad
 
                 var counter = Interlocked.Read(ref _counter);
 
-                OnHeartbeat(counter / delta.TotalSeconds);
+                OnHeartbeat(throughput: counter / delta.TotalSeconds);
 
                 if (delta >= _configuration.Duration)
                 {
@@ -97,17 +97,18 @@ namespace NLoad
             }
         }
 
+        //todo: move to another class
         private void ThreadProc()
         {
             var test = new T();
 
             test.Initialize();
 
-            var results = new List<TestResult>();
+            var results = new List<TestRunResult>();
 
             while (!_quitEvent.WaitOne(0))
             {
-                var result = new TestResult(startTime: DateTime.Now);
+                var result = new TestRunResult(startTime: DateTime.Now);
 
                 test.Execute();
 
@@ -173,5 +174,10 @@ namespace NLoad
 
             if (handler != null) handler(this, heartbeat);
         }
+    }
+
+    public class ThreadProc
+    {
+
     }
 }
