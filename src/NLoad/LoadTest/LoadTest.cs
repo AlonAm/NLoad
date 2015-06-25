@@ -61,7 +61,7 @@ namespace NLoad
                 return new LoadTestResult
                 {
                     TestRunnersResults = testRunners.Select(k => k.Result),
-                    TotalIterations = testRunners.Where(k => k.Result != null).Sum(k => k.Result.Iterations), //TestRunner<T>.Counter, 
+                    TotalIterations = testRunners.Where(k => k.Result != null).Sum(k => k.Result.Iterations), //TestRunner<T>.TotalIterations, 
                     TotalRuntime = stopWatch.Elapsed,
                     Heartbeat = _heartbeat
                 };
@@ -97,11 +97,11 @@ namespace NLoad
         {
             var running = true;
 
-            var start = DateTime.Now;
+            var start = DateTime.UtcNow;
 
             while (running)
             {
-                var elapsed = DateTime.Now - start;
+                var elapsed = DateTime.UtcNow - start;
 
                 if (elapsed >= _configuration.Duration)
                 {
@@ -109,11 +109,11 @@ namespace NLoad
                 }
                 else
                 {
-                    var throughput = TestRunner<T>.Counter / elapsed.TotalSeconds;
+                    var throughput = TestRunner<T>.TotalIterations / elapsed.TotalSeconds;
 
                     OnHeartbeat(throughput, elapsed);
 
-                    if (DateTime.Now - start < _configuration.Duration)
+                    if (DateTime.UtcNow - start < _configuration.Duration)
                     {
                         Thread.Sleep(1000);
                     }
@@ -143,7 +143,7 @@ namespace NLoad
 
         private void OnHeartbeat(double throughput, TimeSpan delta)
         {
-            var heartbeat = new Heartbeat(DateTime.Now, throughput, delta);
+            var heartbeat = new Heartbeat(DateTime.UtcNow, throughput, delta);
 
             _heartbeat.Add(heartbeat);
 

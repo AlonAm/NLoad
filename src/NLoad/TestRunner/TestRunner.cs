@@ -7,6 +7,8 @@ namespace NLoad
 {
     public class TestRunner<T> where T : ITest, new()
     {
+        #region Fields
+
         private BackgroundWorker _backgroundWorker;
         private readonly ManualResetEvent _quitEvent;
 
@@ -14,12 +16,27 @@ namespace NLoad
         // Every TestRunner<T> has its own instance of _totalIterations
         private static long _totalIterations;
 
+        #endregion
+
+        #region Ctor
+
         public TestRunner(ManualResetEvent quitEvent)
         {
             _quitEvent = quitEvent;
         }
 
+        #endregion
+
         #region Properties
+
+        public static long TotalIterations
+        {
+            get
+            {
+                return Interlocked.Read(ref _totalIterations);
+            }
+        }
+
 
         public bool IsBusy
         {
@@ -27,12 +44,7 @@ namespace NLoad
         }
 
         public TestRunnerResult Result { get; private set; }
-
-        public static long Counter
-        {
-            get { return Interlocked.Read(ref _totalIterations); }
-        }
-
+        
         #endregion
 
         public void Initialize()
@@ -63,7 +75,7 @@ namespace NLoad
         {
             var context = (TestRunContext)e.Argument;
 
-            var result = new TestRunnerResult(starTime: DateTime.Now);
+            var result = new TestRunnerResult(starTime: DateTime.UtcNow);
 
             var testRunResults = new List<TestRunResult>();
 
@@ -75,14 +87,13 @@ namespace NLoad
 
             while (!context.QuitEvent.WaitOne(0))
             {
-                var testRunResult = new TestRunResult
-                {
-                    StartTime = DateTime.Now,
+                var testRunResult = new TestRunResult();
 
-                    TestResult = test.Execute(), //todo: add try-catch?
+                testRunResult.StartTime = DateTime.UtcNow;
 
-                    EndTime = DateTime.Now
-                };
+                testRunResult.TestResult = test.Execute();
+
+                testRunResult.EndTime = DateTime.UtcNow;
 
                 Interlocked.Increment(ref _totalIterations);
 
@@ -93,7 +104,7 @@ namespace NLoad
 
             result.TestRuns = testRunResults;
 
-            result.EndTime = DateTime.Now;
+            result.EndTime = DateTime.UtcNow;
 
             result.Iterations = iterations;
 

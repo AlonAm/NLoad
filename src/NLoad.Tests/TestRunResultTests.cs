@@ -12,12 +12,12 @@ namespace NLoad.Tests
         {
             var testRunResult = new TestRunResult
             {
-                StartTime = DateTime.Now
+                StartTime = DateTime.UtcNow
             };
 
             Thread.Sleep(1);
 
-            testRunResult.EndTime = DateTime.Now;
+            testRunResult.EndTime = DateTime.UtcNow;
 
             Assert.AreEqual(testRunResult.EndTime - testRunResult.StartTime, testRunResult.ResponseTime);
         }
