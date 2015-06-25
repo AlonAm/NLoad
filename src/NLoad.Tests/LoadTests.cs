@@ -43,7 +43,7 @@ namespace NLoad.Tests
         [TestMethod]
         public void HeartbeatCountEqualsDurationInSeconds()
         {
-            for (var durationInSeconds = 1; durationInSeconds < 5; durationInSeconds++)
+            for (var durationInSeconds = 1; durationInSeconds < 3; durationInSeconds++)
             {
                 var duration = TimeSpan.FromSeconds(durationInSeconds);
 
