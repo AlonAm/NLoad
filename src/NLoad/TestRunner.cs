@@ -7,10 +7,10 @@ namespace NLoad
 {
     public class TestRunner<T> where T : ITest, new()
     {
+        private static long _totalIterations;
+
         private readonly ManualResetEvent _quitEvent;
         private BackgroundWorker _backgroundWorker;
-
-        private static long _counter;
 
         public TestRunner(ManualResetEvent quitEvent)
         {
@@ -31,7 +31,7 @@ namespace NLoad
         {
             get
             {
-                return Interlocked.Read(ref _counter);
+                return Interlocked.Read(ref _totalIterations);
             }
         }
 
@@ -59,7 +59,12 @@ namespace NLoad
             _backgroundWorker.RunWorkerAsync(context);
         }
 
-        private void Run(object sender, DoWorkEventArgs e)
+        /// <summary>
+        /// Runs on backgroundworker thread
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private static void Run(object sender, DoWorkEventArgs e)
         {
             var context = e.Argument as TestRunContext;
 
@@ -74,25 +79,25 @@ namespace NLoad
 
             long iterations = 0;
 
+            var test = new T();
+
+            test.Initialize();
+
             while (!context.QuitEvent.WaitOne(0))
             {
-                var testRunResult = new TestRunResult(startTime: DateTime.Now);
+                var testRunResult = new TestRunResult();
 
+                testRunResult.StartTime = DateTime.Now;
 
-                Thread.Sleep(1000); //execute test here
-
-                testRunResult.TestResult = new TestResult(passed: true); //execute test here
-
+                testRunResult.TestResult = test.Execute(); //todo: add try-catch?
 
                 testRunResult.EndTime = DateTime.Now;
 
-                testRunResults.Add(testRunResult);
-
-                Interlocked.Increment(ref _counter);
+                //Interlocked.Increment(ref _totalIterations);
 
                 iterations++;
 
-                _backgroundWorker.ReportProgress(0, iterations);
+                testRunResults.Add(testRunResult);
             }
 
             result.TestRuns = testRunResults;

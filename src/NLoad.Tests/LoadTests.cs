@@ -11,9 +11,11 @@ namespace NLoad.Tests
         [TestMethod]
         public void SingleThreadLoadTest()
         {
+            var duration = TimeSpan.FromSeconds(1);
+
             var loadTest = NLoad.Test<OneSecondDelayTest>()
                                     .WithNumberOfThreads(1)
-                                    .WithDurationOf(TimeSpan.FromSeconds(1))
+                                    .WithDurationOf(duration)
                                     .WithDeleyBetweenThreadStart(TimeSpan.Zero)
                                         .Build();
 
@@ -23,9 +25,9 @@ namespace NLoad.Tests
 
             Assert.AreNotEqual(TimeSpan.Zero, result.TotalRuntime);
 
-            //Assert.IsTrue(result.TotalRuntime > duration);
+            Assert.IsTrue(result.TotalRuntime > duration);
 
-            //Assert.IsTrue(result.Heartbeat.Any());
+            Assert.IsTrue(result.Heartbeat.Any());
 
             //Assert.IsTrue(result.TestRuns.Any());
 
@@ -57,12 +59,20 @@ namespace NLoad.Tests
         }
 
         [TestMethod]
-        public void ExpectedNumberOfIterationsForOneThread()
+        public void OneIteration()
         {
             TestNumberOfIterations(durationInSeconds: 1, numThreads: 1);
+        }
 
+        [TestMethod]
+        public void TwoIterations()
+        {
             TestNumberOfIterations(durationInSeconds: 2, numThreads: 1);
+        }
 
+        [TestMethod]
+        public void ThreeIterations()
+        {
             TestNumberOfIterations(durationInSeconds: 3, numThreads: 1);
         }
 
@@ -77,7 +87,7 @@ namespace NLoad.Tests
                 .Build()
                 .Run();
 
-            Assert.AreEqual(numThreads * duration.TotalSeconds, result.TotalIterations);
+            Assert.AreEqual(numThreads * durationInSeconds, result.TotalIterations);
         }
 
         [TestMethod]
