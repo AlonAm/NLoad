@@ -68,7 +68,7 @@ namespace NLoad
             }
             catch (Exception e)
             {
-                throw new LoadTestException("An error occurred while running load test. See inner exception for details.", e);
+                throw new NLoadException("An error occurred while running load test. See inner exception for details.", e);
             }
         }
 

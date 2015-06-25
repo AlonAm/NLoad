@@ -16,7 +16,7 @@ namespace NLoad.App.Cmd
 
         private static void RunLoadTest()
         {
-            var loadTest = NLoad.Test<MyTest>()
+            var loadTest = NLoad.Test<InMemoryTest>()
                 .WithNumberOfThreads(10)
                 .WithDurationOf(TimeSpan.FromSeconds(30))
                 .WithDeleyBetweenThreadStart(TimeSpan.FromMilliseconds(100))
@@ -42,10 +42,7 @@ namespace NLoad.App.Cmd
             Console.ReadLine();
         }
 
-        /// <summary>
-        /// Example Test Class
-        /// </summary>
-        private sealed class MyTest : ITest
+        private sealed class InMemoryTest : ITest
         {
             public void Initialize()
             {
