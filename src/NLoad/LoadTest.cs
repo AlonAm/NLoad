@@ -61,7 +61,7 @@ namespace NLoad
                 return new LoadTestResult
                 {
                     TestRunnersResults = testRunners.Select(k => k.Result),
-                    TotalIterations = testRunners.Sum(k => k.Result.Iterations),//TestRunner<T>.Counter, 
+                    TotalIterations = testRunners.Where(k => k.Result != null).Sum(k => k.Result.Iterations), //TestRunner<T>.Counter, 
                     TotalRuntime = stopWatch.Elapsed,
                     Heartbeat = _heartbeat
                 };

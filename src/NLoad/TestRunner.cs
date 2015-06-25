@@ -93,7 +93,7 @@ namespace NLoad
 
                 testRunResult.EndTime = DateTime.Now;
 
-                //Interlocked.Increment(ref _totalIterations);
+                Interlocked.Increment(ref _totalIterations);
 
                 iterations++;
 
