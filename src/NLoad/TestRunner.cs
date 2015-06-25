@@ -7,6 +7,7 @@ namespace NLoad
 {
     public class TestRunner<T> where T : ITest, new()
     {
+        // Every TestRunner<T> has its own instance of _totalIterations
         private static long _totalIterations;
 
         private readonly ManualResetEvent _quitEvent;
@@ -17,23 +18,21 @@ namespace NLoad
             _quitEvent = quitEvent;
         }
 
+        #region Properties
+
         public bool IsBusy
         {
-            get
-            {
-                return _backgroundWorker.IsBusy;
-            }
+            get { return _backgroundWorker.IsBusy; }
         }
 
         public TestRunnerResult Result { get; private set; }
 
         public static long Counter
         {
-            get
-            {
-                return Interlocked.Read(ref _totalIterations);
-            }
+            get { return Interlocked.Read(ref _totalIterations); }
         }
+
+        #endregion
 
         public void Initialize()
         {
@@ -42,9 +41,9 @@ namespace NLoad
                 WorkerReportsProgress = true,
             };
 
-            backgroundWorker.DoWork += Run;
+            backgroundWorker.DoWork += RunOnBackgroundWorker;
 
-            backgroundWorker.RunWorkerCompleted += OnWorkerCompleted;
+            backgroundWorker.RunWorkerCompleted += BindResponseFromWorkerThread;
 
             _backgroundWorker = backgroundWorker;
         }
@@ -59,18 +58,13 @@ namespace NLoad
             _backgroundWorker.RunWorkerAsync(context);
         }
 
-        /// <summary>
-        /// Runs on backgroundworker thread
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private static void Run(object sender, DoWorkEventArgs e)
+        private static void RunOnBackgroundWorker(object sender, DoWorkEventArgs e)
         {
             var context = e.Argument as TestRunContext;
 
             if (context == null)
             {
-                throw new LoadTestException("TestRunContext is null.");
+                throw new ArgumentNullException("e", "Argument is null or is not of type TestRunContext");
             }
 
             var result = new TestRunnerResult(starTime: DateTime.Now);
@@ -85,13 +79,14 @@ namespace NLoad
 
             while (!context.QuitEvent.WaitOne(0))
             {
-                var testRunResult = new TestRunResult();
+                var testRunResult = new TestRunResult
+                {
+                    StartTime = DateTime.Now,
 
-                testRunResult.StartTime = DateTime.Now;
+                    TestResult = test.Execute(), //todo: add try-catch?
 
-                testRunResult.TestResult = test.Execute(); //todo: add try-catch?
-
-                testRunResult.EndTime = DateTime.Now;
+                    EndTime = DateTime.Now
+                };
 
                 Interlocked.Increment(ref _totalIterations);
 
@@ -101,15 +96,22 @@ namespace NLoad
             }
 
             result.TestRuns = testRunResults;
+
             result.EndTime = DateTime.Now;
+
             result.Iterations = iterations;
 
             e.Result = result;
         }
 
-        private void OnWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        private void BindResponseFromWorkerThread(object sender, RunWorkerCompletedEventArgs e)
         {
-            Result = (TestRunnerResult)e.Result;
+            var result = e.Result as TestRunnerResult;
+
+            if (result != null)
+            {
+                Result = result;
+            }
         }
     }
 }

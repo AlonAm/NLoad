@@ -7,30 +7,49 @@ namespace NLoad.App.Cmd
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Running Load Test\n");
+            Header();
 
+            RunLoadTest();
 
+            Footer();
+        }
+
+        private static void RunLoadTest()
+        {
             var loadTest = NLoad.Test<MyTest>()
-                                        .WithNumberOfThreads(10)
-                                        .WithDurationOf(TimeSpan.FromSeconds(30))
-                                        .WithDeleyBetweenThreadStart(TimeSpan.FromMilliseconds(100))
-                                        .OnHeartbeat((s, e) => 
-                                            Console.WriteLine("[{0}] {1}", e.Timestamp.ToString("T"), e.Throughput))
-                                    .Build();
+                .WithNumberOfThreads(10)
+                .WithDurationOf(TimeSpan.FromSeconds(30))
+                .WithDeleyBetweenThreadStart(TimeSpan.FromMilliseconds(100))
+                .OnHeartbeat((s, e) =>
+                    Console.WriteLine(" {0}  {1}  {2}", e.Timestamp.ToString("T"), e.Elapsed.ToString("c"), e.Throughput))
+                .Build();
 
             var result = loadTest.Run();
 
-
             Console.WriteLine("\nTotal Iterations: {0}\n", result.TotalIterations);
+        }
 
+        private static void Header()
+        {
+            Console.WriteLine("\n  NLoad \n ________________________________________________\n\n");
+            Console.WriteLine(" Running in memory load test...\n\n");
+            Console.WriteLine(" [Time]       [Elapsed]         [Throughput]\n");
+        }
+
+        private static void Footer()
+        {
             Console.WriteLine("Press <Enter> to terminate.");
             Console.ReadLine();
         }
 
-        class MyTest : ITest
+        /// <summary>
+        /// Example Test Class
+        /// </summary>
+        private sealed class MyTest : ITest
         {
             public void Initialize()
             {
+                Console.WriteLine("Initialize test...");
             }
 
             public TestResult Execute()

@@ -101,17 +101,17 @@ namespace NLoad
 
             while (running)
             {
-                var delta = DateTime.Now - start;
+                var elapsed = DateTime.Now - start;
 
-                if (delta >= _configuration.Duration)
+                if (elapsed >= _configuration.Duration)
                 {
                     running = false;
                 }
                 else
                 {
-                    var throughput = TestRunner<T>.Counter / delta.TotalSeconds;
+                    var throughput = TestRunner<T>.Counter / elapsed.TotalSeconds;
 
-                    OnHeartbeat(throughput);
+                    OnHeartbeat(throughput, elapsed);
 
                     if (DateTime.Now - start < _configuration.Duration)
                     {
@@ -141,9 +141,9 @@ namespace NLoad
             }
         }
 
-        protected virtual void OnHeartbeat(double throughput)
+        protected virtual void OnHeartbeat(double throughput, TimeSpan delta)
         {
-            var heartbeat = new Heartbeat(timestamp: DateTime.Now, throughput: throughput);
+            var heartbeat = new Heartbeat(DateTime.Now, throughput, delta);
 
             _heartbeat.Add(heartbeat);
 
