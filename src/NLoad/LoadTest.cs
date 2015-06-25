@@ -9,9 +9,14 @@ namespace NLoad
 {
     public class LoadTest<T> where T : ITest, new()
     {
-        private long _counter;
-        private readonly LoadTestConfiguration _configuration;
+        // ReSharper disable once StaticFieldInGenericType
+        //every LoadTest<T> has its own instance of _counter
+        private static long _counter;
+
         private readonly ManualResetEvent _quitEvent = new ManualResetEvent(false);
+
+        private readonly LoadTestConfiguration _configuration;
+        
         private readonly List<TestRunResult> _testRunResults = new List<TestRunResult>();
         private readonly List<Heartbeat> _heartbeats = new List<Heartbeat>();
 
@@ -42,27 +47,15 @@ namespace NLoad
 
             try
             {
-                var threads = CreateThreads();
+                var threads = CreateThreads(_configuration.NumberOfThreads, _quitEvent);
 
-                StartThreads(threads);
+                StartThreads(threads, _configuration.DelayBetweenThreadStart);
 
                 Monitor();
 
                 ShutdownThreads(threads);
 
-                var result = new LoadTestResult
-                {
-                    Iterations = _counter,
-                    Runtime = stopWatch.Elapsed,
-                    TestRuns = _testRunResults,
-                    Heartbeats = _heartbeats,
-                    MinThroughput = _heartbeats.Min(k => k.Throughput),
-                    MaxThroughput = _heartbeats.Max(k => k.Throughput),
-                    AverageThroughput = _heartbeats.Average(k => k.Throughput),
-                    MinResponseTime = _testRunResults.Min(k => k.ResponseTime),
-                    MaxResponseTime = _testRunResults.Max(k => k.ResponseTime),
-                    AverageResponseTime = new TimeSpan(Convert.ToInt64(_testRunResults.Average(k => k.ResponseTime.Ticks)))
-                };
+                var result = CreateLoadTestResult(stopWatch.Elapsed);
 
                 return result;
             }
@@ -74,6 +67,25 @@ namespace NLoad
             {
                 stopWatch.Stop();
             }
+        }
+
+        private LoadTestResult CreateLoadTestResult(TimeSpan totalRuntime)
+        {
+            var result = new LoadTestResult
+            {
+                Iterations = _counter,
+                TotalRuntime = totalRuntime,
+                TestRuns = _testRunResults,
+                Heartbeats = _heartbeats,
+                MinThroughput = _heartbeats.Min(k => k.Throughput),
+                MaxThroughput = _heartbeats.Max(k => k.Throughput),
+                AverageThroughput = _heartbeats.Average(k => k.Throughput),
+                MinResponseTime = _testRunResults.Min(k => k.ResponseTime),
+                MaxResponseTime = _testRunResults.Max(k => k.ResponseTime),
+                AverageResponseTime = new TimeSpan(Convert.ToInt64(_testRunResults.Average(k => k.ResponseTime.Ticks)))
+            };
+
+            return result;
         }
 
         private void Monitor()
@@ -140,11 +152,13 @@ namespace NLoad
             }
         }
 
-        private List<Thread> CreateThreads()
+        private List<Thread> CreateThreads(int numberOfThreads, ManualResetEvent quitEvent)
         {
-            var threads = new List<Thread>(_configuration.NumberOfThreads);
+            //var threadProc = new ThreadProc<T>(_counter, quitEvent, _testRunResults);
 
-            for (var i = 0; i < _configuration.NumberOfThreads; i++)
+            var threads = new List<Thread>(numberOfThreads);
+
+            for (var i = 0; i < numberOfThreads; i++)
             {
                 var thread = new Thread(ThreadProc);
 
@@ -154,13 +168,13 @@ namespace NLoad
             return threads;
         }
 
-        private void StartThreads(IEnumerable<Thread> threads)
+        private static void StartThreads(IEnumerable<Thread> threads, TimeSpan delay)
         {
             foreach (var thread in threads)
             {
                 thread.Start();
 
-                Thread.Sleep(_configuration.DelayBetweenThreadStart);
+                Thread.Sleep(delay);
             }
         }
 

@@ -9,7 +9,7 @@ namespace NLoad
 
         public long Iterations { get; set; }
         
-        public TimeSpan Runtime { get; set; }
+        public TimeSpan TotalRuntime { get; set; }
         
         public List<Heartbeat> Heartbeats { get; set; }
 

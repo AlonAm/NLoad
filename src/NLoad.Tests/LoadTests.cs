@@ -10,16 +10,16 @@ namespace NLoad.Tests
         [TestMethod]
         public void LoadTestResult()
         {
-            var loadTest = NLoad.Test<TestMock>()
-                                    .WithNumberOfThreads(1)
-                                    .WithDurationOf(TimeSpan.Zero)
+            var loadTest = NLoad.Test<OneSecondDelayTest>()
+                                    .WithNumberOfThreads(5)
+                                    .WithDurationOf(TimeSpan.FromSeconds(5))
                                     .WithDeleyBetweenThreadStart(TimeSpan.Zero)
                                         .Build();
 
             var result = loadTest.Run();
 
             Assert.IsTrue(result.Iterations > 0);
-            Assert.IsTrue(result.Runtime > TimeSpan.Zero);
+            Assert.IsTrue(result.TotalRuntime > TimeSpan.Zero);
             Assert.IsTrue(result.TestRuns.Any());
             Assert.IsTrue(result.Heartbeats.Any());
 
@@ -33,15 +33,29 @@ namespace NLoad.Tests
         }
 
         [TestMethod]
+        public void CorrectNumberOfIterations()
+        {
+            var loadTest = NLoad.Test<OneSecondDelayTest>()
+                                    .WithNumberOfThreads(1)
+                                    .WithDurationOf(TimeSpan.FromSeconds(1))
+                                    .WithDeleyBetweenThreadStart(TimeSpan.Zero)
+                                        .Build();
+
+            var result = loadTest.Run();
+
+            Assert.AreEqual(1, result.Iterations);
+        }
+
+        [TestMethod]
         public void NumberOfThreads()
         {
             const int numberOfThreads = 10;
 
             var loadTest = NLoad.Test<ThreadCounter>()
-                    .WithNumberOfThreads(numberOfThreads)
-                    .WithDurationOf(TimeSpan.Zero)
-                    .WithDeleyBetweenThreadStart(TimeSpan.Zero)
-                        .Build();
+                                    .WithNumberOfThreads(numberOfThreads)
+                                    .WithDurationOf(TimeSpan.Zero)
+                                    .WithDeleyBetweenThreadStart(TimeSpan.Zero)
+                                        .Build();
 
             loadTest.Run();
 
