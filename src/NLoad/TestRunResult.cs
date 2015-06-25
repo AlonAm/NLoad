@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace NLoad
 {
@@ -10,6 +11,7 @@ namespace NLoad
 
         public DateTime EndTime { get; set; }
 
+        [ExcludeFromCodeCoverage]
         public TimeSpan ResponseTime
         {
             get

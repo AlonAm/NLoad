@@ -61,12 +61,7 @@ namespace NLoad
 
         private static void RunOnBackgroundWorker(object sender, DoWorkEventArgs e)
         {
-            var context = e.Argument as TestRunContext;
-
-            if (context == null)
-            {
-                throw new ArgumentNullException("e", "Argument is null or is not of type TestRunContext");
-            }
+            var context = (TestRunContext)e.Argument;
 
             var result = new TestRunnerResult(starTime: DateTime.Now);
 

@@ -8,7 +8,7 @@ using System.Threading;
 
 namespace NLoad
 {
-    public class LoadTest<T> where T : ITest, new()
+    public sealed class LoadTest<T> where T : ITest, new()
     {
         private readonly LoadTestConfiguration _configuration;
         private readonly List<Heartbeat> _heartbeat = new List<Heartbeat>();
@@ -141,7 +141,7 @@ namespace NLoad
             }
         }
 
-        protected virtual void OnHeartbeat(double throughput, TimeSpan delta)
+        private void OnHeartbeat(double throughput, TimeSpan delta)
         {
             var heartbeat = new Heartbeat(DateTime.Now, throughput, delta);
 

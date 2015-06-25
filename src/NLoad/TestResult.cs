@@ -1,7 +1,10 @@
-﻿namespace NLoad
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace NLoad
 {
     public class TestResult
     {
+        [ExcludeFromCodeCoverage]
         public TestResult()
         {
         }
