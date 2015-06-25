@@ -99,8 +99,6 @@ namespace NLoad
 
             var start = DateTime.Now;
 
-            Thread.Sleep(1000);
-
             while (running)
             {
                 var delta = DateTime.Now - start;
@@ -111,9 +109,14 @@ namespace NLoad
                 }
                 else
                 {
-                    OnHeartbeat(throughput: TestRunner<T>.Counter / delta.TotalSeconds);
+                    var throughput = TestRunner<T>.Counter / delta.TotalSeconds;
 
-                    Thread.Sleep(1000);
+                    OnHeartbeat(throughput);
+
+                    if (DateTime.Now - start < _configuration.Duration)
+                    {
+                        Thread.Sleep(1000);
+                    }
                 }
             }
         }

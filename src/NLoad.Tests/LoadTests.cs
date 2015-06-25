@@ -9,10 +9,10 @@ namespace NLoad.Tests
     public class LoadTests
     {
         [TestMethod]
-        public void LoadTestResult()
+        public void SingleThreadLoadTest()
         {
             var loadTest = NLoad.Test<OneSecondDelayTest>()
-                                    .WithNumberOfThreads(5)
+                                    .WithNumberOfThreads(1)
                                     .WithDurationOf(TimeSpan.FromSeconds(1))
                                     .WithDeleyBetweenThreadStart(TimeSpan.Zero)
                                         .Build();
@@ -20,9 +20,11 @@ namespace NLoad.Tests
             var result = loadTest.Run();
 
             Assert.AreNotEqual(0, result.TotalIterations);
-            
+
             Assert.AreNotEqual(TimeSpan.Zero, result.TotalRuntime);
-            
+
+            //Assert.IsTrue(result.TotalRuntime > duration);
+
             //Assert.IsTrue(result.Heartbeat.Any());
 
             //Assert.IsTrue(result.TestRuns.Any());
@@ -37,21 +39,49 @@ namespace NLoad.Tests
         }
 
         [TestMethod]
-        public void CorrectNumberOfIterations()
+        public void HeartbeatCountEqualsDurationInSeconds()
         {
-            var loadTest = NLoad.Test<OneSecondDelayTest>()
+            for (var durationInSeconds = 1; durationInSeconds < 5; durationInSeconds++)
+            {
+                var duration = TimeSpan.FromSeconds(durationInSeconds);
+
+                var result = NLoad.Test<TestMock>()
                                     .WithNumberOfThreads(1)
-                                    .WithDurationOf(TimeSpan.FromSeconds(1))
+                                    .WithDurationOf(duration)
                                     .WithDeleyBetweenThreadStart(TimeSpan.Zero)
-                                        .Build();
+                                        .Build()
+                                            .Run();
 
-            var result = loadTest.Run();
-
-            Assert.AreEqual(1, result.TotalIterations);
+                Assert.AreEqual(durationInSeconds, result.Heartbeat.Count);
+            }
         }
 
         [TestMethod]
-        public void NumberOfThreads()
+        public void ExpectedNumberOfIterationsForOneThread()
+        {
+            TestNumberOfIterations(durationInSeconds: 1, numThreads: 1);
+
+            TestNumberOfIterations(durationInSeconds: 2, numThreads: 1);
+
+            TestNumberOfIterations(durationInSeconds: 3, numThreads: 1);
+        }
+
+        private static void TestNumberOfIterations(int durationInSeconds, int numThreads)
+        {
+            var duration = TimeSpan.FromSeconds(durationInSeconds);
+
+            var result = NLoad.Test<OneSecondDelayTest>()
+                .WithNumberOfThreads(numThreads)
+                .WithDurationOf(duration)
+                .WithDeleyBetweenThreadStart(TimeSpan.Zero)
+                .Build()
+                .Run();
+
+            Assert.AreEqual(numThreads * duration.TotalSeconds, result.TotalIterations);
+        }
+
+        [TestMethod]
+        public void ActualNumberOfThreads()
         {
             const int numberOfThreads = 10;
 
@@ -72,18 +102,17 @@ namespace NLoad.Tests
             var eventFired = false;
             double throughput = 0;
 
-            var loadTest = NLoad.Test<TestMock>()
-                                    .WithNumberOfThreads(1)
-                                    .WithDurationOf(TimeSpan.FromSeconds(5))
-                                    .OnHeartbeat((s, hearbeat) =>
-                                    {
-                                        eventFired = true;
-                                        throughput = hearbeat.Throughput;
-                                        Debug.WriteLine(hearbeat.Throughput);
-                                    })
-                                .Build();
-
-            loadTest.Run();
+            NLoad.Test<TestMock>()
+                    .WithNumberOfThreads(1)
+                    .WithDurationOf(TimeSpan.FromSeconds(1))
+                    .OnHeartbeat((s, hearbeat) =>
+                        {
+                            eventFired = true;
+                            throughput = hearbeat.Throughput;
+                            Debug.WriteLine(hearbeat.Throughput);
+                        })
+                    .Build()
+                    .Run();
 
             Assert.IsTrue(eventFired);
             Assert.AreNotEqual(0, throughput);
