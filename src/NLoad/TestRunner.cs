@@ -7,11 +7,12 @@ namespace NLoad
 {
     public class TestRunner<T> where T : ITest, new()
     {
+        private BackgroundWorker _backgroundWorker;
+        private readonly ManualResetEvent _quitEvent;
+
+        // ReSharper disable once StaticFieldInGenericType
         // Every TestRunner<T> has its own instance of _totalIterations
         private static long _totalIterations;
-
-        private readonly ManualResetEvent _quitEvent;
-        private BackgroundWorker _backgroundWorker;
 
         public TestRunner(ManualResetEvent quitEvent)
         {

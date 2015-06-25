@@ -22,6 +22,36 @@ namespace NLoad.Tests
             var result = loadTest.Run();
 
             Assert.AreNotEqual(0, result.TotalIterations);
+            Assert.AreNotEqual(TimeSpan.Zero, result.TotalRuntime);
+            Assert.IsTrue(result.TotalRuntime > duration);
+            
+            Assert.IsTrue(result.Heartbeat.Any());
+
+            //Assert.IsTrue(result.TestRuns.Any());
+
+            //Assert.IsTrue(result.MinThroughput > 0);
+            //Assert.IsTrue(result.MaxThroughput > 0);
+            //Assert.IsTrue(result.AverageThroughput > 0);
+
+            //Assert.IsTrue(result.MinResponseTime > TimeSpan.Zero);
+            //Assert.IsTrue(result.MaxResponseTime > TimeSpan.Zero);
+            //Assert.IsTrue(result.AverageResponseTime > TimeSpan.Zero);
+        }
+
+        [TestMethod]
+        public void MultithreadedLoadTest()
+        {
+            var duration = TimeSpan.FromSeconds(1);
+
+            var loadTest = NLoad.Test<OneSecondDelayTest>()
+                                    .WithNumberOfThreads(10)
+                                    .WithDurationOf(duration)
+                                    .WithDeleyBetweenThreadStart(TimeSpan.Zero)
+                                        .Build();
+
+            var result = loadTest.Run();
+
+            Assert.AreNotEqual(0, result.TotalIterations);
 
             Assert.AreNotEqual(TimeSpan.Zero, result.TotalRuntime);
 

@@ -1,6 +1,6 @@
 ﻿namespace NLoad
 {
-    public class NLoad
+    public sealed class NLoad
     {
         public static LoadTestBuilder<T> Test<T>()
             where T : ITest, new()
