@@ -5,13 +5,17 @@ namespace NLoad
 {
     public class LoadTestResult
     {
+        public IEnumerable<TestRunnerResult> TestRunnersResults { get; set; }
+
         public List<TestRunResult> TestRuns { get; set; }
 
-        public long Iterations { get; set; }
-        
+        public List<Heartbeat> Heartbeat { get; set; }
+
+
+
+
+        public long TotalIterations { get; set; }
         public TimeSpan TotalRuntime { get; set; }
-        
-        public List<Heartbeat> Heartbeats { get; set; }
 
         public double MinThroughput { get; set; }
         public double MaxThroughput { get; set; }

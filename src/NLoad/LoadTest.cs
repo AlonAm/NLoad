@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -9,18 +10,13 @@ namespace NLoad
 {
     public class LoadTest<T> where T : ITest, new()
     {
-        // ReSharper disable once StaticFieldInGenericType
-        //every LoadTest<T> has its own instance of _counter
-        private static long _counter;
-
+        private readonly LoadTestConfiguration _configuration;
+        private readonly List<Heartbeat> _heartbeat = new List<Heartbeat>();
         private readonly ManualResetEvent _quitEvent = new ManualResetEvent(false);
 
-        private readonly LoadTestConfiguration _configuration;
-        
-        private readonly List<TestRunResult> _testRunResults = new List<TestRunResult>();
-        private readonly List<Heartbeat> _heartbeats = new List<Heartbeat>();
-
         public event EventHandler<Heartbeat> Heartbeat;
+
+        #region Ctor
 
         [ExcludeFromCodeCoverage]
         public LoadTest(LoadTestConfiguration configuration)
@@ -33,68 +29,75 @@ namespace NLoad
             _configuration = configuration;
         }
 
+        #endregion
+
+        #region Properties
+
         public LoadTestConfiguration Configuration
         {
-            get
-            {
-                return _configuration;
-            }
+            get { return _configuration; }
         }
+
+        #endregion
 
         public LoadTestResult Run()
         {
-            var stopWatch = Stopwatch.StartNew();
-
             try
             {
-                var threads = CreateThreads(_configuration.NumberOfThreads, _quitEvent);
+                var stopWatch = Stopwatch.StartNew();
 
-                StartThreads(threads, _configuration.DelayBetweenThreadStart);
+                var testRunners = CreateAndInitializeTestRunners(_configuration.NumberOfThreads, _quitEvent);
 
-                Monitor();
+                StartTestRunners(testRunners);
 
-                ShutdownThreads(threads);
+                MonitorHeartRate();
 
-                var result = CreateLoadTestResult(stopWatch.Elapsed);
+                ShutdownTestRunners();
 
-                return result;
+                WaitForTestRunners(testRunners);
+
+                stopWatch.Stop();
+
+                return new LoadTestResult
+                {
+                    TestRunnersResults = testRunners.Select(k => k.Result),
+                    TotalIterations = testRunners.Sum(k => k.Result.Iterations),
+                    TotalRuntime = stopWatch.Elapsed,
+                    Heartbeat = _heartbeat
+                };
             }
             catch (Exception e)
             {
                 throw new LoadTestException("An error occurred while running load test. See inner exception for details.", e);
             }
-            finally
-            {
-                stopWatch.Stop();
-            }
         }
 
-        private LoadTestResult CreateLoadTestResult(TimeSpan totalRuntime)
+        private static List<TestRunner<T>> CreateAndInitializeTestRunners(int count, ManualResetEvent quitEvent)
         {
-            var result = new LoadTestResult
-            {
-                Iterations = _counter,
-                TotalRuntime = totalRuntime,
-                TestRuns = _testRunResults,
-                Heartbeats = _heartbeats,
-                MinThroughput = _heartbeats.Min(k => k.Throughput),
-                MaxThroughput = _heartbeats.Max(k => k.Throughput),
-                AverageThroughput = _heartbeats.Average(k => k.Throughput),
-                MinResponseTime = _testRunResults.Min(k => k.ResponseTime),
-                MaxResponseTime = _testRunResults.Max(k => k.ResponseTime),
-                AverageResponseTime = new TimeSpan(Convert.ToInt64(_testRunResults.Average(k => k.ResponseTime.Ticks)))
-            };
+            var testRunners = new List<TestRunner<T>>(count);
 
-            return result;
+            for (var i = 0; i < count; i++)
+            {
+                var testRunner = new TestRunner<T>(quitEvent);
+
+                testRunner.Initialize();
+
+                testRunners.Add(testRunner);
+            }
+
+            return testRunners;
         }
 
-        private void Monitor()
+        private static void StartTestRunners(List<TestRunner<T>> testRunners)
+        {
+            testRunners.ForEach(k => k.Start()); //todo: add error handling
+        }
+
+        private void MonitorHeartRate()
         {
             var running = true;
 
             var start = DateTime.Now;
-
-            Interlocked.Exchange(ref _counter, 0);
 
             Thread.Sleep(1000);
 
@@ -102,104 +105,180 @@ namespace NLoad
             {
                 var delta = DateTime.Now - start;
 
-                var counter = Interlocked.Read(ref _counter);
-
-                OnHeartbeat(throughput: counter / delta.TotalSeconds);
-
                 if (delta >= _configuration.Duration)
                 {
                     running = false;
                 }
                 else
                 {
+                    OnHeartbeat(throughput: TestRunner<T>.Counter / delta.TotalSeconds);
+
                     Thread.Sleep(1000);
                 }
             }
         }
 
-        private void ThreadProc()
-        {
-            //todo: move to another class
-            //public class ThreadProc
-            //{
-            //}
-
-            var test = new T();
-
-            test.Initialize();
-
-            var results = new List<TestRunResult>();
-
-            while (!_quitEvent.WaitOne(0))
-            {
-                var result = new TestRunResult
-                {
-                    StartTime = DateTime.Now,
-
-                    TestResult = test.Execute(),
-
-                    EndTime = DateTime.Now
-                };
-
-                Interlocked.Increment(ref _counter);
-
-                results.Add(result);
-            }
-
-            lock (_testRunResults)
-            {
-                _testRunResults.AddRange(results);
-            }
-        }
-
-        private List<Thread> CreateThreads(int numberOfThreads, ManualResetEvent quitEvent)
-        {
-            //var threadProc = new ThreadProc<T>(_counter, quitEvent, _testRunResults);
-
-            var threads = new List<Thread>(numberOfThreads);
-
-            for (var i = 0; i < numberOfThreads; i++)
-            {
-                var thread = new Thread(ThreadProc);
-
-                threads.Add(thread);
-            }
-
-            return threads;
-        }
-
-        private static void StartThreads(IEnumerable<Thread> threads, TimeSpan delay)
-        {
-            foreach (var thread in threads)
-            {
-                thread.Start();
-
-                Thread.Sleep(delay);
-            }
-        }
-
-        private void ShutdownThreads(IEnumerable<Thread> threads)
+        private void ShutdownTestRunners()
         {
             _quitEvent.Set();
+        }
 
-            foreach (var t in threads)
+        private static void WaitForTestRunners(List<TestRunner<T>> testRunners)
+        {
+            while (true)
             {
-                t.Join();
+                if (testRunners.Any(w => w.IsBusy))
+                {
+                    //Thread.Sleep(1);
+                }
+                else
+                {
+                    break;
+                }
             }
         }
 
         protected virtual void OnHeartbeat(double throughput)
         {
-            var heartbeat = new Heartbeat
-            {
-                Throughput = throughput
-            };
+            var heartbeat = new Heartbeat(timestamp: DateTime.Now, throughput: throughput);
 
-            _heartbeats.Add(heartbeat);
+            _heartbeat.Add(heartbeat);
 
             var handler = Heartbeat;
 
-            if (handler != null) handler(this, heartbeat);
+            if (handler != null)
+            {
+                handler(this, heartbeat); //todo: add try catch?
+            }
         }
     }
 }
+
+
+//private LoadTestResult CreateLoadTestResult(TimeSpan totalRuntime)
+//{
+//    var result = new LoadTestResult
+//    {
+//        TotalIterations = _counter,
+//        TotalRuntime = totalRuntime,
+//        TestRuns = _testRunResults,
+//        Heartbeat = _heartbeats,
+//        MinThroughput = _heartbeats.Min(k => k.Throughput),
+//        MaxThroughput = _heartbeats.Max(k => k.Throughput),
+//        AverageThroughput = _heartbeats.Average(k => k.Throughput),
+//        MinResponseTime = _testRunResults.Min(k => k.ResponseTime),
+//        MaxResponseTime = _testRunResults.Max(k => k.ResponseTime),
+//        AverageResponseTime = new TimeSpan(Convert.ToInt64(_testRunResults.Average(k => k.ResponseTime.Ticks)))
+//    };
+
+//    return result;
+//}
+
+//private void ThreadProc()
+//{
+//    //todo: move to another class
+//    //public class ThreadProc
+//    //{
+//    //}
+
+//    var test = new T();
+
+//    test.Initialize();
+
+//    var results = new List<TestRunResult>();
+
+//    while (!_quitEvent.WaitOne(0))
+//    {
+//        var result = new TestRunResult
+//        {
+//            StartTime = DateTime.Now,
+
+//            TestResult = test.Execute(),
+
+//            EndTime = DateTime.Now
+//        };
+
+//        Interlocked.Increment(ref _counter);
+
+//        results.Add(result);
+//    }
+
+//    lock (_testRunResults)
+//    {
+//        _testRunResults.AddRange(results);
+//    }
+//}
+
+//private List<BackgroundWorker> CreateThreads(int numberOfThreads)
+//{
+//    var backgroundWorkers = new List<BackgroundWorker>(numberOfThreads);
+
+//    for (var i = 0; i < numberOfThreads; i++)
+//    {
+//        var backgroundWorker = new BackgroundWorker();
+
+//        backgroundWorker.DoWork += OnDoWork;
+
+//        backgroundWorker.RunWorkerCompleted += OnRunWorkerCompleted;
+
+//        backgroundWorker.ProgressChanged += ProgressChanged;
+
+//        backgroundWorkers.Add(backgroundWorker);
+//    }
+
+//    return backgroundWorkers;
+//}
+
+//private void ProgressChanged(object sender, ProgressChangedEventArgs e)
+//{
+
+//}
+
+//private void OnDoWork(object sender, DoWorkEventArgs e)
+//{
+//    var context = (TestRunContext)e.Argument;
+
+//    var proc = new ThreadProc<T>(context);
+
+//    e.Result = proc.Start();
+
+
+//    //e.Result = new ThreadResult
+//    //{
+//    //    Iterations = iterations
+//    //};
+//}
+
+//private void OnRunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+//{
+//    var result = (ThreadResult)e.Result;
+
+//    _counter = _counter + result.Iterations;
+//}
+
+//private void StartThreads(IEnumerable<BackgroundWorker> threads, TimeSpan delay)
+//{
+//    foreach (var thread in threads)
+//    {
+//        var context = new TestRunContext
+//        {
+//            QuitEvent = _quitEvent
+//        };
+
+//        //var threadProc = new ThreadProc<T>(_counter, quitEvent, _testRunResults);
+
+//        thread.RunWorkerAsync(context);
+
+//        Thread.Sleep(delay);
+//    }
+//}
+
+//private void ShutdownThreads(IEnumerable<BackgroundWorker> threads)
+//{
+//    _quitEvent.Set();
+
+//    //foreach (var t in threads)
+//    //{
+//    //    t.Join();
+//    //}
+//}

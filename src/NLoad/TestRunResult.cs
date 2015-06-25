@@ -4,6 +4,16 @@ namespace NLoad
 {
     public class TestRunResult
     {
+        public TestRunResult()
+        {
+            
+        }
+
+        public TestRunResult(DateTime startTime)
+        {
+            StartTime = startTime;
+        }
+
         public TestResult TestResult { get; set; }
 
         public DateTime StartTime { get; set; }
