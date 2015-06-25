@@ -38,6 +38,3 @@ To install NLoad via [NuGet](http://www.nuget.org/packages/NLoad), run the follo
 ```
 Install-Package NLoad
 ```
-
-## License
-NLoad is licensed under [MIT](http://www.opensource.org/licenses/mit-license.php "Read more about the MIT license form"). Refer to license file for more information.
