@@ -57,21 +57,9 @@ namespace NLoad
 
                 stopWatch.Stop();
 
-
-                var maxResponseTime = TimeSpan.Zero;
-                var minResponseTime = TimeSpan.Zero;
-                var averageResponseTime = TimeSpan.Zero;
-
                 var testRuns = testRunners.Where(k => k.Result != null && k.Result.TestRuns != null)
-                                             .SelectMany(k => k.Result.TestRuns)
-                                             .ToList();
-
-                if (testRuns.Any())
-                {
-                    maxResponseTime = testRuns.Max(k => k.ResponseTime);
-                    minResponseTime = testRuns.Min(k => k.ResponseTime);
-                    averageResponseTime = new TimeSpan(Convert.ToInt64((testRuns.Average(k => k.ResponseTime.Ticks))));
-                }
+                                          .SelectMany(k => k.Result.TestRuns)
+                                          .ToList();
 
                 var result = new LoadTestResult
                 {
@@ -79,12 +67,15 @@ namespace NLoad
                     TotalIterations = testRunners.Where(k => k.Result != null).Sum(k => k.Result.Iterations), //TestRunner<T>.TotalIterations, 
                     TotalRuntime = stopWatch.Elapsed,
                     Heartbeat = _heartbeat,
-
-                    MaxResponseTime = maxResponseTime,
-                    MinResponseTime = minResponseTime,
-                    AverageResponseTime = averageResponseTime,
+                    TestRuns = testRuns
                 };
 
+                if (testRuns.Any())
+                {
+                    result.MaxResponseTime = testRuns.Max(k => k.ResponseTime);
+                    result.MinResponseTime = testRuns.Min(k => k.ResponseTime);
+                    result.AverageResponseTime = new TimeSpan(Convert.ToInt64((testRuns.Average(k => k.ResponseTime.Ticks))));
+                }
                 if (_heartbeat.Any())
                 {
                     result.MaxThroughput = _heartbeat.Where(k => !double.IsNaN(k.Throughput)).Max(k => k.Throughput);

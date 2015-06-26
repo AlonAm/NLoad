@@ -14,7 +14,7 @@ namespace NLoad.App.Cmd
         {
             Thread.Sleep(1);
 
-            return new TestResult(true);
+            return TestResult.Default; // todo: turn to mutable
         }
     }
 }

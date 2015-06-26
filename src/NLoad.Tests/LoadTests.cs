@@ -24,7 +24,7 @@ namespace NLoad.Tests
             Assert.AreNotEqual(0, result.TotalIterations);
             Assert.AreNotEqual(TimeSpan.Zero, result.TotalRuntime);
             Assert.IsTrue(result.TotalRuntime > duration);
-            
+
             Assert.IsTrue(result.Heartbeat.Any());
 
             //Assert.IsTrue(result.MinThroughput > 0);
@@ -35,7 +35,7 @@ namespace NLoad.Tests
             Assert.IsTrue(result.MaxResponseTime > TimeSpan.Zero);
             Assert.IsTrue(result.AverageResponseTime > TimeSpan.Zero);
 
-            //Assert.IsTrue(result.TestRuns.Any());
+            Assert.IsTrue(result.TestRuns.Any());
         }
 
         [TestMethod]
@@ -59,7 +59,7 @@ namespace NLoad.Tests
 
             Assert.IsTrue(result.Heartbeat.Any());
 
-//            Assert.IsTrue(result.MinThroughput > 0);
+            //Assert.IsTrue(result.MinThroughput > 0);
             Assert.IsTrue(result.MaxThroughput > 0);
             Assert.IsTrue(result.AverageThroughput > 0);
 
@@ -67,7 +67,7 @@ namespace NLoad.Tests
             Assert.IsTrue(result.MaxResponseTime > TimeSpan.Zero);
             Assert.IsTrue(result.AverageResponseTime > TimeSpan.Zero);
 
-            //Assert.IsTrue(result.TestRuns.Any());
+            Assert.IsTrue(result.TestRuns.Any());
         }
 
         [TestMethod]

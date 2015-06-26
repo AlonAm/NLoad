@@ -87,9 +87,11 @@ namespace NLoad
 
             test.Initialize();
 
+            TestRunResult testRunResult; // move to inner scope?
+
             while (!context.QuitEvent.WaitOne(0))
             {
-                var testRunResult = new TestRunResult();
+                testRunResult = new TestRunResult();
 
                 testRunResult.StartTime = DateTime.UtcNow;
 

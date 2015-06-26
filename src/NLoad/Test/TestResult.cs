@@ -4,6 +4,8 @@ namespace NLoad
 {
     public class TestResult
     {
+        public static readonly TestResult Default = new TestResult(true);
+
         [ExcludeFromCodeCoverage]
         public TestResult()
         {
