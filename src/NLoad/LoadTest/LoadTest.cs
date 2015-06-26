@@ -7,8 +7,10 @@ using System.Threading;
 
 namespace NLoad
 {
-    public sealed class LoadTest<T> where T : ITest, new()
+    public sealed class LoadTest<T> : ILoadTest where T : ITest, new()
     {
+        private long _totalIterations;
+
         private readonly LoadTestConfiguration _configuration;
         private readonly List<Heartbeat> _heartbeat = new List<Heartbeat>();
         private readonly ManualResetEvent _quitEvent = new ManualResetEvent(false);
@@ -39,6 +41,7 @@ namespace NLoad
 
         #endregion
 
+
         public LoadTestResult Run()
         {
             try
@@ -64,7 +67,7 @@ namespace NLoad
                 var result = new LoadTestResult
                 {
                     TestRunnersResults = testRunners.Where(k => k.Result != null).Select(k => k.Result),
-                    TotalIterations = testRunners.Where(k => k.Result != null).Sum(k => k.Result.Iterations), //TestRunner<T>.TotalIterations, 
+                    TotalIterations = _totalIterations,
                     TotalRuntime = stopWatch.Elapsed,
                     Heartbeat = _heartbeat,
                     TestRuns = testRuns
@@ -76,6 +79,7 @@ namespace NLoad
                     result.MinResponseTime = testRuns.Min(k => k.ResponseTime);
                     result.AverageResponseTime = new TimeSpan(Convert.ToInt64((testRuns.Average(k => k.ResponseTime.Ticks))));
                 }
+
                 if (_heartbeat.Any())
                 {
                     result.MaxThroughput = _heartbeat.Where(k => !double.IsNaN(k.Throughput)).Max(k => k.Throughput);
@@ -91,13 +95,14 @@ namespace NLoad
             }
         }
 
-        private static List<TestRunner<T>> CreateAndInitializeTestRunners(int count, ManualResetEvent quitEvent)
+
+        private List<TestRunner<T>> CreateAndInitializeTestRunners(int count, ManualResetEvent quitEvent)
         {
             var testRunners = new List<TestRunner<T>>(count);
 
             for (var i = 0; i < count; i++)
             {
-                var testRunner = new TestRunner<T>(quitEvent);
+                var testRunner = new TestRunner<T>(this, quitEvent);
 
                 testRunner.Initialize();
 
@@ -126,7 +131,9 @@ namespace NLoad
 
                 if (elapsed < _configuration.Duration)
                 {
-                    var throughput = TestRunner<T>.TotalIterations / elapsed.TotalSeconds;
+                    var iterations = Interlocked.Read(ref _totalIterations);
+
+                    var throughput = iterations / elapsed.TotalSeconds; //TestRunner<T>.TotalIterations / elapsed.TotalSeconds;
 
                     if (double.IsNaN(throughput) || double.IsInfinity(throughput)) continue;
 
@@ -174,5 +181,15 @@ namespace NLoad
                 handler(this, heartbeat); //todo: add try catch?
             }
         }
+
+        public void IncrementCounter()
+        {
+            Interlocked.Increment(ref _totalIterations);
+        }
+    }
+
+    public interface ILoadTest
+    {
+        void IncrementCounter();
     }
 }

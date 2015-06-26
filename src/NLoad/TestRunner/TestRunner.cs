@@ -9,19 +9,17 @@ namespace NLoad
     {
         #region Fields
 
+        private readonly ILoadTest _loadTest;
         private BackgroundWorker _backgroundWorker;
         private readonly ManualResetEvent _quitEvent;
-
-        // ReSharper disable once StaticFieldInGenericType
-        // Every TestRunner<T> has its own instance of _totalIterations
-        private static long _totalIterations;
 
         #endregion
 
         #region Ctor
 
-        public TestRunner(ManualResetEvent quitEvent)
+        public TestRunner(ILoadTest loadTest, ManualResetEvent quitEvent)
         {
+            _loadTest = loadTest;
             _quitEvent = quitEvent;
         }
 
@@ -31,14 +29,6 @@ namespace NLoad
 
         public TestRunnerResult Result { get; private set; }
 
-        public static long TotalIterations
-        {
-            get
-            {
-                return Interlocked.Read(ref _totalIterations);
-            }
-        }
-
         public bool IsBusy
         {
             get
@@ -46,15 +36,12 @@ namespace NLoad
                 return _backgroundWorker.IsBusy;
             }
         }
-        
+
         #endregion
 
         public void Initialize()
         {
-            var backgroundWorker = new BackgroundWorker
-            {
-                WorkerReportsProgress = true,
-            };
+            var backgroundWorker = new BackgroundWorker();
 
             backgroundWorker.DoWork += RunOnBackgroundWorker;
 
@@ -73,7 +60,7 @@ namespace NLoad
             _backgroundWorker.RunWorkerAsync(context);
         }
 
-        private static void RunOnBackgroundWorker(object sender, DoWorkEventArgs e)
+        private void RunOnBackgroundWorker(object sender, DoWorkEventArgs e)
         {
             var context = (TestRunContext)e.Argument;
 
@@ -87,19 +74,16 @@ namespace NLoad
 
             test.Initialize();
 
-            TestRunResult testRunResult; // move to inner scope?
-
             while (!context.QuitEvent.WaitOne(0))
             {
-                testRunResult = new TestRunResult();
+                var testRunResult = new TestRunResult
+                {
+                    StartTime = DateTime.UtcNow,
+                    TestResult = test.Execute(),
+                    EndTime = DateTime.UtcNow
+                };
 
-                testRunResult.StartTime = DateTime.UtcNow;
-
-                testRunResult.TestResult = test.Execute();
-
-                testRunResult.EndTime = DateTime.UtcNow;
-
-                Interlocked.Increment(ref _totalIterations);
+                _loadTest.IncrementCounter();
 
                 iterations++;
 

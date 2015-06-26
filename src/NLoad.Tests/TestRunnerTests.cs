@@ -1,5 +1,4 @@
-﻿using System.Threading;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace NLoad.Tests
 {
@@ -9,9 +8,9 @@ namespace NLoad.Tests
         [TestMethod]
         public void TestMethod1()
         {
-            var quitEvent = new ManualResetEvent(false);
+            //var quitEvent = new ManualResetEvent(false);
 
-            var runner = new TestRunner<TestMock>(quitEvent);
+            //var runner = new TestRunner<TestMock>(quitEvent);
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using System.Collections.Generic;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Diagnostics;
 using System.Linq;
@@ -152,6 +153,32 @@ namespace NLoad.Tests
                     .Run();
 
             Assert.IsTrue(eventFired);
+        }
+
+        [TestMethod]
+        public void ShouldCleanStaticVars()
+        {
+            var throughput = new List<double>();
+
+            NLoad.Test<TestMock>()
+                    .WithNumberOfThreads(1)
+                    .WithDurationOf(TimeSpan.FromSeconds(1))
+                    .OnHeartbeat((s, hearbeat) => throughput.Add(hearbeat.Throughput))
+                    .Build()
+                    .Run();
+
+            var last = throughput.Last();
+            
+            throughput.Clear();
+
+            NLoad.Test<TestMock>()
+                    .WithNumberOfThreads(1)
+                    .WithDurationOf(TimeSpan.FromSeconds(1))
+                    .OnHeartbeat((s, hearbeat) => throughput.Add(hearbeat.Throughput))
+                    .Build()
+                    .Run();
+
+            var first = throughput.First();
         }
     }
 }
