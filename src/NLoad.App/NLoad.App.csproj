@@ -7,8 +7,8 @@
     <ProjectGuid>{40FBEB92-2C93-47BD-B61C-13A1795F95FB}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>NLoad.App.Cmd</RootNamespace>
-    <AssemblyName>NLoad.App.Cmd</AssemblyName>
+    <RootNamespace>NLoad.App</RootNamespace>
+    <AssemblyName>NLoad.App</AssemblyName>
     <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>

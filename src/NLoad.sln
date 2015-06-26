@@ -15,7 +15,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{F0D716
 		.nuget\NuGetPack.bat = .nuget\NuGetPack.bat
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NLoad.App.Cmd", "NLoad.App.Cmd\NLoad.App.Cmd.csproj", "{40FBEB92-2C93-47BD-B61C-13A1795F95FB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NLoad.App", "NLoad.App\NLoad.App.csproj", "{40FBEB92-2C93-47BD-B61C-13A1795F95FB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -38,8 +38,5 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(Performance) = preSolution
-		HasPerformanceSessions = true
 	EndGlobalSection
 EndGlobal

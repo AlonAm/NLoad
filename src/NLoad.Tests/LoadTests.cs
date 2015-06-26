@@ -137,10 +137,9 @@ namespace NLoad.Tests
         }
 
         [TestMethod]
-        public void HeartbeatEvent()
+        public void SubscribeToHeartbeatEvent()
         {
             var eventFired = false;
-            double throughput = 0;
 
             NLoad.Test<TestMock>()
                     .WithNumberOfThreads(1)
@@ -148,14 +147,11 @@ namespace NLoad.Tests
                     .OnHeartbeat((s, hearbeat) =>
                         {
                             eventFired = true;
-                            throughput = hearbeat.Throughput;
-                            Debug.WriteLine(hearbeat.Throughput);
                         })
                     .Build()
                     .Run();
 
             Assert.IsTrue(eventFired);
-            Assert.AreNotEqual(0, throughput);
         }
     }
 }
