@@ -29,6 +29,8 @@ namespace NLoad
 
         #region Properties
 
+        public TestRunnerResult Result { get; private set; }
+
         public static long TotalIterations
         {
             get
@@ -40,10 +42,11 @@ namespace NLoad
 
         public bool IsBusy
         {
-            get { return _backgroundWorker.IsBusy; }
+            get
+            {
+                return _backgroundWorker.IsBusy;
+            }
         }
-
-        public TestRunnerResult Result { get; private set; }
         
         #endregion
 
