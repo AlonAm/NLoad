@@ -58,13 +58,51 @@ namespace NLoad
 
                 stopWatch.Stop();
 
-                return new LoadTestResult
+
+                var maxResponseTime = TimeSpan.Zero;
+                var minResponseTime = TimeSpan.Zero;
+                var averageResponseTime = TimeSpan.Zero;
+
+                var testRuns = testRunners.Where(k => k.Result != null && k.Result.TestRuns != null)
+                                             .SelectMany(k => k.Result.TestRuns)
+                                             .ToList();
+
+                if (testRuns.Any())
+                {
+                    maxResponseTime = testRuns.Max(k => k.ResponseTime);
+                    minResponseTime = testRuns.Min(k => k.ResponseTime);
+                    averageResponseTime = new TimeSpan(Convert.ToInt64((testRuns.Average(k => k.ResponseTime.Ticks))));
+                }
+
+                var result = new LoadTestResult
                 {
                     TestRunnersResults = testRunners.Select(k => k.Result),
                     TotalIterations = testRunners.Where(k => k.Result != null).Sum(k => k.Result.Iterations), //TestRunner<T>.TotalIterations, 
                     TotalRuntime = stopWatch.Elapsed,
-                    Heartbeat = _heartbeat
+                    Heartbeat = _heartbeat,
+
+                    MaxResponseTime = maxResponseTime,
+                    MinResponseTime = minResponseTime,
+                    AverageResponseTime = averageResponseTime,
                 };
+
+                if (_heartbeat == null)
+                {
+                    return result;
+                }
+
+                var heartbeats = _heartbeat.Where(k => !double.IsNaN(k.Throughput));
+
+                if (!heartbeats.Any())
+                {
+                    return result;
+                }
+
+                result.MaxThroughput = _heartbeat.Where(k => !double.IsNaN(k.Throughput)).Max(k => k.Throughput);
+                result.MinThroughput = _heartbeat.Where(k => !double.IsNaN(k.Throughput)).Min(k => k.Throughput);
+                result.AverageThroughput = _heartbeat.Where(k => !double.IsNaN(k.Throughput)).Average(k => k.Throughput);
+
+                return result;
             }
             catch (Exception e)
             {
@@ -97,19 +135,24 @@ namespace NLoad
         {
             var running = true;
 
+            while (double.IsNaN(TestRunner<T>.TotalIterations))
+            {
+            }
+
             var start = DateTime.UtcNow;
 
             while (running)
             {
                 var elapsed = DateTime.UtcNow - start;
 
-                if (elapsed >= _configuration.Duration)
-                {
-                    running = false;
-                }
-                else
+                if (elapsed < _configuration.Duration)
                 {
                     var throughput = TestRunner<T>.TotalIterations / elapsed.TotalSeconds;
+
+                    if (double.IsNaN(throughput))
+                    {
+                        continue;
+                    }
 
                     OnHeartbeat(throughput, elapsed);
 
@@ -117,6 +160,10 @@ namespace NLoad
                     {
                         Thread.Sleep(1000);
                     }
+                }
+                else
+                {
+                    running = false;
                 }
             }
         }
@@ -132,7 +179,7 @@ namespace NLoad
             {
                 if (testRunners.Any(w => w.IsBusy))
                 {
-                    //Thread.Sleep(1);
+                    Thread.Sleep(1); //todo: ???
                 }
                 else
                 {

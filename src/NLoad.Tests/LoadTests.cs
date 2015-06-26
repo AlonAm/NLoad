@@ -1,7 +1,7 @@
-﻿using System;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 using System.Diagnostics;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace NLoad.Tests
 {
@@ -11,7 +11,7 @@ namespace NLoad.Tests
         [TestMethod]
         public void SingleThreadLoadTest()
         {
-            var duration = TimeSpan.FromSeconds(1);
+            var duration = TimeSpan.FromSeconds(3);
 
             var loadTest = NLoad.Test<OneSecondDelayTest>()
                                     .WithNumberOfThreads(1)
@@ -27,21 +27,21 @@ namespace NLoad.Tests
             
             Assert.IsTrue(result.Heartbeat.Any());
 
-            //Assert.IsTrue(result.TestRuns.Any());
-
             //Assert.IsTrue(result.MinThroughput > 0);
-            //Assert.IsTrue(result.MaxThroughput > 0);
-            //Assert.IsTrue(result.AverageThroughput > 0);
+            Assert.IsTrue(result.MaxThroughput > 0);
+            Assert.IsTrue(result.AverageThroughput > 0);
 
-            //Assert.IsTrue(result.MinResponseTime > TimeSpan.Zero);
-            //Assert.IsTrue(result.MaxResponseTime > TimeSpan.Zero);
-            //Assert.IsTrue(result.AverageResponseTime > TimeSpan.Zero);
+            Assert.IsTrue(result.MinResponseTime > TimeSpan.Zero);
+            Assert.IsTrue(result.MaxResponseTime > TimeSpan.Zero);
+            Assert.IsTrue(result.AverageResponseTime > TimeSpan.Zero);
+
+            //Assert.IsTrue(result.TestRuns.Any());
         }
 
         [TestMethod]
         public void MultithreadedLoadTest()
         {
-            var duration = TimeSpan.FromSeconds(1);
+            var duration = TimeSpan.FromSeconds(3);
 
             var loadTest = NLoad.Test<OneSecondDelayTest>()
                                     .WithNumberOfThreads(10)
@@ -59,15 +59,15 @@ namespace NLoad.Tests
 
             Assert.IsTrue(result.Heartbeat.Any());
 
+//            Assert.IsTrue(result.MinThroughput > 0);
+            Assert.IsTrue(result.MaxThroughput > 0);
+            Assert.IsTrue(result.AverageThroughput > 0);
+
+            Assert.IsTrue(result.MinResponseTime > TimeSpan.Zero);
+            Assert.IsTrue(result.MaxResponseTime > TimeSpan.Zero);
+            Assert.IsTrue(result.AverageResponseTime > TimeSpan.Zero);
+
             //Assert.IsTrue(result.TestRuns.Any());
-
-            //Assert.IsTrue(result.MinThroughput > 0);
-            //Assert.IsTrue(result.MaxThroughput > 0);
-            //Assert.IsTrue(result.AverageThroughput > 0);
-
-            //Assert.IsTrue(result.MinResponseTime > TimeSpan.Zero);
-            //Assert.IsTrue(result.MaxResponseTime > TimeSpan.Zero);
-            //Assert.IsTrue(result.AverageResponseTime > TimeSpan.Zero);
         }
 
         [TestMethod]
