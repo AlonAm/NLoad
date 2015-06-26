@@ -17,8 +17,8 @@ namespace NLoad.App.Cmd
         private static void RunLoadTest()
         {
             var loadTest = NLoad.Test<InMemoryTest>()
-                                    .WithNumberOfThreads(50)
-                                    .WithDurationOf(TimeSpan.FromSeconds(10))
+                                    .WithNumberOfThreads(100)
+                                    .WithDurationOf(TimeSpan.FromSeconds(60))
                                     .WithDeleyBetweenThreadStart(TimeSpan.FromMilliseconds(100))
                                     .OnHeartbeat(PrintHeartbeat)
                                     .Build();

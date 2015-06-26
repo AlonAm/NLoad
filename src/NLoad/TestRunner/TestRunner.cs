@@ -39,7 +39,6 @@ namespace NLoad
             }
         }
 
-
         public bool IsBusy
         {
             get

@@ -10,7 +10,7 @@ namespace NLoad.Tests
 
         public TestResult Execute()
         {
-            Thread.Sleep(1100);
+            Thread.Sleep(1001);
 
             return new TestResult(true);
         }

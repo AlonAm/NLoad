@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -76,7 +75,7 @@ namespace NLoad
 
                 var result = new LoadTestResult
                 {
-                    TestRunnersResults = testRunners.Select(k => k.Result),
+                    TestRunnersResults = testRunners.Where(k => k.Result != null).Select(k => k.Result),
                     TotalIterations = testRunners.Where(k => k.Result != null).Sum(k => k.Result.Iterations), //TestRunner<T>.TotalIterations, 
                     TotalRuntime = stopWatch.Elapsed,
                     Heartbeat = _heartbeat,
@@ -86,21 +85,12 @@ namespace NLoad
                     AverageResponseTime = averageResponseTime,
                 };
 
-                if (_heartbeat == null)
+                if (_heartbeat.Any())
                 {
-                    return result;
+                    result.MaxThroughput = _heartbeat.Where(k => !double.IsNaN(k.Throughput)).Max(k => k.Throughput);
+                    result.MinThroughput = _heartbeat.Where(k => !double.IsNaN(k.Throughput)).Min(k => k.Throughput);
+                    result.AverageThroughput = _heartbeat.Where(k => !double.IsNaN(k.Throughput)).Average(k => k.Throughput);
                 }
-
-                var heartbeats = _heartbeat.Where(k => !double.IsNaN(k.Throughput));
-
-                if (!heartbeats.Any())
-                {
-                    return result;
-                }
-
-                result.MaxThroughput = _heartbeat.Where(k => !double.IsNaN(k.Throughput)).Max(k => k.Throughput);
-                result.MinThroughput = _heartbeat.Where(k => !double.IsNaN(k.Throughput)).Min(k => k.Throughput);
-                result.AverageThroughput = _heartbeat.Where(k => !double.IsNaN(k.Throughput)).Average(k => k.Throughput);
 
                 return result;
             }
@@ -128,16 +118,14 @@ namespace NLoad
 
         private static void StartTestRunners(List<TestRunner<T>> testRunners)
         {
-            testRunners.ForEach(k => k.Start()); //todo: add error handling
+            //todo: add error handling
+
+            testRunners.ForEach(k => k.Start());
         }
 
         private void MonitorHeartRate()
         {
             var running = true;
-
-            while (double.IsNaN(TestRunner<T>.TotalIterations))
-            {
-            }
 
             var start = DateTime.UtcNow;
 
@@ -149,17 +137,11 @@ namespace NLoad
                 {
                     var throughput = TestRunner<T>.TotalIterations / elapsed.TotalSeconds;
 
-                    if (double.IsNaN(throughput))
-                    {
-                        continue;
-                    }
+                    if (double.IsNaN(throughput) || double.IsInfinity(throughput)) continue;
 
                     OnHeartbeat(throughput, elapsed);
 
-                    if (DateTime.UtcNow - start < _configuration.Duration)
-                    {
-                        Thread.Sleep(1000);
-                    }
+                    if (DateTime.UtcNow - start < _configuration.Duration) Thread.Sleep(1000);
                 }
                 else
                 {
