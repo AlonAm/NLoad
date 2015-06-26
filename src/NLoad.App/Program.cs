@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 
-namespace NLoad.App.Cmd
+namespace NLoad.App
 {
     class Program
     {

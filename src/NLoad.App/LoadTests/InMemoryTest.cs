@@ -1,7 +1,6 @@
-using System;
 using System.Threading;
 
-namespace NLoad.App.Cmd
+namespace NLoad.App
 {
     internal sealed class InMemoryTest : ITest
     {
