@@ -37,9 +37,13 @@ var result = loadTest.Run();
 ```
 ## Result
 Total Iterations
+
 Total Runtime
+
 Min/Max/Average Throughput
+
 Min/Max/Average Response Time
+
 
 ## Installation
 To install NLoad via [NuGet](http://www.nuget.org/packages/NLoad), run the following command in the Package Manager Console
