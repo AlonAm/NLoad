@@ -35,7 +35,7 @@ var loadTest = NLoad.Test<MyTest>()
 
 var result = loadTest.Run();
 ```
-## Result
+### Result
 Total Iterations
 
 Total Runtime
