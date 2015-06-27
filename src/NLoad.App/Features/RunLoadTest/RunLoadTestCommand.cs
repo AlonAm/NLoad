@@ -28,8 +28,8 @@ namespace NLoad.App.Features.RunLoadTest
 
             _loadTestViewModel = loadTestViewModel;
 
-            NumberOfThreads = 100;
-            Duration = TimeSpan.FromSeconds(10);
+            NumberOfThreads = 10;
+            Duration = TimeSpan.FromSeconds(30);
             DeleyBetweenThreadStart = TimeSpan.Zero;
         }
 
