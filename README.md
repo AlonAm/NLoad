@@ -1,7 +1,7 @@
 # NLoad
 A simple and friendly load testing framework for .NET
 
-In process multithreaded load testing with no dependencies
+In-process multithreaded load testing with no dependencies
 
 [![NuGet](https://img.shields.io/nuget/dt/NLoad.svg?style=flat-square)](https://www.nuget.org/packages/NLoad)
 [![NuGet](https://img.shields.io/nuget/v/NLoad.svg?style=flat-square)](https://www.nuget.org/packages/NLoad)
