@@ -29,9 +29,9 @@ namespace NLoad.App.Commands
 
             _loadTestViewModel = loadTestViewModel;
 
-            NumberOfThreads = 10;
-            Duration = TimeSpan.FromSeconds(10);
-            DeleyBetweenThreadStart = TimeSpan.FromMilliseconds(50);
+            NumberOfThreads = 100;
+            Duration = TimeSpan.FromSeconds(30);
+            DeleyBetweenThreadStart = TimeSpan.Zero;
         }
 
         #endregion
