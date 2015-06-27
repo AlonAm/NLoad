@@ -7,10 +7,20 @@
         <app:LoadTestViewModel/>
     </Window.DataContext>
     <Grid>
-        <Button Content="Run Toad Test" Command="{Binding RunLoadTestCommand}" HorizontalAlignment="Left" Margin="100,213,0,0" VerticalAlignment="Top" Width="94"/>
-        <StackPanel HorizontalAlignment="Left" Height="100" Width="150" Margin="10,10,0,0" VerticalAlignment="Top">
-            <Label Content="Last Throughput" HorizontalAlignment="Center" VerticalAlignment="Top"/>
-            <Label Content="{Binding CurrentThroughput, Mode=TwoWay}" HorizontalAlignment="Center" VerticalAlignment="Top" RenderTransformOrigin="3.25,-0.231" FontSize="36"/>
-        </StackPanel>
+
+        <Button Content="Start" Command="{Binding RunLoadTestCommand}" HorizontalAlignment="Center" Margin="0,0,0,20" VerticalAlignment="Bottom" Width="90"/>
+
+        <WrapPanel>
+            <StackPanel HorizontalAlignment="Left" Height="100" Width="150" VerticalAlignment="Top">
+                <Label Content="Throughput" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+                <Label Content="{Binding CurrentThroughput, Mode=TwoWay}" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="36"/>
+            </StackPanel>
+
+            <StackPanel HorizontalAlignment="Left" Height="100" Width="150" VerticalAlignment="Top">
+                <Label Content="Iterations" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+                <Label Content="0" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="36"/>
+            </StackPanel>
+        </WrapPanel>
+
     </Grid>
 </Window>

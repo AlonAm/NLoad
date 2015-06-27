@@ -9,7 +9,7 @@ namespace NLoad.App
         static void Main(string[] args)
         {
             var app = new Application();
-            
+
             var viewModel = new LoadTestViewModel();
             
             var window = new LoadTestWindow
