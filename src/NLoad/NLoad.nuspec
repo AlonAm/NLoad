@@ -6,11 +6,11 @@
     <title>$title$</title>
     <authors>$author$</authors>
     <owners>$author$</owners>
-    <licenseUrl>https://github.com/AlonAmsalem/NLoad/blob/master/LICENSE</licenseUrl>
-    <projectUrl>https://github.com/AlonAmsalem/NLoad</projectUrl>
+    <licenseUrl>https://github.com/NLoad/NLoad/blob/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/NLoad/NLoad</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
     <copyright>Copyright 2015 Alon Amsalem</copyright>
-    <tags>load testing loadtest unit test tdd performance health analysis</tags>
+    <tags>load testing loadtest unit test unittest tdd automation performance stress health analysis</tags>
   </metadata>
 </package>
