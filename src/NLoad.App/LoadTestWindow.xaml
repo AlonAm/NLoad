@@ -1,0 +1,38 @@
+﻿<Window x:Class="NLoad.App.LoadTestWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:app="clr-namespace:NLoad.App"
+        Title="NLoad" Height="200" Width="740">
+    <Window.DataContext>
+        <app:LoadTestViewModel/>
+    </Window.DataContext>
+    <Grid>
+
+        <Button Content="Start" Command="{Binding RunLoadTestCommand}" HorizontalAlignment="Center" Margin="0,0,0,20" VerticalAlignment="Bottom" Width="90"/>
+
+        <WrapPanel Margin="0,20,0,0">
+            
+            <StackPanel HorizontalAlignment="Left" Height="100" Width="180" VerticalAlignment="Top">
+                <Label Content="Throughput" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+                <Label Content="{Binding CurrentThroughput, Mode=TwoWay}" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="34"/>
+            </StackPanel>
+
+            <StackPanel IsEnabled="False" HorizontalAlignment="Left" Height="100" Width="180" VerticalAlignment="Top">
+                <Label Content="Iterations" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+                <Label Content="0" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="34"/>
+            </StackPanel>
+
+            <StackPanel IsEnabled="False" HorizontalAlignment="Left" Height="100" Width="180" VerticalAlignment="Top">
+                <Label Content="Elapsed" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+                <Label Content="00:00:00" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="34"/>
+            </StackPanel>
+
+            <StackPanel IsEnabled="False" HorizontalAlignment="Left" Height="100" Width="180" VerticalAlignment="Top">
+                <Label Content="Errors" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+                <Label Content="0" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="34"/>
+            </StackPanel>
+            
+        </WrapPanel>
+
+    </Grid>
+</Window>
