@@ -1,10 +1,9 @@
-﻿using NLoad.App.LoadTests;
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Input;
 
-namespace NLoad.App.Commands
+namespace NLoad.App.Features.RunLoadTest
 {
     internal class RunLoadTestCommand : ICommand
     {

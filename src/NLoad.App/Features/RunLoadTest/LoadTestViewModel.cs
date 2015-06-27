@@ -1,9 +1,8 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
-using NLoad.App.Commands;
 
-namespace NLoad.App
+namespace NLoad.App.Features.RunLoadTest
 {
     internal class LoadTestViewModel : INotifyPropertyChanged
     {

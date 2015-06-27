@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Windows;
+using NLoad.App.Features.RunLoadTest;
 
 namespace NLoad.App
 {

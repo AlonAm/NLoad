@@ -1,12 +1,11 @@
 using System.Threading;
 
-namespace NLoad.App.LoadTests
+namespace NLoad.App.Features.RunLoadTest
 {
     internal sealed class InMemoryTest : ITest
     {
         public void Initialize()
         {
-            //Console.WriteLine("Initialize test...");
         }
 
         public TestResult Execute()
