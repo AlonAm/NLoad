@@ -10,7 +10,7 @@ NLoad is a simple load testing framework for .NET, Intended for load testing you
 
 NLoad is used for load testing websites, WCF services, CPU intensive algorithms or small bits of code to identify bottlenecks in your code before letting real users in.
 
-## Usage
+### Usage
 Implement a test class
 ```csharp
 public class MyTest : ITest
@@ -38,7 +38,7 @@ var loadTest = NLoad.Test<MyTest>()
 var result = loadTest.Run();
 ```
 
-## Installation
+### Installation
 To install NLoad via [NuGet](http://www.nuget.org/packages/NLoad), run the following command in the Package Manager Console
 ```
 Install-Package NLoad
