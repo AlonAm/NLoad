@@ -3,10 +3,10 @@ A simple and friendly load testing framework for .NET
 
 In process multithreaded load testing with no dependencies
 
-[![NuGet downloads](https://img.shields.io/nuget/dt/NLoad.svg)](https://www.nuget.org/packages/NLoad)
-[![Version](https://img.shields.io/nuget/v/NLoad.svg)](https://www.nuget.org/packages/NLoad) 
-[![NuGet Pre Release](https://img.shields.io/nuget/vpre/NLoad.svg)]()
-[![AppVeyor](https://img.shields.io/appveyor/ci/AlonAmsalem/nload/master.svg)](https://ci.appveyor.com/project/AlonAmsalem/nload/branch/master)
+[![NuGet](https://img.shields.io/nuget/dt/NLoad.svg?style=flat-square)](https://www.nuget.org/packages/NLoad)
+[![NuGet](https://img.shields.io/nuget/v/NLoad.svg?style=flat-square)](https://www.nuget.org/packages/NLoad)
+[![NuGet Pre Release](https://img.shields.io/nuget/vpre/NLoad.svg?style=flat-square)](https://www.nuget.org/packages/NLoad)
+[![AppVeyor branch](https://img.shields.io/appveyor/ci/AlonAmsalem/nload/master.svg?style=flat-square)](https://ci.appveyor.com/project/AlonAmsalem/nload/branch/master)
 
 ## Usage
 Implement a test class
@@ -35,6 +35,11 @@ var loadTest = NLoad.Test<MyTest>()
 
 var result = loadTest.Run();
 ```
+## Result
+Total Iterations
+Total Runtime
+Min/Max/Average Throughput
+Min/Max/Average Response Time
 
 ## Installation
 To install NLoad via [NuGet](http://www.nuget.org/packages/NLoad), run the following command in the Package Manager Console
