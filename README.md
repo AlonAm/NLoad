@@ -6,9 +6,8 @@
 [![AppVeyor branch](https://img.shields.io/appveyor/ci/AlonAmsalem/nload/master.svg?style=flat-square)](https://ci.appveyor.com/project/AlonAmsalem/nload/branch/master)
 
 ### What is NLoad?
-NLoad is a simple load testing framework, Intended for load testing your code and figuring how many concurrent requests your code can handle.
-
-NLoad can be used for load testing websites, WCF services, algorithms, etc.
+NLoad is a simple load testing framework for .NET, Intended for load testing your code and figuring out how many concurrent requests your code can handle.
+NLoad is used for load testing websites, WCF services, CPU intensive algorithms or small bits of code to identify bottlenecks in your code before letting real users in.
 
 ## Usage
 Implement a test class
