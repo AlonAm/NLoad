@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:app="clr-namespace:NLoad.App"
         xmlns:runLoadTest="clr-namespace:NLoad.App.Features.RunLoadTest"
-        Title="NLoad" Height="200" Width="740">
+        Title="NLoad" Height="200" Width="816">
     <Window.DataContext>
         <runLoadTest:LoadTestViewModel/>
     </Window.DataContext>
@@ -13,22 +13,22 @@
 
         <WrapPanel Margin="0,20,0,0">
             
-            <StackPanel HorizontalAlignment="Left" Height="100" Width="180" VerticalAlignment="Top">
+            <StackPanel HorizontalAlignment="Left" Height="100" Width="200" VerticalAlignment="Top">
                 <Label Content="Throughput" HorizontalAlignment="Center" VerticalAlignment="Top"/>
                 <Label Content="{Binding CurrentThroughput, Mode=TwoWay}" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="34"/>
             </StackPanel>
 
-            <StackPanel IsEnabled="False" HorizontalAlignment="Left" Height="100" Width="180" VerticalAlignment="Top">
+            <StackPanel HorizontalAlignment="Left" Height="100" Width="200" VerticalAlignment="Top">
                 <Label Content="Iterations" HorizontalAlignment="Center" VerticalAlignment="Top"/>
-                <Label Content="0" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="34"/>
+                <Label Content="{Binding Iterations}" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="34"/>
             </StackPanel>
 
-            <StackPanel IsEnabled="False" HorizontalAlignment="Left" Height="100" Width="180" VerticalAlignment="Top">
+            <StackPanel HorizontalAlignment="Left" Height="100" Width="200" VerticalAlignment="Top">
                 <Label Content="Elapsed" HorizontalAlignment="Center" VerticalAlignment="Top"/>
-                <Label Content="00:00:00" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="34"/>
+                <Label Content="{Binding Elapsed}" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="34"/>
             </StackPanel>
 
-            <StackPanel IsEnabled="False" HorizontalAlignment="Left" Height="100" Width="180" VerticalAlignment="Top">
+            <StackPanel IsEnabled="False" HorizontalAlignment="Left" Height="100" Width="200" VerticalAlignment="Top">
                 <Label Content="Errors" HorizontalAlignment="Center" VerticalAlignment="Top"/>
                 <Label Content="0" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="34"/>
             </StackPanel>

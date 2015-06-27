@@ -10,7 +10,7 @@ namespace NLoad.App.Features.RunLoadTest
 
         public TestResult Execute()
         {
-            Thread.Sleep(1);
+            Thread.Sleep(10);
 
             return TestResult.Default; // todo: turn to mutable
         }

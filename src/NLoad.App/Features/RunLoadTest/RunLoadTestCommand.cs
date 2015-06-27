@@ -29,7 +29,7 @@ namespace NLoad.App.Features.RunLoadTest
             _loadTestViewModel = loadTestViewModel;
 
             NumberOfThreads = 100;
-            Duration = TimeSpan.FromSeconds(30);
+            Duration = TimeSpan.FromSeconds(10);
             DeleyBetweenThreadStart = TimeSpan.Zero;
         }
 
@@ -96,6 +96,15 @@ namespace NLoad.App.Features.RunLoadTest
 
         private void LoadTestCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
+            var result = (LoadTestResult)e.Result;
+
+            _loadTestViewModel.Elapsed = FormatElapsed(result.TotalRuntime);
+            _loadTestViewModel.Iterations = result.TotalIterations;
+
+            _loadTestViewModel.MinThroughput = result.MinThroughput;
+            _loadTestViewModel.MaxThroughput = result.MaxThroughput;
+            _loadTestViewModel.AverageThroughput = result.AverageThroughput;
+
             UnSubscribeWorkerEvents();
 
             _worker = null;
@@ -114,7 +123,14 @@ namespace NLoad.App.Features.RunLoadTest
             if (e != null)
             {
                 _loadTestViewModel.CurrentThroughput = Math.Round(e.Throughput, 2, MidpointRounding.AwayFromZero);
+                _loadTestViewModel.Elapsed = FormatElapsed(e.Elapsed);
+                _loadTestViewModel.Iterations = e.Iterations;
             }
+        }
+
+        private static string FormatElapsed(TimeSpan elapsed)
+        {
+            return string.Format("{0}:{1}:{2}", elapsed.ToString("hh"), elapsed.ToString("mm"), elapsed.ToString("ss"));
         }
 
         #endregion
