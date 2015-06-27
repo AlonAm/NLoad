@@ -5,6 +5,7 @@ In process multithreaded load testing with no dependencies
 
 [![NuGet downloads](https://img.shields.io/nuget/dt/NLoad.svg)](https://www.nuget.org/packages/NLoad)
 [![Version](https://img.shields.io/nuget/v/NLoad.svg)](https://www.nuget.org/packages/NLoad) 
+[![NuGet Pre Release](https://img.shields.io/nuget/vpre/NLoad.svg)]()
 [![AppVeyor](https://img.shields.io/appveyor/ci/AlonAmsalem/nload/master.svg)](https://ci.appveyor.com/project/AlonAmsalem/nload/branch/master)
 
 ## Usage
