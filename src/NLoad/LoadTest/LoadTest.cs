@@ -137,7 +137,7 @@ namespace NLoad
 
                     if (double.IsNaN(throughput) || double.IsInfinity(throughput)) continue;
 
-                    OnHeartbeat(throughput, elapsed);
+                    OnHeartbeat(throughput, elapsed, iterations);
 
                     if (DateTime.UtcNow - start < _configuration.Duration) Thread.Sleep(1000);
                 }
@@ -168,9 +168,9 @@ namespace NLoad
             }
         }
 
-        private void OnHeartbeat(double throughput, TimeSpan delta)
+        private void OnHeartbeat(double throughput, TimeSpan delta, long iterations)
         {
-            var heartbeat = new Heartbeat(DateTime.UtcNow, throughput, delta);
+            var heartbeat = new Heartbeat(DateTime.UtcNow, throughput, delta, iterations);
 
             _heartbeat.Add(heartbeat);
 
