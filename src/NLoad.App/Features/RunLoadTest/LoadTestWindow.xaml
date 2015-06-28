@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:app="clr-namespace:NLoad.App"
         xmlns:runLoadTest="clr-namespace:NLoad.App.Features.RunLoadTest"
-        Title="NLoad" Height="200" Width="816">
+        Title="NLoad" Height="200" Width="816" MinHeight="200" MinWidth="210">
     <Window.DataContext>
         <runLoadTest:LoadTestViewModel/>
     </Window.DataContext>
