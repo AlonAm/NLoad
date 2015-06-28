@@ -22,7 +22,8 @@ var loadTest = NLoad.Test<MyTest>()
 var result = loadTest.Run();
 ```
 
-For more information see [Getting Started](https://github.com/NLoad/NLoad/wiki/Getting-Started).
+For more information see [Getting Started](https://github.com/NLoad/NLoad/wiki/Getting-Started)
+
 ### Installation
 To install NLoad via [NuGet](http://www.nuget.org/packages/NLoad), run the following command in the Package Manager Console
 ```
