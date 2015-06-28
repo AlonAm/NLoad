@@ -3,19 +3,29 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:app="clr-namespace:NLoad.App"
         xmlns:runLoadTest="clr-namespace:NLoad.App.Features.RunLoadTest"
-        Title="NLoad" Height="200" Width="816" MinHeight="200" MinWidth="210">
+        Title="NLoad" Height="175" Width="816" MinHeight="200" MinWidth="210">
     <Window.DataContext>
         <runLoadTest:LoadTestViewModel/>
     </Window.DataContext>
     <Grid>
+        <ToolBarTray>
+            <ToolBar>
+                <Label FontWeight="Bold" Content="Load Test"/>
+                <TextBox Text="In Memory" IsEnabled="False" />
+                <Label FontWeight="Bold" Content="# Threads"/>
+                <TextBox Text="{Binding NumberOfThreads}" />
+                <Label FontWeight="Bold" Content="Duration" />
+                <TextBox Text="{Binding Duration}" />
+                <Button Content="Start" Command="{Binding RunLoadTestCommand}" Width="50"/>
+                <Button Content="Stop" IsEnabled="False" Width="50"/>
+            </ToolBar>
+        </ToolBarTray>
 
-        <Button Content="Start" Command="{Binding RunLoadTestCommand}" HorizontalAlignment="Center" Margin="0,0,0,20" VerticalAlignment="Bottom" Width="90"/>
+        <WrapPanel Margin="0,50,0,0">
 
-        <WrapPanel Margin="0,20,0,0">
-            
             <StackPanel HorizontalAlignment="Left" Height="100" Width="200" VerticalAlignment="Top">
                 <Label Content="Throughput" HorizontalAlignment="Center" VerticalAlignment="Top"/>
-                <Label Content="{Binding CurrentThroughput, Mode=TwoWay}" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="34"/>
+                <Label Content="{Binding Throughput, Mode=TwoWay}" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="34"/>
             </StackPanel>
 
             <StackPanel HorizontalAlignment="Left" Height="100" Width="200" VerticalAlignment="Top">
@@ -34,6 +44,5 @@
             </StackPanel>
             
         </WrapPanel>
-
     </Grid>
 </Window>

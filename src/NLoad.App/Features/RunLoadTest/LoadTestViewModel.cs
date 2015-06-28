@@ -12,7 +12,8 @@ namespace NLoad.App.Features.RunLoadTest
         private double _minThroughput;
         private double _maxThroughput;
         private double _averageThroughput;
-        private double _currentThroughput;
+        private double _throughput;
+
         private readonly RunLoadTestCommand _runLoadTestCommand;
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -20,7 +21,16 @@ namespace NLoad.App.Features.RunLoadTest
         public LoadTestViewModel()
         {
             _runLoadTestCommand = new RunLoadTestCommand(this);
+
+            Defaults();
+        }
+
+        private void Defaults()
+        {
             Elapsed = "00:00:00";
+            NumberOfThreads = 10;
+            Duration = TimeSpan.FromSeconds(30);
+            DeleyBetweenThreadStart = TimeSpan.Zero;
         }
 
         #region Properties
@@ -30,12 +40,12 @@ namespace NLoad.App.Features.RunLoadTest
             get { return _runLoadTestCommand; }
         }
 
-        public double CurrentThroughput
+        public double Throughput
         {
-            get { return _currentThroughput; }
+            get { return _throughput; }
             set
             {
-                _currentThroughput = value;
+                _throughput = value;
                 OnPropertyChanged();
             }
         }
@@ -89,6 +99,14 @@ namespace NLoad.App.Features.RunLoadTest
                 OnPropertyChanged();
             }
         }
+
+
+        public int NumberOfThreads { get; set; }
+
+        public TimeSpan Duration { get; set; }
+
+        public TimeSpan DeleyBetweenThreadStart { get; set; }
+        
 
         #endregion
 
