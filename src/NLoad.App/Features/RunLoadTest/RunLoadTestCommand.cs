@@ -7,24 +7,31 @@ namespace NLoad.App.Features.RunLoadTest
 {
     internal class RunLoadTestCommand : ICommand
     {
-        #region Fields
-
         private bool _canExecute = true;
         private BackgroundWorker _worker;
         private readonly LoadTestViewModel _viewModel;
 
         public event EventHandler CanExecuteChanged;
 
-        #endregion
-
         public RunLoadTestCommand(LoadTestViewModel viewModel)
+            : this(viewModel, new BackgroundWorker())
         {
+        }
+
+        public RunLoadTestCommand(LoadTestViewModel viewModel, BackgroundWorker worker)
+        {
+            if (worker == null)
+            {
+                throw new ArgumentNullException("worker");
+            }
+
             if (viewModel == null)
             {
                 throw new ArgumentNullException("viewModel");
             }
 
             _viewModel = viewModel;
+            _worker = worker;
         }
 
         public bool CanExecute(object parameter)
@@ -38,22 +45,21 @@ namespace NLoad.App.Features.RunLoadTest
 
             Initialize();
 
-            Start();
+            RunLoadTestAsync();
         }
 
         #region Helpers
 
-        private void Start()
+        private void RunLoadTestAsync()
         {
             _worker.RunWorkerAsync();
         }
 
         private void Initialize()
         {
-            _worker = new BackgroundWorker();
-
+            _worker.WorkerSupportsCancellation = true;
             _worker.DoWork += RunLoadTest;
-            _worker.RunWorkerCompleted += OnLoadTestCompleted;
+            _worker.RunWorkerCompleted += LoadTestCompleted;
         }
 
         /// <summary>
@@ -73,21 +79,20 @@ namespace NLoad.App.Features.RunLoadTest
             e.Result = loadTest.Run();
         }
 
-        private void OnLoadTestCompleted(object sender, RunWorkerCompletedEventArgs e)
+        private void LoadTestCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             var result = (LoadTestResult)e.Result;
 
-            SaveResult(result);
+            MapResultToViewModel(result);
 
             _worker.DoWork -= RunLoadTest;
-            _worker.RunWorkerCompleted -= OnLoadTestCompleted;
-            
-            _worker = null;
+
+            _worker.RunWorkerCompleted -= LoadTestCompleted;
 
             ChangeCanExecuteTo(true);
         }
 
-        private void SaveResult(LoadTestResult result)
+        private void MapResultToViewModel(LoadTestResult result)
         {
             _viewModel.Elapsed = FormatElapsed(result.TotalRuntime);
             _viewModel.Iterations = result.TotalIterations;

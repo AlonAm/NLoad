@@ -16,11 +16,16 @@ namespace NLoad.App.Features.RunLoadTest
 
         private readonly RunLoadTestCommand _runLoadTestCommand;
 
+        private readonly StopLoadTestCommand _stopLoadTestCommand;
+
         public event PropertyChangedEventHandler PropertyChanged;
 
         public LoadTestViewModel()
         {
-            _runLoadTestCommand = new RunLoadTestCommand(this);
+            var worker = new BackgroundWorker();
+
+            _runLoadTestCommand = new RunLoadTestCommand(this, worker);
+            _stopLoadTestCommand = new StopLoadTestCommand(worker);
 
             Defaults();
         }
@@ -35,10 +40,19 @@ namespace NLoad.App.Features.RunLoadTest
 
         #region Properties
 
+        // Commands
+
         public ICommand RunLoadTestCommand
         {
             get { return _runLoadTestCommand; }
         }
+
+        public ICommand StopLoadTestCommand
+        {
+            get { return _stopLoadTestCommand; }
+        }
+
+        // Display
 
         public double Throughput
         {
@@ -75,7 +89,7 @@ namespace NLoad.App.Features.RunLoadTest
             get { return _minThroughput; }
             set
             {
-                _minThroughput = value; 
+                _minThroughput = value;
                 OnPropertyChanged();
             }
         }
@@ -100,13 +114,13 @@ namespace NLoad.App.Features.RunLoadTest
             }
         }
 
+        // Toolbar
 
         public int NumberOfThreads { get; set; }
 
         public TimeSpan Duration { get; set; }
 
         public TimeSpan DeleyBetweenThreadStart { get; set; }
-        
 
         #endregion
 
