@@ -17,7 +17,7 @@ namespace NLoad.App.Features.RunLoadTest
 
         public bool CanExecute(object parameter)
         {
-            return true;//_worker != null && _worker.IsBusy;
+            return _loadTestViewModel.LoadTest != null; //_worker != null && _worker.IsBusy;
         }
 
         public void Execute(object parameter)
