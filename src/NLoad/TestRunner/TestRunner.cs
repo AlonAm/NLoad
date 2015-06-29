@@ -7,25 +7,15 @@ namespace NLoad
 {
     public class TestRunner<T> where T : ITest, new()
     {
-        #region Fields
-
         private readonly ILoadTest _loadTest;
         private BackgroundWorker _backgroundWorker;
         private readonly ManualResetEvent _quitEvent;
-
-        #endregion
-
-        #region Ctor
 
         public TestRunner(ILoadTest loadTest, ManualResetEvent quitEvent)
         {
             _loadTest = loadTest;
             _quitEvent = quitEvent;
         }
-
-        #endregion
-
-        #region Properties
 
         public TestRunnerResult Result { get; private set; }
 
@@ -36,8 +26,6 @@ namespace NLoad
                 return _backgroundWorker.IsBusy;
             }
         }
-
-        #endregion
 
         public void Initialize()
         {
