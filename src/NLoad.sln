@@ -17,6 +17,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{F0D716
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NLoad.App", "NLoad.App\NLoad.App.csproj", "{CDF477ED-3F4F-4375-9054-1DAA3EE7BB34}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Examples", "Examples", "{2328DC64-3905-4705-8297-2371E86E99CD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NLoad.Examples.ConsoleApplication", "NLoad.Examples.ConsoleApplication\NLoad.Examples.ConsoleApplication.csproj", "{ED95ECA7-03C2-4DF7-B238-3C2082EA2163}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -35,8 +39,15 @@ Global
 		{CDF477ED-3F4F-4375-9054-1DAA3EE7BB34}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CDF477ED-3F4F-4375-9054-1DAA3EE7BB34}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CDF477ED-3F4F-4375-9054-1DAA3EE7BB34}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ED95ECA7-03C2-4DF7-B238-3C2082EA2163}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ED95ECA7-03C2-4DF7-B238-3C2082EA2163}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ED95ECA7-03C2-4DF7-B238-3C2082EA2163}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ED95ECA7-03C2-4DF7-B238-3C2082EA2163}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{ED95ECA7-03C2-4DF7-B238-3C2082EA2163} = {2328DC64-3905-4705-8297-2371E86E99CD}
 	EndGlobalSection
 EndGlobal
