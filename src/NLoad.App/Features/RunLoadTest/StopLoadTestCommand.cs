@@ -6,24 +6,27 @@ namespace NLoad.App.Features.RunLoadTest
 {
     public class StopLoadTestCommand : ICommand
     {
+        private readonly LoadTestViewModel _loadTestViewModel;
         private readonly BackgroundWorker _worker;
 
-        public StopLoadTestCommand(BackgroundWorker worker)
+        public StopLoadTestCommand(LoadTestViewModel loadTestViewModel, BackgroundWorker worker)
         {
+            _loadTestViewModel = loadTestViewModel;
             _worker = worker;
         }
 
         public bool CanExecute(object parameter)
         {
-            return _worker != null && _worker.IsBusy;
+            return true;//_worker != null && _worker.IsBusy;
         }
 
         public void Execute(object parameter)
         {
-            if (_worker != null && _worker.IsBusy)
-            {
-                _worker.CancelAsync();
-            }
+            _loadTestViewModel.LoadTest.Cancel();
+            //if (_worker != null && _worker.IsBusy)
+            //{
+            //    _worker.CancelAsync();
+            //}
         }
 
         public event EventHandler CanExecuteChanged;

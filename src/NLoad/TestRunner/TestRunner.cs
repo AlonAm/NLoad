@@ -29,16 +29,18 @@ namespace NLoad
 
         public void Initialize()
         {
-            var backgroundWorker = new BackgroundWorker();
+            var backgroundWorker = new BackgroundWorker
+            {
+                WorkerSupportsCancellation = true
+            };
 
             backgroundWorker.DoWork += RunOnBackgroundWorker;
-
             backgroundWorker.RunWorkerCompleted += BindResponseFromWorkerThread;
 
             _backgroundWorker = backgroundWorker;
         }
 
-        public void Start()
+        public void Run()
         {
             var context = new TestRunContext
             {
@@ -50,13 +52,11 @@ namespace NLoad
 
         private void RunOnBackgroundWorker(object sender, DoWorkEventArgs e)
         {
-            var context = (TestRunContext)e.Argument;
-
-            var result = new TestRunnerResult(starTime: DateTime.UtcNow);
-
-            var testRunResults = new List<TestRunResult>();
-
             long iterations = 0;
+            var worker = (BackgroundWorker)sender;
+            var context = (TestRunContext)e.Argument;
+            var result = new TestRunnerResult(starTime: DateTime.UtcNow);
+            var testRunResults = new List<TestRunResult>();
 
             var test = new T();
 
@@ -64,6 +64,14 @@ namespace NLoad
 
             while (!context.QuitEvent.WaitOne(0))
             {
+                if (worker.CancellationPending)
+                {
+                    e.Cancel = true;
+                    result.EndTime = DateTime.UtcNow;
+                    e.Result = result;
+                    return;
+                }
+
                 var testRunResult = new TestRunResult
                 {
                     StartTime = DateTime.UtcNow,
@@ -71,7 +79,7 @@ namespace NLoad
                     EndTime = DateTime.UtcNow
                 };
 
-                _loadTest.IncrementCounter();
+                _loadTest.IncrementIterationsCounter();
 
                 iterations++;
 
@@ -79,9 +87,7 @@ namespace NLoad
             }
 
             result.TestRuns = testRunResults;
-
             result.EndTime = DateTime.UtcNow;
-
             result.Iterations = iterations;
 
             e.Result = result;
@@ -89,12 +95,19 @@ namespace NLoad
 
         private void BindResponseFromWorkerThread(object sender, RunWorkerCompletedEventArgs e)
         {
+            if (e.Cancelled) return;
+            
             var result = e.Result as TestRunnerResult;
 
             if (result != null)
             {
                 Result = result;
             }
+        }
+
+        public void Cancel()
+        {
+            _backgroundWorker.CancelAsync();
         }
     }
 }

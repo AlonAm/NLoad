@@ -5,7 +5,7 @@ using System.Windows.Input;
 
 namespace NLoad.App.Features.RunLoadTest
 {
-    internal class LoadTestViewModel : INotifyPropertyChanged
+    public class LoadTestViewModel : INotifyPropertyChanged
     {
         private string _elapsed;
         private long _iterations;
@@ -15,19 +15,19 @@ namespace NLoad.App.Features.RunLoadTest
         private double _throughput;
 
         private readonly RunLoadTestCommand _runLoadTestCommand;
-
         private readonly StopLoadTestCommand _stopLoadTestCommand;
+        private ILoadTest _loadTest;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
         public LoadTestViewModel()
         {
+            Defaults();
+
             var worker = new BackgroundWorker();
 
             _runLoadTestCommand = new RunLoadTestCommand(this, worker);
-            _stopLoadTestCommand = new StopLoadTestCommand(worker);
-
-            Defaults();
+            _stopLoadTestCommand = new StopLoadTestCommand(this, worker);
         }
 
         private void Defaults()
@@ -53,6 +53,16 @@ namespace NLoad.App.Features.RunLoadTest
         }
 
         // Display
+
+        public ILoadTest LoadTest
+        {
+            get { return _loadTest; }
+            set
+            {
+                _loadTest = value;
+                OnPropertyChanged();
+            }
+        }
 
         public double Throughput
         {
