@@ -17,7 +17,7 @@
                 <Label FontWeight="Bold" Content="Duration" />
                 <TextBox Text="{Binding Duration}" />
                 <Button Content="Start" Command="{Binding RunLoadTestCommand}" Width="50"/>
-                <!--<Button Content="Stop" Command="{Binding StopLoadTestCommand}" Width="50"/>-->
+                <Button Content="Stop" Command="{Binding StopLoadTestCommand}" Width="50"/>
             </ToolBar>
         </ToolBarTray>
 

@@ -4,15 +4,17 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{F0DAD423-3AA7-434A-A7C4-72B54300E541}</ProjectGuid>
-    <OutputType>Library</OutputType>
+    <ProjectGuid>{ED95ECA7-03C2-4DF7-B238-3C2082EA2163}</ProjectGuid>
+    <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>NLoad</RootNamespace>
-    <AssemblyName>NLoad</AssemblyName>
+    <RootNamespace>NLoad.Examples.ConsoleApplication</RootNamespace>
+    <AssemblyName>NLoad.Examples.ConsoleApplication</AssemblyName>
     <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -22,6 +24,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -34,25 +37,14 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="LoadTest\Heartbeat.cs" />
-    <Compile Include="LoadTest\ILoadTest.cs" />
-    <Compile Include="Test\ITest.cs" />
-    <Compile Include="LoadTest\LoadTest.cs" />
-    <Compile Include="LoadTest\LoadTestBuilder.cs" />
-    <Compile Include="LoadTest\LoadTestConfiguration.cs" />
-    <Compile Include="Exceptions\NLoadException.cs" />
-    <Compile Include="LoadTest\LoadTestResult.cs" />
-    <Compile Include="NLoad.cs" />
+    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Test\TestContext.cs" />
-    <Compile Include="Test\TestResult.cs" />
-    <Compile Include="TestRun\TestRunContext.cs" />
-    <Compile Include="TestRunner\TestRunner.cs" />
-    <Compile Include="TestRunner\TestRunnerResult.cs" />
-    <Compile Include="TestRun\TestRunResult.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="NLoad.nuspec" />
+    <ProjectReference Include="..\NLoad\NLoad.csproj">
+      <Project>{f0dad423-3aa7-434a-a7c4-72b54300e541}</Project>
+      <Name>NLoad</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

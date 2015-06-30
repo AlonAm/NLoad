@@ -8,7 +8,7 @@ namespace NLoad.App.Features.RunLoadTest
     internal class RunLoadTestCommand : ICommand
     {
         private bool _canExecute = true;
-        private BackgroundWorker _worker;
+        private readonly BackgroundWorker _worker;
         private readonly LoadTestViewModel _viewModel;
 
         public event EventHandler CanExecuteChanged;
@@ -75,6 +75,8 @@ namespace NLoad.App.Features.RunLoadTest
                                     .WithDeleyBetweenThreadStart(_viewModel.DeleyBetweenThreadStart)
                                     .OnHeartbeat(OnHeartbeat)
                                 .Build();
+
+            _viewModel.LoadTest = loadTest;
 
             e.Result = loadTest.Run();
         }
