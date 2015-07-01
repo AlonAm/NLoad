@@ -36,7 +36,7 @@ namespace NLoad.Examples.ConsoleApplication
         {
             Thread.Sleep(1000);
 
-            return TestResult.Successful;
+            return TestResult.Success;
         }
     }
 }

@@ -5,10 +5,10 @@ namespace NLoad
 {
     public class TestResult
     {
-        [Obsolete("Use TestResult.Successful instead.")]
+        [Obsolete("Use TestResult.Success instead.")]
         public static readonly TestResult Default = new TestResult(true);
 
-        public static readonly TestResult Successful = new TestResult(true);
+        public static readonly TestResult Success = new TestResult(true);
         public static readonly TestResult Failed = new TestResult(true);
 
         [ExcludeFromCodeCoverage]
