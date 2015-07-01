@@ -19,7 +19,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NLoad.App", "NLoad.App\NLoa
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Examples", "Examples", "{2328DC64-3905-4705-8297-2371E86E99CD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NLoad.Examples.ConsoleApplication", "NLoad.Examples.ConsoleApplication\NLoad.Examples.ConsoleApplication.csproj", "{ED95ECA7-03C2-4DF7-B238-3C2082EA2163}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NLoad.Examples.ConsoleApplication", "Examples\NLoad.Examples.ConsoleApplication\NLoad.Examples.ConsoleApplication.csproj", "{ED95ECA7-03C2-4DF7-B238-3C2082EA2163}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
