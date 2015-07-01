@@ -41,7 +41,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\NLoad\NLoad.csproj">
+    <ProjectReference Include="..\..\NLoad\NLoad.csproj">
       <Project>{f0dad423-3aa7-434a-a7c4-72b54300e541}</Project>
       <Name>NLoad</Name>
     </ProjectReference>
