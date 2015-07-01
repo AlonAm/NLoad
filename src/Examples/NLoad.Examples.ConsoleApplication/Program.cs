@@ -15,8 +15,8 @@ namespace NLoad.Examples.ConsoleApplication
 
             var result = loadTest.Run();
 
-            Console.WriteLine("\nTotal Runtime: {0}", result.TotalRuntime);
             Console.WriteLine("Total Iterations: {0}", result.TotalIterations);
+            Console.WriteLine("\nTotal Runtime: {0}", result.TotalRuntime);
             Console.WriteLine("Average Throughput: {0}", result.AverageThroughput);
             Console.WriteLine("Average Response Time: {0}", result.AverageResponseTime);
 
