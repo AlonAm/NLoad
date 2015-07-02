@@ -7,7 +7,7 @@
     <authors>$author$</authors>
     <owners>$author$</owners>
     <licenseUrl>https://github.com/NLoad/NLoad/blob/master/LICENSE</licenseUrl>
-    <projectUrl>https://github.com/NLoad/NLoad</projectUrl>
+    <projectUrl>http://nload.github.io</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
     <copyright>Copyright 2015 Alon Amsalem</copyright>
