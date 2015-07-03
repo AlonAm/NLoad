@@ -8,15 +8,16 @@
     <Window.DataContext>
         <runLoadTest:LoadTestViewModel/>
     </Window.DataContext>
+    
     <Grid>
         
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        
-        <ToolBarTray>
-            <ToolBar>
+
+        <ToolBarTray  Background="Transparent">
+            <ToolBar  Background="Transparent">
                 <Label FontWeight="Bold" Content="Load Test"/>
                 <ComboBox>
                     <ComboBoxItem Content="In Memory" IsSelected="True"></ComboBoxItem>
@@ -30,7 +31,7 @@
             </ToolBar>
         </ToolBarTray>
 
-        <WrapPanel Grid.Row="0" Margin="0,35,0,0">
+        <WrapPanel Grid.Row="0" Margin="0,35,0,0" Background="Transparent">
 
             <StackPanel Height="100" Width="200">
                 <Label Content="Throughput" HorizontalAlignment="Center" VerticalAlignment="Top"/>
@@ -54,7 +55,7 @@
 
         </WrapPanel>
         
-        <oxy:PlotView Grid.Row="1" Model="{Binding PlotModel}" Background="Transparent"  />
+        <oxy:PlotView Grid.Row="1" Model="{Binding PlotModel}" Background="Transparent" />
         
     </Grid>
 </Window>

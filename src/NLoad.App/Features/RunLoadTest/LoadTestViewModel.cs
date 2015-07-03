@@ -31,7 +31,7 @@ namespace NLoad.App.Features.RunLoadTest
             var worker = new BackgroundWorker();
 
             _runLoadTestCommand = new RunLoadTestCommand(this, worker);
-            
+
             _stopLoadTestCommand = new StopLoadTestCommand(this, worker);
         }
 
@@ -41,10 +41,13 @@ namespace NLoad.App.Features.RunLoadTest
             NumberOfThreads = 10;
             Duration = TimeSpan.FromSeconds(30);
             DeleyBetweenThreadStart = TimeSpan.Zero;
-            
+
             Points = new List<DataPoint>();
-            PlotModel = new PlotModel();
-            
+            PlotModel = new PlotModel
+            {
+                Background = OxyColors.Transparent,
+                PlotAreaBorderThickness = new OxyThickness(1,0,0,1)
+            };
             PlotModel.Series.Add(new LineSeries()
             {
                 ItemsSource = Points
