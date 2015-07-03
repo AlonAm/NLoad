@@ -23,10 +23,7 @@ namespace NLoad.Tests
         {
             Thread.Sleep(1);
 
-            return new TestResult
-            {
-                Passed = true
-            };
+            return TestResult.Success;
         }
     }
 }
