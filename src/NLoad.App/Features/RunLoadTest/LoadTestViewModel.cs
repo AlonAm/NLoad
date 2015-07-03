@@ -1,7 +1,11 @@
 using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
+using OxyPlot;
+using OxyPlot.Series;
 
 namespace NLoad.App.Features.RunLoadTest
 {
@@ -27,6 +31,7 @@ namespace NLoad.App.Features.RunLoadTest
             var worker = new BackgroundWorker();
 
             _runLoadTestCommand = new RunLoadTestCommand(this, worker);
+            
             _stopLoadTestCommand = new StopLoadTestCommand(this, worker);
         }
 
@@ -36,6 +41,14 @@ namespace NLoad.App.Features.RunLoadTest
             NumberOfThreads = 10;
             Duration = TimeSpan.FromSeconds(30);
             DeleyBetweenThreadStart = TimeSpan.Zero;
+            
+            Points = new List<DataPoint>();
+            PlotModel = new PlotModel();
+            
+            PlotModel.Series.Add(new LineSeries()
+            {
+                ItemsSource = Points
+            });
         }
 
         #region Properties
@@ -54,6 +67,7 @@ namespace NLoad.App.Features.RunLoadTest
 
         // Display
 
+        //todo: the view should not have access to the load-test
         public ILoadTest LoadTest
         {
             get { return _loadTest; }
@@ -131,6 +145,12 @@ namespace NLoad.App.Features.RunLoadTest
         public TimeSpan Duration { get; set; }
 
         public TimeSpan DeleyBetweenThreadStart { get; set; }
+
+        // Chart
+
+        public PlotModel PlotModel { get; set; }
+
+        public List<DataPoint> Points { get; private set; }
 
         #endregion
 

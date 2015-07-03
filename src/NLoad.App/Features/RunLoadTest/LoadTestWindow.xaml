@@ -3,15 +3,24 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:app="clr-namespace:NLoad.App"
         xmlns:runLoadTest="clr-namespace:NLoad.App.Features.RunLoadTest"
-        Title="NLoad" Height="175" Width="816" MinHeight="200" MinWidth="210">
+        xmlns:oxy="http://oxyplot.org/wpf"
+        Title="NLoad" Height="380" Width="816" MinHeight="200" MinWidth="210">
     <Window.DataContext>
         <runLoadTest:LoadTestViewModel/>
     </Window.DataContext>
     <Grid>
+        
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        
         <ToolBarTray>
             <ToolBar>
                 <Label FontWeight="Bold" Content="Load Test"/>
-                <TextBox Text="In Memory" IsEnabled="False" />
+                <ComboBox>
+                    <ComboBoxItem Content="In Memory" IsSelected="True"></ComboBoxItem>
+                </ComboBox>
                 <Label FontWeight="Bold" Content="# Threads"/>
                 <TextBox Text="{Binding NumberOfThreads}" />
                 <Label FontWeight="Bold" Content="Duration" />
@@ -21,28 +30,31 @@
             </ToolBar>
         </ToolBarTray>
 
-        <WrapPanel Margin="0,50,0,0">
+        <WrapPanel Grid.Row="0" Margin="0,35,0,0">
 
-            <StackPanel HorizontalAlignment="Left" Height="100" Width="200" VerticalAlignment="Top">
+            <StackPanel Height="100" Width="200">
                 <Label Content="Throughput" HorizontalAlignment="Center" VerticalAlignment="Top"/>
                 <Label Content="{Binding Throughput, Mode=TwoWay}" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="34"/>
             </StackPanel>
 
-            <StackPanel HorizontalAlignment="Left" Height="100" Width="200" VerticalAlignment="Top">
-                <Label Content="Iterations" HorizontalAlignment="Center" VerticalAlignment="Top"/>
-                <Label Content="{Binding Iterations}" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="34"/>
+            <StackPanel Height="100" Width="200">
+                <Label Content="Iterations" HorizontalAlignment="Center"/>
+                <Label Content="{Binding Iterations}" HorizontalAlignment="Center" FontSize="34"/>
             </StackPanel>
 
-            <StackPanel HorizontalAlignment="Left" Height="100" Width="200" VerticalAlignment="Top">
-                <Label Content="Elapsed" HorizontalAlignment="Center" VerticalAlignment="Top"/>
-                <Label Content="{Binding Elapsed}" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="34"/>
+            <StackPanel Height="100" Width="200">
+                <Label Content="Elapsed" HorizontalAlignment="Center"/>
+                <Label Content="{Binding Elapsed}" HorizontalAlignment="Center" FontSize="34"/>
             </StackPanel>
 
-            <StackPanel IsEnabled="False" HorizontalAlignment="Left" Height="100" Width="200" VerticalAlignment="Top">
-                <Label Content="Errors" HorizontalAlignment="Center" VerticalAlignment="Top"/>
-                <Label Content="0" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="34"/>
+            <StackPanel IsEnabled="False" Height="100" Width="200">
+                <Label Content="Errors" HorizontalAlignment="Center"/>
+                <Label Content="0" HorizontalAlignment="Center" FontSize="34"/>
             </StackPanel>
-            
+
         </WrapPanel>
+        
+        <oxy:PlotView Grid.Row="1" Model="{Binding PlotModel}" Background="Transparent"  />
+        
     </Grid>
 </Window>

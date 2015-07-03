@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel;
+using System.Threading;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Diagnostics;
@@ -168,7 +170,7 @@ namespace NLoad.Tests
                     .Run();
 
             var last = throughput.Last();
-            
+
             throughput.Clear();
 
             NLoad.Test<TestMock>()
@@ -179,6 +181,29 @@ namespace NLoad.Tests
                     .Run();
 
             var first = throughput.First();
+        }
+
+        [TestMethod]
+        public void CancelLoadTest()
+        {
+            var worker = new BackgroundWorker();
+
+            var loadTest = NLoad.Test<TestMock>()
+                .WithNumberOfThreads(1)
+                .WithDurationOf(TimeSpan.FromSeconds(2))
+                //.OnHeartbeat((s, hearbeat) => throughput.Add(hearbeat.Throughput))
+                .Build();
+
+            worker.DoWork += (s, e) =>
+            {
+                loadTest.Run();
+            };
+
+            Thread.Sleep(1000);
+
+            loadTest.Cancel();
+            
+            Assert.IsNotNull(loadTest);
         }
     }
 }

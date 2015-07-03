@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Linq;
 using System.Windows;
 using System.Windows.Input;
+using OxyPlot;
 
 namespace NLoad.App.Features.RunLoadTest
 {
@@ -77,6 +80,8 @@ namespace NLoad.App.Features.RunLoadTest
                                 .Build();
 
             _viewModel.LoadTest = loadTest;
+            
+            _viewModel.Points.Clear();
 
             e.Result = loadTest.Run();
         }
@@ -85,21 +90,24 @@ namespace NLoad.App.Features.RunLoadTest
         {
             var result = (LoadTestResult)e.Result;
 
-            MapResultToViewModel(result);
+            MapLoadTestResultToViewModel(result);
 
             _worker.DoWork -= RunLoadTest;
-
             _worker.RunWorkerCompleted -= LoadTestCompleted;
 
             ChangeCanExecuteTo(true);
         }
 
-        private void MapResultToViewModel(LoadTestResult result)
+        private void MapLoadTestResultToViewModel(LoadTestResult result)
         {
             _viewModel.Elapsed = FormatElapsed(result.TotalRuntime);
+
             _viewModel.Iterations = result.TotalIterations;
+
             _viewModel.MinThroughput = result.MinThroughput;
+
             _viewModel.MaxThroughput = result.MaxThroughput;
+
             _viewModel.AverageThroughput = result.AverageThroughput;
         }
 
@@ -110,6 +118,10 @@ namespace NLoad.App.Features.RunLoadTest
             _viewModel.Throughput = Math.Round(e.Throughput, 2, MidpointRounding.AwayFromZero);
             _viewModel.Elapsed = FormatElapsed(e.Elapsed);
             _viewModel.Iterations = e.Iterations;
+
+            _viewModel.Points.Add(new DataPoint(_viewModel.Iterations, _viewModel.Throughput));
+
+            _viewModel.PlotModel.InvalidatePlot(true);
         }
 
         private void ChangeCanExecuteTo(bool canExecute)

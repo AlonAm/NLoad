@@ -10,7 +10,7 @@ namespace NLoad
     public sealed class LoadTest<T> : ILoadTest where T : ITest, new()
     {
         private long _totalIterations;
-        private bool _cancelled = false;
+        private bool _cancelled;
         List<TestRunner<T>> _testRunners;
         private readonly LoadTestConfiguration _configuration;
         private readonly List<Heartbeat> _heartbeat = new List<Heartbeat>();
@@ -33,7 +33,6 @@ namespace NLoad
         {
             get { return _configuration; }
         }
-
 
         public LoadTestResult Run()
         {
@@ -96,14 +95,16 @@ namespace NLoad
 
         public void Cancel()
         {
-            _cancelled = true;
-
-            foreach (var testRunner in _testRunners)
+            if (_testRunners != null && _testRunners.Any())
             {
-                testRunner.Cancel();
+                foreach (var testRunner in _testRunners)
+                {
+                    testRunner.Cancel();
+                }
             }
-        }
 
+            _cancelled = true;
+        }
 
         private void Initialize()
         {
@@ -201,4 +202,4 @@ namespace NLoad
     }
 }
 
-// ui -> worker -> load test -> runners -> worker
+// ui -> worker -> load test -> runners -> workers
