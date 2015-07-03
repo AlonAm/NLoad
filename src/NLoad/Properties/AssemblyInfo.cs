@@ -4,8 +4,8 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("NLoad - Simple load testing framework")]
-[assembly: AssemblyDescription("A simple and friendly load testing framework for .NET")]
+[assembly: AssemblyTitle("NLoad")]
+[assembly: AssemblyDescription("A simple and easy to use load testing framework for .NET")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Alon Amsalem")]
 [assembly: AssemblyProduct("NLoad")]
