@@ -1,5 +1,4 @@
-﻿using OxyPlot;
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Input;
@@ -71,8 +70,7 @@ namespace NLoad.App.Features.RunLoadTest
         private void RunLoadTest(object sender, DoWorkEventArgs e)
         {
             //todo: refactor
-            _viewModel.IterationsPoints.Clear(); 
-            _viewModel.ErrorPoints.Clear();
+            _viewModel.Heartbeats.Clear();
 
             var loadTest = NLoad.Test<HttpRequestTest>()
                                     .WithNumberOfThreads(_viewModel.NumberOfThreads)
@@ -112,15 +110,14 @@ namespace NLoad.App.Features.RunLoadTest
         {
             if (e == null) return;
 
-            _viewModel.Throughput = Math.Round(e.Throughput, 2, MidpointRounding.AwayFromZero);
+            _viewModel.Heartbeats.Add(e);
+
+            _viewModel.Throughput = Math.Round(e.Throughput, 0, MidpointRounding.AwayFromZero);
             _viewModel.Elapsed = FormatElapsed(e.Elapsed);
             _viewModel.TotalIterations = e.TotalIterations;
             _viewModel.TotalErrors = e.TotalErrors;
 
-            _viewModel.IterationsPoints.Add(new DataPoint(_viewModel.TotalIterations, _viewModel.Throughput));
-            _viewModel.ErrorPoints.Add(new DataPoint(_viewModel.TotalIterations, _viewModel.TotalErrors));
-
-            _viewModel.PlotModel.InvalidatePlot(true);
+            _viewModel.ChartModel.InvalidatePlot(true);
         }
 
         private void ChangeCanExecuteTo(bool canExecute)

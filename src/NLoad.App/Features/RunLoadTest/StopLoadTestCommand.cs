@@ -14,15 +14,12 @@ namespace NLoad.App.Features.RunLoadTest
 
         public bool CanExecute(object parameter)
         {
-            return _loadTestViewModel != null; //_loadTestViewModel.LoadTest != null;
+            return _loadTestViewModel != null;
         }
 
         public void Execute(object parameter)
         {
-            if (_loadTestViewModel.LoadTest != null)
-            {
-                _loadTestViewModel.LoadTest.Cancel();
-            }
+            _loadTestViewModel.CancelLoadTest();
         }
 
         public event EventHandler CanExecuteChanged;

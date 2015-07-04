@@ -62,6 +62,7 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Compile Include="Features\RunLoadTest\HttpRequestTest.cs" />
+    <Compile Include="Features\RunLoadTest\LoadTestChart.cs" />
     <Compile Include="Features\RunLoadTest\RunLoadTestCommand.cs" />
     <Compile Include="Features\RunLoadTest\InMemoryTest.cs" />
     <Compile Include="Features\RunLoadTest\LoadTestViewModel.cs" />

@@ -1,6 +1,4 @@
-using System.Windows.Media;
 using OxyPlot;
-using OxyPlot.Series;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -19,78 +17,41 @@ namespace NLoad.App.Features.RunLoadTest
         private double _averageThroughput;
         private double _throughput;
 
-        private ILoadTest _loadTest;
-
-        private readonly RunLoadTestCommand _runLoadTestCommand;
-        private readonly StopLoadTestCommand _stopLoadTestCommand;
-
         public event PropertyChangedEventHandler PropertyChanged;
 
         public LoadTestViewModel()
         {
-            Defaults();
-
-            _runLoadTestCommand = new RunLoadTestCommand(this);
-
-            _stopLoadTestCommand = new StopLoadTestCommand(this);
+            SetDefaults();
         }
 
-        private void Defaults()
+        private void SetDefaults()
         {
+            Heartbeats = new List<Heartbeat>();
+
+            RunLoadTestCommand = new RunLoadTestCommand(this);
+            StopLoadTestCommand = new StopLoadTestCommand(this);
+
             Elapsed = "00:00:00";
             NumberOfThreads = 10;
             Duration = TimeSpan.FromSeconds(30);
             DeleyBetweenThreadStart = TimeSpan.Zero;
 
-            // Throughput Chart
-
-            IterationsPoints = new List<DataPoint>();
-            ErrorPoints = new List<DataPoint>();
-
-            PlotModel = new PlotModel
-            {
-                Background = OxyColors.Transparent,
-                PlotAreaBorderThickness = new OxyThickness(1, 0, 0, 1)
-            };
-
-            PlotModel.Series.Add(new LineSeries
-            {
-                ItemsSource = IterationsPoints,
-                Color = OxyColors.DodgerBlue
-            });
-
-            PlotModel.Series.Add(new LineSeries
-            {
-                ItemsSource = ErrorPoints,
-                Color = OxyColors.Red
-            });
+            ChartModel = new LoadTestChart(Heartbeats);
         }
 
         #region Properties
 
+        public List<Heartbeat> Heartbeats { get; set; }
+
+        public ILoadTest LoadTest { get; set; } //todo: replace with cancellationtoken
+
         // Commands
 
-        public ICommand RunLoadTestCommand
-        {
-            get { return _runLoadTestCommand; }
-        }
+        public ICommand RunLoadTestCommand { get; private set; }
 
-        public ICommand StopLoadTestCommand
-        {
-            get { return _stopLoadTestCommand; }
-        }
+        public ICommand StopLoadTestCommand { get; private set; }
 
         // Display
-
-        public ILoadTest LoadTest //todo: the view should not have access to the load-test
-        {
-            get { return _loadTest; }
-            set
-            {
-                _loadTest = value;
-                OnPropertyChanged();
-            }
-        }
 
         public double Throughput
         {
@@ -172,13 +133,17 @@ namespace NLoad.App.Features.RunLoadTest
 
         // Chart
 
-        public PlotModel PlotModel { get; set; }
-
-        public List<DataPoint> IterationsPoints { get; private set; }
-
-        public List<DataPoint> ErrorPoints { get; private set; }
+        public PlotModel ChartModel { get; set; }
 
         #endregion
+
+        public void CancelLoadTest()
+        {
+            if (LoadTest != null)
+            {
+                LoadTest.Cancel();
+            }
+        }
 
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {

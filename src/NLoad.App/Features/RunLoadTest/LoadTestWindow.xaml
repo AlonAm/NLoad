@@ -55,7 +55,7 @@
 
         </WrapPanel>
         
-        <oxy:PlotView Grid.Row="1" Model="{Binding PlotModel}" Background="Transparent" />
+        <oxy:PlotView Grid.Row="1" Model="{Binding ChartModel}" Background="Transparent" />
         
     </Grid>
 </Window>
