@@ -52,6 +52,7 @@
   <ItemGroup>
     <Compile Include="Mocks\OneSecondDelayTest.cs" />
     <Compile Include="Mocks\RandomDelayTest.cs" />
+    <Compile Include="Mocks\FailedTest.cs" />
     <Compile Include="Mocks\ThreadCounter.cs" />
     <Compile Include="Mocks\TestMock.cs" />
     <Compile Include="LoadTestBuilderTests.cs" />

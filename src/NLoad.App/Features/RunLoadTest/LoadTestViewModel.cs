@@ -1,3 +1,4 @@
+using System.Windows.Media;
 using OxyPlot;
 using OxyPlot.Series;
 using System;
@@ -11,16 +12,17 @@ namespace NLoad.App.Features.RunLoadTest
     public class LoadTestViewModel : INotifyPropertyChanged
     {
         private string _elapsed;
+        private long _totalErrors;
         private long _totalIterations;
         private double _minThroughput;
         private double _maxThroughput;
         private double _averageThroughput;
         private double _throughput;
 
+        private ILoadTest _loadTest;
+
         private readonly RunLoadTestCommand _runLoadTestCommand;
         private readonly StopLoadTestCommand _stopLoadTestCommand;
-        private ILoadTest _loadTest;
-        private long _totalErrors;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -29,6 +31,7 @@ namespace NLoad.App.Features.RunLoadTest
             Defaults();
 
             _runLoadTestCommand = new RunLoadTestCommand(this);
+
             _stopLoadTestCommand = new StopLoadTestCommand(this);
         }
 
@@ -42,7 +45,7 @@ namespace NLoad.App.Features.RunLoadTest
             // Throughput Chart
 
             IterationsPoints = new List<DataPoint>();
-            ErrorsPoints = new List<DataPoint>();
+            ErrorPoints = new List<DataPoint>();
 
             PlotModel = new PlotModel
             {
@@ -53,13 +56,13 @@ namespace NLoad.App.Features.RunLoadTest
             PlotModel.Series.Add(new LineSeries
             {
                 ItemsSource = IterationsPoints,
-                Color = OxyColor.FromRgb(0, 64, 213)
+                Color = OxyColors.DodgerBlue
             });
 
             PlotModel.Series.Add(new LineSeries
             {
-                ItemsSource = ErrorsPoints,
-                Color = OxyColor.FromRgb(255, 0, 0)
+                ItemsSource = ErrorPoints,
+                Color = OxyColors.Red
             });
         }
 
@@ -173,7 +176,7 @@ namespace NLoad.App.Features.RunLoadTest
 
         public List<DataPoint> IterationsPoints { get; private set; }
 
-        public List<DataPoint> ErrorsPoints { get; private set; }
+        public List<DataPoint> ErrorPoints { get; private set; }
 
         #endregion
 

@@ -72,7 +72,7 @@ namespace NLoad.App.Features.RunLoadTest
         {
             //todo: refactor
             _viewModel.IterationsPoints.Clear(); 
-            _viewModel.ErrorsPoints.Clear();
+            _viewModel.ErrorPoints.Clear();
 
             var loadTest = NLoad.Test<HttpRequestTest>()
                                     .WithNumberOfThreads(_viewModel.NumberOfThreads)
@@ -118,7 +118,7 @@ namespace NLoad.App.Features.RunLoadTest
             _viewModel.TotalErrors = e.TotalErrors;
 
             _viewModel.IterationsPoints.Add(new DataPoint(_viewModel.TotalIterations, _viewModel.Throughput));
-            _viewModel.ErrorsPoints.Add(new DataPoint(_viewModel.TotalIterations, _viewModel.TotalErrors));
+            _viewModel.ErrorPoints.Add(new DataPoint(_viewModel.TotalIterations, _viewModel.TotalErrors));
 
             _viewModel.PlotModel.InvalidatePlot(true);
         }
