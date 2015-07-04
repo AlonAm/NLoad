@@ -1,18 +1,17 @@
+using OxyPlot;
+using OxyPlot.Series;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
-using OxyPlot;
-using OxyPlot.Series;
 
 namespace NLoad.App.Features.RunLoadTest
 {
     public class LoadTestViewModel : INotifyPropertyChanged
     {
         private string _elapsed;
-        private long _iterations;
+        private long _totalIterations;
         private double _minThroughput;
         private double _maxThroughput;
         private double _averageThroughput;
@@ -21,6 +20,7 @@ namespace NLoad.App.Features.RunLoadTest
         private readonly RunLoadTestCommand _runLoadTestCommand;
         private readonly StopLoadTestCommand _stopLoadTestCommand;
         private ILoadTest _loadTest;
+        private long _totalErrors;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -41,7 +41,8 @@ namespace NLoad.App.Features.RunLoadTest
 
             // Throughput Chart
 
-            Points = new List<DataPoint>();
+            IterationsPoints = new List<DataPoint>();
+            ErrorsPoints = new List<DataPoint>();
 
             PlotModel = new PlotModel
             {
@@ -49,9 +50,16 @@ namespace NLoad.App.Features.RunLoadTest
                 PlotAreaBorderThickness = new OxyThickness(1, 0, 0, 1)
             };
 
-            PlotModel.Series.Add(new LineSeries()
+            PlotModel.Series.Add(new LineSeries
             {
-                ItemsSource = Points
+                ItemsSource = IterationsPoints,
+                Color = OxyColor.FromRgb(0, 64, 213)
+            });
+
+            PlotModel.Series.Add(new LineSeries
+            {
+                ItemsSource = ErrorsPoints,
+                Color = OxyColor.FromRgb(255, 0, 0)
             });
         }
 
@@ -71,8 +79,7 @@ namespace NLoad.App.Features.RunLoadTest
 
         // Display
 
-        //todo: the view should not have access to the load-test
-        public ILoadTest LoadTest
+        public ILoadTest LoadTest //todo: the view should not have access to the load-test
         {
             get { return _loadTest; }
             set
@@ -102,12 +109,22 @@ namespace NLoad.App.Features.RunLoadTest
             }
         }
 
-        public long Iterations
+        public long TotalIterations
         {
-            get { return _iterations; }
+            get { return _totalIterations; }
             set
             {
-                _iterations = value;
+                _totalIterations = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public long TotalErrors
+        {
+            get { return _totalErrors; }
+            set
+            {
+                _totalErrors = value;
                 OnPropertyChanged();
             }
         }
@@ -154,7 +171,9 @@ namespace NLoad.App.Features.RunLoadTest
 
         public PlotModel PlotModel { get; set; }
 
-        public List<DataPoint> Points { get; private set; }
+        public List<DataPoint> IterationsPoints { get; private set; }
+
+        public List<DataPoint> ErrorsPoints { get; private set; }
 
         #endregion
 

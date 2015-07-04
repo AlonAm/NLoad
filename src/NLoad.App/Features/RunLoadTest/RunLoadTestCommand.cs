@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.ObjectModel;
+﻿using OxyPlot;
+using System;
 using System.ComponentModel;
-using System.Linq;
 using System.Windows;
 using System.Windows.Input;
-using OxyPlot;
 
 namespace NLoad.App.Features.RunLoadTest
 {
@@ -72,9 +70,11 @@ namespace NLoad.App.Features.RunLoadTest
         /// <param name="e"></param>
         private void RunLoadTest(object sender, DoWorkEventArgs e)
         {
-            _viewModel.Points.Clear(); //todo: refactor
+            //todo: refactor
+            _viewModel.IterationsPoints.Clear(); 
+            _viewModel.ErrorsPoints.Clear();
 
-            var loadTest = NLoad.Test<InMemoryTest>()
+            var loadTest = NLoad.Test<HttpRequestTest>()
                                     .WithNumberOfThreads(_viewModel.NumberOfThreads)
                                     .WithDurationOf(_viewModel.Duration)
                                     .WithDeleyBetweenThreadStart(_viewModel.DeleyBetweenThreadStart)
@@ -101,14 +101,11 @@ namespace NLoad.App.Features.RunLoadTest
         private void MapLoadTestResultToViewModel(LoadTestResult result)
         {
             _viewModel.Elapsed = FormatElapsed(result.TotalRuntime);
-
-            _viewModel.Iterations = result.TotalIterations;
-
+            _viewModel.TotalIterations = result.TotalIterations;
             _viewModel.MinThroughput = result.MinThroughput;
-
             _viewModel.MaxThroughput = result.MaxThroughput;
-
             _viewModel.AverageThroughput = result.AverageThroughput;
+            _viewModel.TotalErrors = result.TotalErrors;
         }
 
         private void OnHeartbeat(object sender, Heartbeat e)
@@ -117,9 +114,11 @@ namespace NLoad.App.Features.RunLoadTest
 
             _viewModel.Throughput = Math.Round(e.Throughput, 2, MidpointRounding.AwayFromZero);
             _viewModel.Elapsed = FormatElapsed(e.Elapsed);
-            _viewModel.Iterations = e.Iterations;
+            _viewModel.TotalIterations = e.TotalIterations;
+            _viewModel.TotalErrors = e.TotalErrors;
 
-            _viewModel.Points.Add(new DataPoint(_viewModel.Iterations, _viewModel.Throughput));
+            _viewModel.IterationsPoints.Add(new DataPoint(_viewModel.TotalIterations, _viewModel.Throughput));
+            _viewModel.ErrorsPoints.Add(new DataPoint(_viewModel.TotalIterations, _viewModel.TotalErrors));
 
             _viewModel.PlotModel.InvalidatePlot(true);
         }

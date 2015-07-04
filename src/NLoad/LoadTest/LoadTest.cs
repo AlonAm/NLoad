@@ -10,6 +10,7 @@ namespace NLoad
     public sealed class LoadTest<T> : ILoadTest where T : ITest, new()
     {
         private long _totalIterations;
+        private long _totalErrors;
         private bool _cancelled;
         List<TestRunner<T>> _testRunners;
         private readonly LoadTestConfiguration _configuration;
@@ -63,6 +64,7 @@ namespace NLoad
                     TestRunnersResults = _testRunners.Where(k => k.Result != null).Select(k => k.Result),
                     TotalIterations = _totalIterations,
                     TotalRuntime = stopWatch.Elapsed,
+                    TotalErrors = _totalErrors,
                     Heartbeat = _heartbeat,
                     TestRuns = testRuns
                 };
@@ -79,8 +81,7 @@ namespace NLoad
                 {
                     result.MaxThroughput = _heartbeat.Where(k => !double.IsNaN(k.Throughput)).Max(k => k.Throughput);
                     result.MinThroughput = _heartbeat.Where(k => !double.IsNaN(k.Throughput)).Min(k => k.Throughput);
-                    result.AverageThroughput =
-                        _heartbeat.Where(k => !double.IsNaN(k.Throughput)).Average(k => k.Throughput);
+                    result.AverageThroughput = _heartbeat.Where(k => !double.IsNaN(k.Throughput)).Average(k => k.Throughput);
                 }
 
                 #endregion
@@ -149,12 +150,14 @@ namespace NLoad
                 else
                 {
                     var iterations = Interlocked.Read(ref _totalIterations);
+                    
+                    var errors = Interlocked.Read(ref _totalErrors);
 
                     var throughput = iterations / elapsed.TotalSeconds;
 
                     if (double.IsNaN(throughput) || double.IsInfinity(throughput)) continue;
 
-                    OnHeartbeat(throughput, elapsed, iterations);
+                    OnHeartbeat(throughput, elapsed, iterations, errors);
 
                     if (DateTime.UtcNow - start < _configuration.Duration) Thread.Sleep(1000);
                 }
@@ -181,9 +184,9 @@ namespace NLoad
             }
         }
 
-        private void OnHeartbeat(double throughput, TimeSpan delta, long iterations)
+        private void OnHeartbeat(double throughput, TimeSpan delta, long totalIterations, long totalErrors)
         {
-            var heartbeat = new Heartbeat(DateTime.UtcNow, throughput, delta, iterations);
+            var heartbeat = new Heartbeat(DateTime.UtcNow, throughput, delta, totalIterations, totalErrors);
 
             _heartbeat.Add(heartbeat);
 
@@ -198,6 +201,11 @@ namespace NLoad
         public void IncrementIterationsCounter()
         {
             Interlocked.Increment(ref _totalIterations);
+        }
+
+        public void IncrementErrorsCounter()
+        {
+            Interlocked.Increment(ref _totalErrors);
         }
     }
 }

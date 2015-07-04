@@ -82,7 +82,7 @@ namespace NLoad.App
 
 //    Console.WriteLine("\n [Summary]\n");
 //    Console.WriteLine(" Total Runtime: {0}", result.TotalRuntime);
-//    Console.WriteLine(" Total Iterations: {0}", result.TotalIterations);
+//    Console.WriteLine(" Total TotalIterations: {0}", result.TotalIterations);
 //    Console.WriteLine(" Test Runners: {0}", result.TestRunnersResults.Count());
 //    Console.WriteLine(" Heartbeats: {0}\n", result.Heartbeat.Count);
 
