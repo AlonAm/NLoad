@@ -28,11 +28,8 @@ namespace NLoad.App.Features.RunLoadTest
         {
             Defaults();
 
-            var worker = new BackgroundWorker();
-
-            _runLoadTestCommand = new RunLoadTestCommand(this, worker);
-
-            _stopLoadTestCommand = new StopLoadTestCommand(this, worker);
+            _runLoadTestCommand = new RunLoadTestCommand(this);
+            _stopLoadTestCommand = new StopLoadTestCommand(this);
         }
 
         private void Defaults()
@@ -42,12 +39,16 @@ namespace NLoad.App.Features.RunLoadTest
             Duration = TimeSpan.FromSeconds(30);
             DeleyBetweenThreadStart = TimeSpan.Zero;
 
+            // Throughput Chart
+
             Points = new List<DataPoint>();
+
             PlotModel = new PlotModel
             {
                 Background = OxyColors.Transparent,
-                PlotAreaBorderThickness = new OxyThickness(1,0,0,1)
+                PlotAreaBorderThickness = new OxyThickness(1, 0, 0, 1)
             };
+
             PlotModel.Series.Add(new LineSeries()
             {
                 ItemsSource = Points

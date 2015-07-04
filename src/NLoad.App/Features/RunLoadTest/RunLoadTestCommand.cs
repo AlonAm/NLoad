@@ -72,6 +72,8 @@ namespace NLoad.App.Features.RunLoadTest
         /// <param name="e"></param>
         private void RunLoadTest(object sender, DoWorkEventArgs e)
         {
+            _viewModel.Points.Clear(); //todo: refactor
+
             var loadTest = NLoad.Test<InMemoryTest>()
                                     .WithNumberOfThreads(_viewModel.NumberOfThreads)
                                     .WithDurationOf(_viewModel.Duration)
@@ -80,8 +82,6 @@ namespace NLoad.App.Features.RunLoadTest
                                 .Build();
 
             _viewModel.LoadTest = loadTest;
-            
-            _viewModel.Points.Clear();
 
             e.Result = loadTest.Run();
         }
