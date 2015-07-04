@@ -1,7 +1,6 @@
-﻿using System.Collections.Generic;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
-using System.Diagnostics;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace NLoad.Tests
@@ -156,19 +155,19 @@ namespace NLoad.Tests
         }
 
         [TestMethod]
-        public void ShouldCleanStaticVars()
+        public void ShouldResetThroughput()
         {
             var throughput = new List<double>();
 
             NLoad.Test<TestMock>()
                     .WithNumberOfThreads(1)
-                    .WithDurationOf(TimeSpan.FromSeconds(1))
+                    .WithDurationOf(TimeSpan.FromSeconds(2))
                     .OnHeartbeat((s, hearbeat) => throughput.Add(hearbeat.Throughput))
                     .Build()
                     .Run();
 
             var last = throughput.Last();
-            
+
             throughput.Clear();
 
             NLoad.Test<TestMock>()
@@ -179,6 +178,31 @@ namespace NLoad.Tests
                     .Run();
 
             var first = throughput.First();
+
+            Assert.AreNotEqual(first, last);
         }
+
+        //[TestMethod]
+        //public void CancelLoadTest()
+        //{
+        //    var worker = new BackgroundWorker();
+
+        //    var loadTest = NLoad.Test<TestMock>()
+        //        .WithNumberOfThreads(1)
+        //        .WithDurationOf(TimeSpan.FromSeconds(2))
+        //        //.OnHeartbeat((s, hearbeat) => throughput.Add(hearbeat.Throughput))
+        //        .Build();
+
+        //    worker.DoWork += (s, e) =>
+        //    {
+        //        loadTest.Run();
+        //    };
+
+        //    Thread.Sleep(1000);
+
+        //    loadTest.Cancel();
+
+        //    Assert.IsNotNull(loadTest);
+        //}
     }
 }
