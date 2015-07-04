@@ -9,28 +9,28 @@ namespace NLoad.App.Features.RunLoadTest
     {
         private bool _canExecute = true;
         private readonly BackgroundWorker _worker;
-        private readonly LoadTestViewModel _viewModel;
+        private readonly LoadTestViewModel _loadTestViewModel;
 
         public event EventHandler CanExecuteChanged;
 
-        public RunLoadTestCommand(LoadTestViewModel viewModel)
-            : this(viewModel, new BackgroundWorker())
+        public RunLoadTestCommand(LoadTestViewModel loadTestViewModel)
+            : this(loadTestViewModel, new BackgroundWorker())
         {
         }
 
-        public RunLoadTestCommand(LoadTestViewModel viewModel, BackgroundWorker worker)
+        public RunLoadTestCommand(LoadTestViewModel loadTestViewModel, BackgroundWorker worker)
         {
             if (worker == null)
             {
                 throw new ArgumentNullException("worker");
             }
 
-            if (viewModel == null)
+            if (loadTestViewModel == null)
             {
-                throw new ArgumentNullException("viewModel");
+                throw new ArgumentNullException("loadTestViewModel");
             }
 
-            _viewModel = viewModel;
+            _loadTestViewModel = loadTestViewModel;
             _worker = worker;
         }
 
@@ -45,79 +45,59 @@ namespace NLoad.App.Features.RunLoadTest
 
             Initialize();
 
-            RunLoadTestAsync();
+            _worker.RunWorkerAsync();
         }
 
         #region Helpers
 
-        private void RunLoadTestAsync()
-        {
-            _worker.RunWorkerAsync();
-        }
-
         private void Initialize()
         {
+            _loadTestViewModel.Reset();
+
             _worker.WorkerSupportsCancellation = true;
             _worker.DoWork += RunLoadTest;
             _worker.RunWorkerCompleted += LoadTestCompleted;
         }
 
-        /// <summary>
-        /// Run load test on background worker (thread)
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
         private void RunLoadTest(object sender, DoWorkEventArgs e)
         {
-            //todo: refactor
-            _viewModel.Heartbeats.Clear();
-
             var loadTest = NLoad.Test<HttpRequestTest>()
-                                    .WithNumberOfThreads(_viewModel.NumberOfThreads)
-                                    .WithDurationOf(_viewModel.Duration)
-                                    .WithDeleyBetweenThreadStart(_viewModel.DeleyBetweenThreadStart)
-                                    .OnHeartbeat(OnHeartbeat)
-                                .Build();
+                .WithNumberOfThreads(_loadTestViewModel.NumberOfThreads)
+                .WithDurationOf(_loadTestViewModel.Duration)
+                .WithDeleyBetweenThreadStart(_loadTestViewModel.DeleyBetweenThreadStart)
+                .OnHeartbeat(OnHeartbeat)
+                .Build();
 
-            _viewModel.LoadTest = loadTest;
+            _loadTestViewModel.LoadTest = loadTest; //todo: replace with cancellation-token
 
             e.Result = loadTest.Run();
         }
 
         private void LoadTestCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            var result = (LoadTestResult)e.Result;
+            var result = (LoadTestResult) e.Result;
 
             MapLoadTestResultToViewModel(result);
 
             _worker.DoWork -= RunLoadTest;
+
             _worker.RunWorkerCompleted -= LoadTestCompleted;
 
             ChangeCanExecuteTo(true);
-        }
-
-        private void MapLoadTestResultToViewModel(LoadTestResult result)
-        {
-            _viewModel.Elapsed = FormatElapsed(result.TotalRuntime);
-            _viewModel.TotalIterations = result.TotalIterations;
-            _viewModel.MinThroughput = result.MinThroughput;
-            _viewModel.MaxThroughput = result.MaxThroughput;
-            _viewModel.AverageThroughput = result.AverageThroughput;
-            _viewModel.TotalErrors = result.TotalErrors;
         }
 
         private void OnHeartbeat(object sender, Heartbeat e)
         {
             if (e == null) return;
 
-            _viewModel.Heartbeats.Add(e);
+            _loadTestViewModel.Heartbeats.Add(e);
 
-            _viewModel.Throughput = Math.Round(e.Throughput, 0, MidpointRounding.AwayFromZero);
-            _viewModel.Elapsed = FormatElapsed(e.Elapsed);
-            _viewModel.TotalIterations = e.TotalIterations;
-            _viewModel.TotalErrors = e.TotalErrors;
+            _loadTestViewModel.Throughput = Math.Round(e.Throughput, 0, MidpointRounding.AwayFromZero);
+            _loadTestViewModel.Elapsed = FormatElapsed(e.Elapsed);
+            _loadTestViewModel.TotalIterations = e.TotalIterations;
+            _loadTestViewModel.TotalErrors = e.TotalErrors;
 
-            _viewModel.ChartModel.InvalidatePlot(true);
+            _loadTestViewModel.ChartModel.InvalidatePlot(true);
         }
 
         private void ChangeCanExecuteTo(bool canExecute)
@@ -135,6 +115,16 @@ namespace NLoad.App.Features.RunLoadTest
         private static string FormatElapsed(TimeSpan elapsed)
         {
             return string.Format("{0}:{1}:{2}", elapsed.ToString("hh"), elapsed.ToString("mm"), elapsed.ToString("ss"));
+        }
+
+        private void MapLoadTestResultToViewModel(LoadTestResult result)
+        {
+            _loadTestViewModel.Elapsed = FormatElapsed(result.TotalRuntime);
+            _loadTestViewModel.TotalIterations = result.TotalIterations;
+            _loadTestViewModel.MinThroughput = result.MinThroughput;
+            _loadTestViewModel.MaxThroughput = result.MaxThroughput;
+            _loadTestViewModel.AverageThroughput = result.AverageThroughput;
+            _loadTestViewModel.TotalErrors = result.TotalErrors;
         }
 
         #endregion

@@ -21,7 +21,7 @@ namespace NLoad.App.Features.RunLoadTest
 
         public void Execute(object parameter)
         {
-            _loadTestViewModel.CancelLoadTest();
+            _loadTestViewModel.Cancel();
         }
 
         public event EventHandler CanExecuteChanged;

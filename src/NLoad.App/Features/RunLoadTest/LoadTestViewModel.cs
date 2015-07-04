@@ -21,12 +21,8 @@ namespace NLoad.App.Features.RunLoadTest
 
         public LoadTestViewModel()
         {
-            SetDefaults();
-        }
-
-        private void SetDefaults()
-        {
             Heartbeats = new List<Heartbeat>();
+            ChartModel = new LoadTestChart(Heartbeats);
 
             RunLoadTestCommand = new RunLoadTestCommand(this);
             StopLoadTestCommand = new StopLoadTestCommand(this);
@@ -35,8 +31,6 @@ namespace NLoad.App.Features.RunLoadTest
             NumberOfThreads = 10;
             Duration = TimeSpan.FromSeconds(30);
             DeleyBetweenThreadStart = TimeSpan.Zero;
-
-            ChartModel = new LoadTestChart(Heartbeats);
         }
 
         #region Properties
@@ -137,11 +131,19 @@ namespace NLoad.App.Features.RunLoadTest
 
         #endregion
 
-        public void CancelLoadTest()
+        public void Cancel()
         {
             if (LoadTest != null)
             {
                 LoadTest.Cancel();
+            }
+        }
+
+        public void Reset()
+        {
+            if (Heartbeats != null)
+            {
+                Heartbeats.Clear();
             }
         }
 
