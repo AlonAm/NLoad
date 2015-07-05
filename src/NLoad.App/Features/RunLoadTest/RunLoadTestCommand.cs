@@ -61,7 +61,7 @@ namespace NLoad.App.Features.RunLoadTest
 
         private void RunLoadTest(object sender, DoWorkEventArgs e)
         {
-            var loadTest = NLoad.Test<HttpRequestTest>()
+            var loadTest = NLoad.Test<InMemoryTest>()
                 .WithNumberOfThreads(_loadTestViewModel.NumberOfThreads)
                 .WithDurationOf(_loadTestViewModel.Duration)
                 .WithDeleyBetweenThreadStart(_loadTestViewModel.DeleyBetweenThreadStart)
