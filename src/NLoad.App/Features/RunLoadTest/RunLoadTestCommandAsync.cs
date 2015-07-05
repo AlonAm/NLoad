@@ -10,6 +10,7 @@ namespace NLoad.App.Features.RunLoadTest
         private bool _canExecute = true;
         private readonly LoadTestViewModel _viewModel;
         private readonly CancellationToken _cancellationToken;
+
         public event EventHandler CanExecuteChanged;
 
         public RunLoadTestCommandAsync(LoadTestViewModel viewModel, CancellationToken cancellationToken)
@@ -27,12 +28,9 @@ namespace NLoad.App.Features.RunLoadTest
         {
             CanExecute(false);
 
-            var progressHandler = new Progress<Heartbeat>(heartbeat =>
-            {
-                MapHeartbeatToViewModel(heartbeat, _viewModel);
+            _viewModel.Reset();
 
-                _viewModel.ChartModel.InvalidatePlot(true);
-            });
+            var progressHandler = new Progress<Heartbeat>(_viewModel.OnHeartbeat);
 
             var progress = progressHandler as IProgress<Heartbeat>;
 
@@ -51,36 +49,9 @@ namespace NLoad.App.Features.RunLoadTest
             
             }, _cancellationToken);
 
-            MapResultToViewModel(loadTestResult, _viewModel);
+            _viewModel.OnLoadTestCompleted(loadTestResult);
 
             CanExecute(true);
-        }
-
-        private static void MapHeartbeatToViewModel(Heartbeat heartbeat, LoadTestViewModel viewModel)
-        {
-            viewModel.Heartbeats.Add(heartbeat);
-
-            viewModel.Throughput = Math.Round(heartbeat.Throughput, 0, MidpointRounding.AwayFromZero);
-            viewModel.Elapsed = FormatElapsed(heartbeat.Elapsed);
-            viewModel.TotalIterations = heartbeat.TotalIterations;
-            viewModel.TotalErrors = heartbeat.TotalErrors;
-        }
-
-        private static void MapResultToViewModel(LoadTestResult result, LoadTestViewModel viewModel)
-        {
-            //todo: move to extension
-
-            viewModel.Elapsed = FormatElapsed(result.TotalRuntime);
-            viewModel.TotalIterations = result.TotalIterations;
-            viewModel.MinThroughput = result.MinThroughput;
-            viewModel.MaxThroughput = result.MaxThroughput;
-            viewModel.AverageThroughput = result.AverageThroughput;
-            viewModel.TotalErrors = result.TotalErrors;
-        }
-
-        private static string FormatElapsed(TimeSpan elapsed)
-        {
-            return string.Format("{0}:{1}:{2}", elapsed.ToString("hh"), elapsed.ToString("mm"), elapsed.ToString("ss"));
         }
 
         private void CanExecute(bool canExecute)

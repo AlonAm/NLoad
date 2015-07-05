@@ -1,9 +1,9 @@
-using System.Threading;
 using OxyPlot;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Windows.Input;
 
 namespace NLoad.App.Features.RunLoadTest
@@ -23,15 +23,12 @@ namespace NLoad.App.Features.RunLoadTest
         public LoadTestViewModel()
         {
             var cancellationTokenSource = new CancellationTokenSource();
-            
-            var token = cancellationTokenSource.Token;
+
+            RunLoadTestCommand = new RunLoadTestCommandAsync(this, cancellationTokenSource.Token);
+            StopLoadTestCommand = new StopLoadTestCommand(cancellationTokenSource);
 
             Heartbeats = new List<Heartbeat>();
             ChartModel = new LoadTestChart(Heartbeats);
-
-            RunLoadTestCommand = new RunLoadTestCommandAsync(this, token);
-
-            StopLoadTestCommand = new StopLoadTestCommand(cancellationTokenSource);
 
             Elapsed = "00:00:00";
             NumberOfThreads = 10;
@@ -43,15 +40,13 @@ namespace NLoad.App.Features.RunLoadTest
 
         public List<Heartbeat> Heartbeats { get; set; }
 
-        public ILoadTest LoadTest { get; set; } //todo: replace with cancellationtoken
-
         // Commands
 
         public ICommand RunLoadTestCommand { get; private set; }
 
         public ICommand StopLoadTestCommand { get; private set; }
 
-        // Display
+        // Display todo: replace with Load Test Result / Heartbeat
 
         public double Throughput
         {
@@ -137,12 +132,29 @@ namespace NLoad.App.Features.RunLoadTest
 
         #endregion
 
-        public void Cancel()
+        public void OnHeartbeat(Heartbeat heartbeat)
         {
-            if (LoadTest != null)
-            {
-                LoadTest.Cancel();
-            }
+            Heartbeats.Add(heartbeat);
+
+            Throughput = Math.Round(heartbeat.Throughput, 0, MidpointRounding.AwayFromZero);
+
+            Elapsed = FormatElapsed(heartbeat.Elapsed);
+
+            TotalIterations = heartbeat.TotalIterations;
+
+            TotalErrors = heartbeat.TotalErrors;
+
+            ChartModel.InvalidatePlot(true);
+        }
+
+        public void OnLoadTestCompleted(LoadTestResult result)
+        {
+            Elapsed = FormatElapsed(result.TotalRuntime);
+            TotalIterations = result.TotalIterations;
+            MinThroughput = result.MinThroughput;
+            MaxThroughput = result.MaxThroughput;
+            AverageThroughput = result.AverageThroughput;
+            TotalErrors = result.TotalErrors;
         }
 
         public void Reset()
@@ -151,6 +163,11 @@ namespace NLoad.App.Features.RunLoadTest
             {
                 Heartbeats.Clear();
             }
+        }
+
+        private static string FormatElapsed(TimeSpan elapsed)
+        {
+            return string.Format("{0}:{1}:{2}", elapsed.ToString("hh"), elapsed.ToString("mm"), elapsed.ToString("ss"));
         }
 
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
