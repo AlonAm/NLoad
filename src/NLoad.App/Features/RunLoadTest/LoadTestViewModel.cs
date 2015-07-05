@@ -138,7 +138,7 @@ namespace NLoad.App.Features.RunLoadTest
 
             Throughput = Math.Round(heartbeat.Throughput, 0, MidpointRounding.AwayFromZero);
 
-            Elapsed = FormatElapsed(heartbeat.Elapsed);
+            Elapsed = heartbeat.Elapsed.ToTimeString();
 
             TotalIterations = heartbeat.TotalIterations;
 
@@ -149,7 +149,7 @@ namespace NLoad.App.Features.RunLoadTest
 
         public void OnLoadTestCompleted(LoadTestResult result)
         {
-            Elapsed = FormatElapsed(result.TotalRuntime);
+            Elapsed = result.TotalRuntime.ToTimeString();
             TotalIterations = result.TotalIterations;
             MinThroughput = result.MinThroughput;
             MaxThroughput = result.MaxThroughput;
@@ -163,11 +163,6 @@ namespace NLoad.App.Features.RunLoadTest
             {
                 Heartbeats.Clear();
             }
-        }
-
-        private static string FormatElapsed(TimeSpan elapsed)
-        {
-            return string.Format("{0}:{1}:{2}", elapsed.ToString("hh"), elapsed.ToString("mm"), elapsed.ToString("ss"));
         }
 
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
