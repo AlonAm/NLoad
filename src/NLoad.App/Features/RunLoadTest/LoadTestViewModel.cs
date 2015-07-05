@@ -1,86 +1,51 @@
+using OxyPlot;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
-using OxyPlot;
-using OxyPlot.Series;
 
 namespace NLoad.App.Features.RunLoadTest
 {
     public class LoadTestViewModel : INotifyPropertyChanged
     {
         private string _elapsed;
-        private long _iterations;
+        private long _totalErrors;
+        private long _totalIterations;
         private double _minThroughput;
         private double _maxThroughput;
         private double _averageThroughput;
         private double _throughput;
 
-        private readonly RunLoadTestCommand _runLoadTestCommand;
-        private readonly StopLoadTestCommand _stopLoadTestCommand;
-        private ILoadTest _loadTest;
-
         public event PropertyChangedEventHandler PropertyChanged;
 
         public LoadTestViewModel()
         {
-            Defaults();
+            Heartbeats = new List<Heartbeat>();
+            ChartModel = new LoadTestChart(Heartbeats);
 
-            _runLoadTestCommand = new RunLoadTestCommand(this);
-            _stopLoadTestCommand = new StopLoadTestCommand(this);
-        }
+            RunLoadTestCommand = new RunLoadTestCommand(this);
+            StopLoadTestCommand = new StopLoadTestCommand(this);
 
-        private void Defaults()
-        {
             Elapsed = "00:00:00";
             NumberOfThreads = 10;
             Duration = TimeSpan.FromSeconds(30);
             DeleyBetweenThreadStart = TimeSpan.Zero;
-
-            // Throughput Chart
-
-            Points = new List<DataPoint>();
-
-            PlotModel = new PlotModel
-            {
-                Background = OxyColors.Transparent,
-                PlotAreaBorderThickness = new OxyThickness(1, 0, 0, 1)
-            };
-
-            PlotModel.Series.Add(new LineSeries()
-            {
-                ItemsSource = Points
-            });
         }
 
         #region Properties
 
+        public List<Heartbeat> Heartbeats { get; set; }
+
+        public ILoadTest LoadTest { get; set; } //todo: replace with cancellationtoken
+
         // Commands
 
-        public ICommand RunLoadTestCommand
-        {
-            get { return _runLoadTestCommand; }
-        }
+        public ICommand RunLoadTestCommand { get; private set; }
 
-        public ICommand StopLoadTestCommand
-        {
-            get { return _stopLoadTestCommand; }
-        }
+        public ICommand StopLoadTestCommand { get; private set; }
 
         // Display
-
-        //todo: the view should not have access to the load-test
-        public ILoadTest LoadTest
-        {
-            get { return _loadTest; }
-            set
-            {
-                _loadTest = value;
-                OnPropertyChanged();
-            }
-        }
 
         public double Throughput
         {
@@ -102,12 +67,22 @@ namespace NLoad.App.Features.RunLoadTest
             }
         }
 
-        public long Iterations
+        public long TotalIterations
         {
-            get { return _iterations; }
+            get { return _totalIterations; }
             set
             {
-                _iterations = value;
+                _totalIterations = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public long TotalErrors
+        {
+            get { return _totalErrors; }
+            set
+            {
+                _totalErrors = value;
                 OnPropertyChanged();
             }
         }
@@ -152,11 +127,25 @@ namespace NLoad.App.Features.RunLoadTest
 
         // Chart
 
-        public PlotModel PlotModel { get; set; }
-
-        public List<DataPoint> Points { get; private set; }
+        public PlotModel ChartModel { get; set; }
 
         #endregion
+
+        public void Cancel()
+        {
+            if (LoadTest != null)
+            {
+                LoadTest.Cancel();
+            }
+        }
+
+        public void Reset()
+        {
+            if (Heartbeats != null)
+            {
+                Heartbeats.Clear();
+            }
+        }
 
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {

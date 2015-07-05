@@ -15,7 +15,7 @@ namespace NLoad.Tests
         {
             Thread.Sleep(_random.Next(1, 500));
 
-            return new TestResult(true);
+            return TestResult.Success;
         }
     }
 }

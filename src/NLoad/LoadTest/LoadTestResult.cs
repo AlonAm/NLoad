@@ -11,10 +11,9 @@ namespace NLoad
 
         public List<Heartbeat> Heartbeat { get; set; }
 
-
-
-
         public long TotalIterations { get; set; }
+        public long TotalErrors { get; set; }
+
         public TimeSpan TotalRuntime { get; set; }
 
         public double MinThroughput { get; set; }
@@ -24,5 +23,6 @@ namespace NLoad
         public TimeSpan MinResponseTime { get; set; }
         public TimeSpan MaxResponseTime { get; set; }
         public TimeSpan AverageResponseTime { get; set; }
+        
     }
 }

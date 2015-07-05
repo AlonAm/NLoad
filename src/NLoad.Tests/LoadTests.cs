@@ -204,5 +204,17 @@ namespace NLoad.Tests
 
         //    Assert.IsNotNull(loadTest);
         //}
+
+        [TestMethod]
+        public void ShouldReportTotalErrors()
+        {
+            var result = NLoad.Test<FailedTest>()
+                                .WithNumberOfThreads(1)
+                                .WithDurationOf(TimeSpan.FromSeconds(1))
+                                .Build()
+                                .Run();
+
+            Assert.AreEqual(result.TotalErrors, result.TotalIterations);
+        }
     }
 }

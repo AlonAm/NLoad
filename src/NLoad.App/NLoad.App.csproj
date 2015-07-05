@@ -46,9 +46,6 @@
     <Reference Include="OxyPlot.Wpf">
       <HintPath>..\packages\OxyPlot.Wpf.2014.1.546\lib\net45\OxyPlot.Wpf.dll</HintPath>
     </Reference>
-    <Reference Include="OxyPlot.Xps">
-      <HintPath>..\packages\OxyPlot.Wpf.2014.1.546\lib\net45\OxyPlot.Xps.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Core" />
@@ -64,6 +61,8 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Compile Include="Features\RunLoadTest\HttpRequestTest.cs" />
+    <Compile Include="Features\RunLoadTest\LoadTestChart.cs" />
     <Compile Include="Features\RunLoadTest\RunLoadTestCommand.cs" />
     <Compile Include="Features\RunLoadTest\InMemoryTest.cs" />
     <Compile Include="Features\RunLoadTest\LoadTestViewModel.cs" />

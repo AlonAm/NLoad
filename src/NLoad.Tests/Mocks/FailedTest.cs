@@ -2,7 +2,7 @@ using System.Threading;
 
 namespace NLoad.Tests
 {
-    public class TestMock : ITest
+    public class FailedTest : ITest
     {
         public void Initialize()
         {
@@ -12,7 +12,7 @@ namespace NLoad.Tests
         {
             Thread.Sleep(1);
 
-            return TestResult.Success;
+            return TestResult.Failed;
         }
     }
 }

@@ -12,7 +12,7 @@ namespace NLoad.Tests
         {
             Thread.Sleep(1100);
 
-            return new TestResult(true);
+            return TestResult.Success;
         }
     }
 }

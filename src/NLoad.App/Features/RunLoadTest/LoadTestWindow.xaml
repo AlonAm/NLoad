@@ -35,12 +35,12 @@
 
             <StackPanel Height="100" Width="200">
                 <Label Content="Throughput" HorizontalAlignment="Center" VerticalAlignment="Top"/>
-                <Label Content="{Binding Throughput, Mode=TwoWay}" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="34"/>
+                <Label Content="{Binding Throughput}" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="34"/>
             </StackPanel>
 
             <StackPanel Height="100" Width="200">
                 <Label Content="Iterations" HorizontalAlignment="Center"/>
-                <Label Content="{Binding Iterations}" HorizontalAlignment="Center" FontSize="34"/>
+                <Label Content="{Binding TotalIterations}" HorizontalAlignment="Center" FontSize="34"/>
             </StackPanel>
 
             <StackPanel Height="100" Width="200">
@@ -48,14 +48,14 @@
                 <Label Content="{Binding Elapsed}" HorizontalAlignment="Center" FontSize="34"/>
             </StackPanel>
 
-            <StackPanel IsEnabled="False" Height="100" Width="200">
+            <StackPanel Height="100" Width="200">
                 <Label Content="Errors" HorizontalAlignment="Center"/>
-                <Label Content="0" HorizontalAlignment="Center" FontSize="34"/>
+                <Label Content="{Binding TotalErrors}" HorizontalAlignment="Center" FontSize="34"/>
             </StackPanel>
 
         </WrapPanel>
         
-        <oxy:PlotView Grid.Row="1" Model="{Binding PlotModel}" Background="Transparent" />
+        <oxy:PlotView Grid.Row="1" Model="{Binding ChartModel}" Background="Transparent" />
         
     </Grid>
 </Window>

@@ -5,6 +5,8 @@ namespace NLoad.App.Features.RunLoadTest
 {
     public class StopLoadTestCommand : ICommand
     {
+        //todo: use cancellation-token
+
         private readonly LoadTestViewModel _loadTestViewModel;
 
         public StopLoadTestCommand(LoadTestViewModel loadTestViewModel)
@@ -14,15 +16,12 @@ namespace NLoad.App.Features.RunLoadTest
 
         public bool CanExecute(object parameter)
         {
-            return _loadTestViewModel != null; //_loadTestViewModel.LoadTest != null;
+            return _loadTestViewModel != null;
         }
 
         public void Execute(object parameter)
         {
-            if (_loadTestViewModel.LoadTest != null)
-            {
-                _loadTestViewModel.LoadTest.Cancel();
-            }
+            _loadTestViewModel.Cancel();
         }
 
         public event EventHandler CanExecuteChanged;

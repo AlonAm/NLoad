@@ -52,7 +52,7 @@ namespace NLoad
 
         private void RunOnBackgroundWorker(object sender, DoWorkEventArgs e)
         {
-            long iterations = 0;
+            long iterations = 0; //todo: is this needed?
             var worker = (BackgroundWorker)sender;
             var context = (TestRunContext)e.Argument;
             var result = new TestRunnerResult(starTime: DateTime.UtcNow);
@@ -74,10 +74,26 @@ namespace NLoad
 
                 var testRunResult = new TestRunResult
                 {
-                    StartTime = DateTime.UtcNow,
-                    TestResult = test.Execute(),
-                    EndTime = DateTime.UtcNow
+                    StartTime = DateTime.UtcNow
                 };
+
+                try
+                {
+                    testRunResult.TestResult = test.Execute();
+                }
+                catch
+                {
+                    testRunResult.TestResult = TestResult.Failed;
+                }
+                finally
+                {
+                    testRunResult.EndTime = DateTime.UtcNow;
+                }
+
+                if (!testRunResult.TestResult.Passed) //todo: refactor?
+                {
+                    _loadTest.IncrementErrorsCounter();
+                }
 
                 _loadTest.IncrementIterationsCounter();
 
@@ -96,7 +112,7 @@ namespace NLoad
         private void BindResponseFromWorkerThread(object sender, RunWorkerCompletedEventArgs e)
         {
             if (e.Cancelled) return;
-            
+
             var result = e.Result as TestRunnerResult;
 
             if (result != null)
