@@ -5,6 +5,7 @@ using System.Windows.Input;
 
 namespace NLoad.App.Features.RunLoadTest
 {
+    [Obsolete]
     internal class RunLoadTestCommand : ICommand
     {
         private bool _canExecute = true;

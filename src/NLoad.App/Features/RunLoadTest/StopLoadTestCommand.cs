@@ -1,29 +1,28 @@
 using System;
+using System.Threading;
 using System.Windows.Input;
 
 namespace NLoad.App.Features.RunLoadTest
 {
     public class StopLoadTestCommand : ICommand
     {
-        //todo: use cancellation-token
+        private readonly CancellationTokenSource _tokenSource;
 
-        private readonly LoadTestViewModel _loadTestViewModel;
+        public event EventHandler CanExecuteChanged;
 
-        public StopLoadTestCommand(LoadTestViewModel loadTestViewModel)
+        public StopLoadTestCommand(CancellationTokenSource tokenSource)
         {
-            _loadTestViewModel = loadTestViewModel;
+            _tokenSource = tokenSource;
         }
 
         public bool CanExecute(object parameter)
         {
-            return _loadTestViewModel != null;
+            return false;
         }
 
         public void Execute(object parameter)
         {
-            _loadTestViewModel.Cancel();
+            _tokenSource.Cancel();
         }
-
-        public event EventHandler CanExecuteChanged;
     }
 }

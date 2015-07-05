@@ -1,3 +1,4 @@
+using System.Threading;
 using OxyPlot;
 using System;
 using System.Collections.Generic;
@@ -21,11 +22,16 @@ namespace NLoad.App.Features.RunLoadTest
 
         public LoadTestViewModel()
         {
+            var cancellationTokenSource = new CancellationTokenSource();
+            
+            var token = cancellationTokenSource.Token;
+
             Heartbeats = new List<Heartbeat>();
             ChartModel = new LoadTestChart(Heartbeats);
 
-            RunLoadTestCommand = new RunLoadTestCommand(this);
-            StopLoadTestCommand = new StopLoadTestCommand(this);
+            RunLoadTestCommand = new RunLoadTestCommandAsync(this, token);
+
+            StopLoadTestCommand = new StopLoadTestCommand(cancellationTokenSource);
 
             Elapsed = "00:00:00";
             NumberOfThreads = 10;

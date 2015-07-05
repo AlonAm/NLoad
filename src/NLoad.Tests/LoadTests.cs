@@ -1,4 +1,7 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using System.Diagnostics;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -215,6 +218,66 @@ namespace NLoad.Tests
                                 .Run();
 
             Assert.AreEqual(result.TotalErrors, result.TotalIterations);
+        }
+
+        [TestMethod]
+        public void AsyncTest()
+        {
+            Debug.WriteLine("Before");
+            Debug.WriteLine("Task Id: {0}", Task.CurrentId);
+            Debug.WriteLine("Thread Id: {0}", Thread.CurrentThread.ManagedThreadId);
+
+            var progressHandler = new Progress<Heartbeat>(value =>
+            {
+                Debug.WriteLine("Progress");
+                Debug.WriteLine("Task Id: {0}", Task.CurrentId);
+                Debug.WriteLine("Thread Id: {0}", Thread.CurrentThread.ManagedThreadId);
+                Debug.WriteLine("Throughput: {0}", value.Throughput);
+            });
+
+            var progress = progressHandler as IProgress<Heartbeat>;
+
+            var task = RunLoadTestAsync(progress);
+            
+            Debug.WriteLine("After");
+            Debug.WriteLine("Task Id: {0}", Task.CurrentId);
+            Debug.WriteLine("Thread Id: {0}", Thread.CurrentThread.ManagedThreadId);
+
+
+            Debug.WriteLine("Result Max Throughput: {0}", task.Result.MaxThroughput);
+            Debug.WriteLine("Result Iterations: {0}", task.Result.TotalIterations);
+
+            Debug.WriteLine("After Result");
+            Debug.WriteLine("Task Id: {0}", Task.CurrentId);
+            Debug.WriteLine("Thread Id: {0}", Thread.CurrentThread.ManagedThreadId);
+
+            Assert.IsNotNull(task.Result);
+            Assert.IsInstanceOfType(task.Result, typeof(LoadTestResult));
+        }
+
+        private static async Task<LoadTestResult> RunLoadTestAsync(IProgress<Heartbeat> progress)
+        {
+            var task = await Task.Run(() =>
+            {
+                Debug.WriteLine("Start Run");
+                Debug.WriteLine("Task Id: {0}", Task.CurrentId);
+                Debug.WriteLine("Thread Id: {0}", Thread.CurrentThread.ManagedThreadId);
+
+                var result = NLoad.Test<TestMock>()
+                                    .WithNumberOfThreads(1)
+                                    .WithDurationOf(TimeSpan.FromSeconds(5))
+                                    .OnHeartbeat((s, e) => progress.Report(e))
+                                    .Build()
+                                    .Run();
+
+                Debug.WriteLine("End Run");
+                Debug.WriteLine("Task Id: {0}", Task.CurrentId);
+                Debug.WriteLine("Thread Id: {0}", Thread.CurrentThread.ManagedThreadId);
+
+                return result;
+            });
+
+            return task;
         }
     }
 }
