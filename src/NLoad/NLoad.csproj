@@ -35,6 +35,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="LoadTest\Heartbeat.cs" />
+    <Compile Include="LoadTest\HeartRateMonitor.cs" />
     <Compile Include="LoadTest\ILoadTest.cs" />
     <Compile Include="Test\ITest.cs" />
     <Compile Include="LoadTest\LoadTest.cs" />

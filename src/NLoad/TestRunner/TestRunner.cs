@@ -120,10 +120,5 @@ namespace NLoad
                 Result = result;
             }
         }
-
-        public void Cancel()
-        {
-            _backgroundWorker.CancelAsync();
-        }
     }
 }

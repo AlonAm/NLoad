@@ -9,14 +9,17 @@ namespace NLoad.App.Features.RunLoadTest
     {
         private bool _canExecute = true;
         private readonly LoadTestViewModel _viewModel;
-        private readonly CancellationToken _cancellationToken;
 
         public event EventHandler CanExecuteChanged;
 
-        public RunLoadTestCommandAsync(LoadTestViewModel viewModel, CancellationToken cancellationToken)
+        public RunLoadTestCommandAsync(LoadTestViewModel viewModel)
         {
+            if (viewModel == null)
+            {
+                throw new ArgumentNullException("viewModel");
+            }
+
             _viewModel = viewModel;
-            _cancellationToken = cancellationToken;
         }
 
         public bool CanExecute(object parameter)
@@ -26,35 +29,46 @@ namespace NLoad.App.Features.RunLoadTest
 
         public async void Execute(object parameter)
         {
-            CanExecute(false);
+            SetCanExecute(false);
 
             _viewModel.Reset();
 
-            var progressHandler = new Progress<Heartbeat>(_viewModel.OnHeartbeat);
+            var progress = new Progress<Heartbeat>(_viewModel.HandleHeartbeat);
 
-            var progress = progressHandler as IProgress<Heartbeat>;
+            var cancellationTokenSource = new CancellationTokenSource();
 
-            var loadTestResult = await Task.Run(() =>
-            {
-                var loadTest = NLoad.Test<InMemoryTest>()
-                                    .WithNumberOfThreads(_viewModel.NumberOfThreads)
-                                    .WithDurationOf(_viewModel.Duration)
-                                    .WithDeleyBetweenThreadStart(_viewModel.DeleyBetweenThreadStart)
-                                    .OnHeartbeat((s, e) => progress.Report(e))
-                                    .Build();
+            _viewModel.CancellationTokenSource = cancellationTokenSource;
 
-                var result = loadTest.Run();
+            var result = await RunLoadTestAsync(_viewModel.Configuration, cancellationTokenSource.Token, progress);
 
-                return result;
-            
-            }, _cancellationToken);
+            _viewModel.HandleLoadTestResult(result);
 
-            _viewModel.OnLoadTestCompleted(loadTestResult);
-
-            CanExecute(true);
+            SetCanExecute(true);
         }
 
-        private void CanExecute(bool canExecute)
+        #region Helpers
+
+        private static Task<LoadTestResult> RunLoadTestAsync(
+            LoadTestConfiguration configuration,
+            CancellationToken cancellationToken,
+            IProgress<Heartbeat> progress)
+        {
+            return Task.Run(() =>
+            {
+                var loadTest = NLoad.Test<InMemoryTest>()
+                                        .WithNumberOfThreads(configuration.NumberOfThreads)
+                                        .WithDurationOf(configuration.Duration)
+                                        .WithDeleyBetweenThreadStart(configuration.DelayBetweenThreadStart)
+                                        .WithCancellationToken(cancellationToken)
+                                        .OnHeartbeat((s, e) => progress.Report(e))
+                                    .Build();
+
+                return loadTest.Run();
+
+            }, cancellationToken);
+        }
+
+        private void SetCanExecute(bool canExecute)
         {
             _canExecute = canExecute;
 
@@ -63,5 +77,7 @@ namespace NLoad.App.Features.RunLoadTest
                 CanExecuteChanged(this, EventArgs.Empty);
             }
         }
+
+        #endregion
     }
 }

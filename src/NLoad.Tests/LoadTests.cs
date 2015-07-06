@@ -87,7 +87,7 @@ namespace NLoad.Tests
                                         .Build()
                                             .Run();
 
-                Assert.AreEqual(durationInSeconds, result.Heartbeat.Count);
+                Assert.AreEqual(durationInSeconds, result.Heartbeat.Count - 1);
             }
         }
 
@@ -238,7 +238,7 @@ namespace NLoad.Tests
             var progress = progressHandler as IProgress<Heartbeat>;
 
             var task = RunLoadTestAsync(progress);
-            
+
             Debug.WriteLine("After");
             Debug.WriteLine("Task Id: {0}", Task.CurrentId);
             Debug.WriteLine("Thread Id: {0}", Thread.CurrentThread.ManagedThreadId);
@@ -265,7 +265,7 @@ namespace NLoad.Tests
 
                 var result = NLoad.Test<TestMock>()
                                     .WithNumberOfThreads(1)
-                                    .WithDurationOf(TimeSpan.FromSeconds(5))
+                                    .WithDurationOf(TimeSpan.FromSeconds(2))
                                     .OnHeartbeat((s, e) => progress.Report(e))
                                     .Build()
                                     .Run();

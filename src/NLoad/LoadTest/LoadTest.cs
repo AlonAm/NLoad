@@ -4,36 +4,57 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
+using NLoad.LoadTest;
 
 namespace NLoad
 {
     public sealed class LoadTest<T> : ILoadTest where T : ITest, new()
     {
-        private long _totalIterations;
         private long _totalErrors;
-        private bool _cancelled;
+        private long _totalIterations;
         List<TestRunner<T>> _testRunners;
         private readonly LoadTestConfiguration _configuration;
-        private readonly List<Heartbeat> _heartbeat = new List<Heartbeat>();
+
+        private CancellationToken _cancellationToken;
         private readonly ManualResetEvent _quitEvent = new ManualResetEvent(false);
 
         public event EventHandler<Heartbeat> Heartbeat;
 
         [ExcludeFromCodeCoverage]
-        public LoadTest(LoadTestConfiguration configuration)
+        public LoadTest(LoadTestConfiguration configuration, CancellationToken cancellationToken)
         {
             if (configuration == null)
             {
                 throw new ArgumentNullException("configuration");
             }
 
+            if (cancellationToken == null)
+            {
+                throw new ArgumentNullException("cancellationToken");
+            }
+
             _configuration = configuration;
+            _cancellationToken = cancellationToken;
         }
+
+        #region Properties
 
         public LoadTestConfiguration Configuration
         {
             get { return _configuration; }
         }
+
+        public long TotalIterations
+        {
+            get { return Interlocked.Read(ref _totalIterations); }
+        }
+
+        public long TotalErrors
+        {
+            get { return Interlocked.Read(ref _totalErrors); }
+        }
+
+        #endregion
 
         public LoadTestResult Run()
         {
@@ -45,7 +66,7 @@ namespace NLoad
 
                 StartTestRunners();
 
-                MonitorHeartRate();
+                var heartbeats = StartMonitor();
 
                 Shutdown();
 
@@ -65,7 +86,7 @@ namespace NLoad
                     TotalIterations = _totalIterations,
                     TotalRuntime = stopWatch.Elapsed,
                     TotalErrors = _totalErrors,
-                    Heartbeat = _heartbeat,
+                    Heartbeat = heartbeats,
                     TestRuns = testRuns
                 };
 
@@ -77,16 +98,20 @@ namespace NLoad
                         new TimeSpan(Convert.ToInt64((testRuns.Average(k => k.ResponseTime.Ticks))));
                 }
 
-                if (_heartbeat.Any())
+                if (heartbeats.Any())
                 {
-                    result.MaxThroughput = _heartbeat.Where(k => !double.IsNaN(k.Throughput)).Max(k => k.Throughput);
-                    result.MinThroughput = _heartbeat.Where(k => !double.IsNaN(k.Throughput)).Min(k => k.Throughput);
-                    result.AverageThroughput = _heartbeat.Where(k => !double.IsNaN(k.Throughput)).Average(k => k.Throughput);
+                    result.MaxThroughput = heartbeats.Where(k => !double.IsNaN(k.Throughput)).Max(k => k.Throughput);
+                    result.MinThroughput = heartbeats.Where(k => !double.IsNaN(k.Throughput)).Min(k => k.Throughput);
+                    result.AverageThroughput = heartbeats.Where(k => !double.IsNaN(k.Throughput)).Average(k => k.Throughput);
                 }
 
                 #endregion
 
                 return result;
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
             }
             catch (Exception e)
             {
@@ -94,17 +119,17 @@ namespace NLoad
             }
         }
 
-        public void Cancel()
+        private List<Heartbeat> StartMonitor()
         {
-            if (_testRunners != null && _testRunners.Any())
-            {
-                foreach (var testRunner in _testRunners)
-                {
-                    testRunner.Cancel();
-                }
-            }
+            var monitor = new HeartRateMonitor(this, _cancellationToken);
 
-            _cancelled = true;
+            monitor.Heartbeat += Heartbeat;
+
+            monitor.Start();
+
+            monitor.Heartbeat -= Heartbeat;
+
+            return monitor.Heartbeats;//todo: verify and/or add unit test
         }
 
         private void Initialize()
@@ -133,37 +158,6 @@ namespace NLoad
             }
         }
 
-        private void MonitorHeartRate()
-        {
-            var running = true;
-
-            var start = DateTime.UtcNow;
-
-            while (running)
-            {
-                var elapsed = DateTime.UtcNow - start;
-
-                if (elapsed >= _configuration.Duration || _cancelled)
-                {
-                    running = false;
-                }
-                else
-                {
-                    var iterations = Interlocked.Read(ref _totalIterations);
-                    
-                    var errors = Interlocked.Read(ref _totalErrors);
-
-                    var throughput = iterations / elapsed.TotalSeconds;
-
-                    if (double.IsNaN(throughput) || double.IsInfinity(throughput)) continue;
-
-                    OnHeartbeat(throughput, elapsed, iterations, errors);
-
-                    if (DateTime.UtcNow - start < _configuration.Duration) Thread.Sleep(1000);
-                }
-            }
-        }
-
         private void Shutdown()
         {
             _quitEvent.Set();
@@ -171,6 +165,7 @@ namespace NLoad
 
         private void WaitForTestRunners()
         {
+            //todo: replace with Task.WaitAll?
             while (true)
             {
                 if (_testRunners.Any(w => w.IsBusy))
@@ -184,20 +179,6 @@ namespace NLoad
             }
         }
 
-        private void OnHeartbeat(double throughput, TimeSpan delta, long totalIterations, long totalErrors)
-        {
-            var heartbeat = new Heartbeat(DateTime.UtcNow, throughput, delta, totalIterations, totalErrors);
-
-            _heartbeat.Add(heartbeat);
-
-            var handler = Heartbeat;
-
-            if (handler != null)
-            {
-                handler(this, heartbeat); //todo: add try catch?
-            }
-        }
-
         public void IncrementIterationsCounter()
         {
             Interlocked.Increment(ref _totalIterations);
@@ -206,6 +187,11 @@ namespace NLoad
         public void IncrementErrorsCounter()
         {
             Interlocked.Increment(ref _totalErrors);
+        }
+
+        public void SetCancellationToken(CancellationToken cancellationToken)
+        {
+            _cancellationToken = cancellationToken;
         }
     }
 }

@@ -22,18 +22,19 @@ namespace NLoad.App.Features.RunLoadTest
 
         public LoadTestViewModel()
         {
-            var cancellationTokenSource = new CancellationTokenSource();
+            Configuration = new LoadTestConfiguration();
+            
+            RunLoadTestCommand = new RunLoadTestCommandAsync(this);
 
-            RunLoadTestCommand = new RunLoadTestCommandAsync(this, cancellationTokenSource.Token);
-            StopLoadTestCommand = new StopLoadTestCommand(cancellationTokenSource);
+            StopLoadTestCommand = new StopLoadTestCommand(this);
 
             Heartbeats = new List<Heartbeat>();
+            
             ChartModel = new LoadTestChart(Heartbeats);
 
-            Elapsed = "00:00:00";
-            NumberOfThreads = 10;
-            Duration = TimeSpan.FromSeconds(30);
-            DeleyBetweenThreadStart = TimeSpan.Zero;
+            Defaults();
+
+            Reset();
         }
 
         #region Properties
@@ -120,19 +121,17 @@ namespace NLoad.App.Features.RunLoadTest
 
         // Toolbar
 
-        public int NumberOfThreads { get; set; }
-
-        public TimeSpan Duration { get; set; }
-
-        public TimeSpan DeleyBetweenThreadStart { get; set; }
+        public LoadTestConfiguration Configuration { get; set; }
 
         // Chart
 
         public PlotModel ChartModel { get; set; }
 
+        public CancellationTokenSource CancellationTokenSource { get; set; }
+
         #endregion
 
-        public void OnHeartbeat(Heartbeat heartbeat)
+        public void HandleHeartbeat(Heartbeat heartbeat)
         {
             Heartbeats.Add(heartbeat);
 
@@ -147,13 +146,18 @@ namespace NLoad.App.Features.RunLoadTest
             ChartModel.InvalidatePlot(true);
         }
 
-        public void OnLoadTestCompleted(LoadTestResult result)
+        public void HandleLoadTestResult(LoadTestResult result)
         {
             Elapsed = result.TotalRuntime.ToTimeString();
+
             TotalIterations = result.TotalIterations;
+
             MinThroughput = result.MinThroughput;
+
             MaxThroughput = result.MaxThroughput;
+
             AverageThroughput = result.AverageThroughput;
+
             TotalErrors = result.TotalErrors;
         }
 
@@ -163,6 +167,15 @@ namespace NLoad.App.Features.RunLoadTest
             {
                 Heartbeats.Clear();
             }
+
+            Elapsed = "00:00:00";
+
+            TotalIterations = 0;
+            TotalErrors = 0;
+
+            MinThroughput = 0;
+            MaxThroughput = 0;
+            AverageThroughput = 0;
         }
 
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
@@ -173,6 +186,15 @@ namespace NLoad.App.Features.RunLoadTest
             {
                 handler(this, new PropertyChangedEventArgs(propertyName));
             }
+        }
+
+        private void Defaults()
+        {
+            Configuration.NumberOfThreads = 10;
+
+            Configuration.Duration = TimeSpan.FromSeconds(30);
+
+            Configuration.DelayBetweenThreadStart = TimeSpan.Zero;
         }
     }
 }
