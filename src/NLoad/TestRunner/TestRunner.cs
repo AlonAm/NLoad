@@ -54,7 +54,7 @@ namespace NLoad
         {
             _loadTest.IncrementThreadCount();//todo: move to debug mode?
 
-            long iterations; //todo: remove if unused
+            long iterations = 0; //todo: remove if unused
             var worker = (BackgroundWorker)sender;
             var context = (TestRunContext)e.Argument;
             var result = new TestRunnerResult(starTime: DateTime.UtcNow);

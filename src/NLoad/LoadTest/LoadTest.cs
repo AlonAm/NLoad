@@ -10,12 +10,12 @@ namespace NLoad
 {
     public sealed class LoadTest<T> : ILoadTest where T : ITest, new()
     {
+        private long _threadCount;
         private long _totalErrors;
         private long _totalIterations;
-        private long _threadCount;
 
         List<TestRunner<T>> _testRunners;
-        private HeartRateMonitor _monitor;
+        private readonly HeartRateMonitor _monitor;
         private readonly LoadTestConfiguration _configuration;
 
         private CancellationToken _cancellationToken;
@@ -26,18 +26,18 @@ namespace NLoad
         [ExcludeFromCodeCoverage]
         public LoadTest(LoadTestConfiguration configuration, CancellationToken cancellationToken)
         {
-            if (configuration == null)
-            {
+            if (configuration == null) 
                 throw new ArgumentNullException("configuration");
-            }
 
-            if (cancellationToken == null)
-            {
+            if (cancellationToken == null) 
                 throw new ArgumentNullException("cancellationToken");
-            }
 
             _configuration = configuration;
             _cancellationToken = cancellationToken;
+
+            _monitor = new HeartRateMonitor(this, _cancellationToken);
+
+            _monitor.Heartbeat += Heartbeat;
         }
 
         #region Properties
@@ -65,7 +65,7 @@ namespace NLoad
             {
                 var stopWatch = Stopwatch.StartNew();
 
-                Initialize(); //todo: make sure it supports re-running load tests
+                CreateAndInitializeTestRunners();
 
                 StartTestRunners();
 
@@ -120,31 +120,16 @@ namespace NLoad
             }
         }
 
-        private void CreateHeartRateMonitor()
+        private void StartTestRunners()
         {
-            _monitor = new HeartRateMonitor(this, _cancellationToken);
-
-            _monitor.Heartbeat += Heartbeat;
-
-            //monitor.Heartbeat -= Heartbeat;
+            _testRunners.ForEach(k => k.Run());
         }
 
-        private void Initialize()
+        private void CreateAndInitializeTestRunners()
         {
-            //todo: init once
-
-            CreateHeartRateMonitor();
-
             CreateTestRunners(_configuration.NumberOfThreads);
 
             _testRunners.ForEach(k => k.Initialize());
-        }
-
-        private void StartTestRunners()
-        {
-            //todo: add error handling
-
-            _testRunners.ForEach(k => k.Run());
         }
 
         private void CreateTestRunners(int count)
