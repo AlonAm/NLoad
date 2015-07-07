@@ -7,6 +7,8 @@ namespace NLoad
         void IncrementIterationsCounter();
 
         void IncrementErrorsCounter();
+        
+        void IncrementThreadCount();
 
         long TotalIterations { get; }
 

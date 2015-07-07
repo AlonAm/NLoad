@@ -9,8 +9,6 @@ namespace NLoad.LoadTest
         private readonly ILoadTest _loadTest;
         private readonly CancellationToken _cancellationToken;
 
-        private readonly List<Heartbeat> _heartbeat = new List<Heartbeat>();
-
         public event EventHandler<Heartbeat> Heartbeat;
 
         public HeartRateMonitor(ILoadTest loadTest, CancellationToken cancellationToken)
@@ -19,32 +17,31 @@ namespace NLoad.LoadTest
             _cancellationToken = cancellationToken;
         }
 
-        public List<Heartbeat> Heartbeats
-        {
-            get
-            {
-                return _heartbeat;
-            }
-        }
-
-        public void Start()//todo: return heartbeat list here instead of holding it
+        public List<Heartbeat> Start()
         {
             var running = true;
 
             var start = DateTime.UtcNow;
 
+            var heartbeats = new List<Heartbeat>();
+
             while (running)
             {
-                var elapsed = DateTime.UtcNow - start;
+                var now = DateTime.UtcNow;
+
+                var elapsed = now - start;
 
                 var iterations = _loadTest.TotalIterations;
-                var errors = _loadTest.TotalErrors;
 
                 var throughput = iterations / elapsed.TotalSeconds;
 
-                if (double.IsNaN(throughput) || double.IsInfinity(throughput)) continue;
+                if (double.IsNaN(throughput) || double.IsInfinity(throughput)) continue; //todo: verify
 
-                OnHeartbeat(throughput, elapsed, iterations, errors);
+                var heartbeat = new Heartbeat(now, throughput, elapsed, iterations, _loadTest.TotalErrors);
+
+                heartbeats.Add(heartbeat);
+
+                OnHeartbeat(heartbeat);
 
                 if (elapsed >= _loadTest.Configuration.Duration || _cancellationToken.IsCancellationRequested)
                 {
@@ -55,14 +52,12 @@ namespace NLoad.LoadTest
                     Thread.Sleep(1000);
                 }
             }
+
+            return heartbeats;
         }
 
-        private void OnHeartbeat(double throughput, TimeSpan delta, long totalIterations, long totalErrors)
+        private void OnHeartbeat(Heartbeat heartbeat)
         {
-            var heartbeat = new Heartbeat(DateTime.UtcNow, throughput, delta, totalIterations, totalErrors);
-
-            _heartbeat.Add(heartbeat);
-
             var handler = Heartbeat;
 
             if (handler != null)

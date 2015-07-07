@@ -12,7 +12,10 @@ namespace NLoad
     {
         private long _totalErrors;
         private long _totalIterations;
+        private long _threadCount;
+
         List<TestRunner<T>> _testRunners;
+        private HeartRateMonitor _monitor;
         private readonly LoadTestConfiguration _configuration;
 
         private CancellationToken _cancellationToken;
@@ -62,11 +65,11 @@ namespace NLoad
             {
                 var stopWatch = Stopwatch.StartNew();
 
-                Initialize();
+                Initialize(); //todo: make sure it supports re-running load tests
 
                 StartTestRunners();
 
-                var heartbeats = StartMonitor();
+                var heartbeats = _monitor.Start();
 
                 Shutdown();
 
@@ -107,11 +110,9 @@ namespace NLoad
 
                 #endregion
 
+                Debug.WriteLine("Thread Count: {0}", _threadCount);
+
                 return result;
-            }
-            catch (OperationCanceledException)
-            {
-                throw;
             }
             catch (Exception e)
             {
@@ -119,21 +120,21 @@ namespace NLoad
             }
         }
 
-        private List<Heartbeat> StartMonitor()
+        private void CreateHeartRateMonitor()
         {
-            var monitor = new HeartRateMonitor(this, _cancellationToken);
+            _monitor = new HeartRateMonitor(this, _cancellationToken);
 
-            monitor.Heartbeat += Heartbeat;
+            _monitor.Heartbeat += Heartbeat;
 
-            monitor.Start();
-
-            monitor.Heartbeat -= Heartbeat;
-
-            return monitor.Heartbeats;//todo: verify and/or add unit test
+            //monitor.Heartbeat -= Heartbeat;
         }
 
         private void Initialize()
         {
+            //todo: init once
+
+            CreateHeartRateMonitor();
+
             CreateTestRunners(_configuration.NumberOfThreads);
 
             _testRunners.ForEach(k => k.Initialize());
@@ -166,16 +167,10 @@ namespace NLoad
         private void WaitForTestRunners()
         {
             //todo: replace with Task.WaitAll?
-            while (true)
+
+            while (_testRunners.Any(w => w.IsBusy))
             {
-                if (_testRunners.Any(w => w.IsBusy))
-                {
-                    Thread.Sleep(1); //todo: ???
-                }
-                else
-                {
-                    break;
-                }
+                Thread.Sleep(1); //todo: ???
             }
         }
 
@@ -187,6 +182,11 @@ namespace NLoad
         public void IncrementErrorsCounter()
         {
             Interlocked.Increment(ref _totalErrors);
+        }
+
+        public void IncrementThreadCount()
+        {
+            Interlocked.Increment(ref _threadCount);
         }
 
         public void SetCancellationToken(CancellationToken cancellationToken)

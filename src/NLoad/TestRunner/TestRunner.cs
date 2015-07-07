@@ -52,7 +52,9 @@ namespace NLoad
 
         private void RunOnBackgroundWorker(object sender, DoWorkEventArgs e)
         {
-            long iterations = 0; //todo: is this needed?
+            _loadTest.IncrementThreadCount();//todo: move to debug mode?
+
+            long iterations; //todo: remove if unused
             var worker = (BackgroundWorker)sender;
             var context = (TestRunContext)e.Argument;
             var result = new TestRunnerResult(starTime: DateTime.UtcNow);

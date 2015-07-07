@@ -17,6 +17,7 @@ namespace NLoad.App.Features.RunLoadTest
         private double _maxThroughput;
         private double _averageThroughput;
         private double _throughput;
+        private int _threadCount;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -48,6 +49,16 @@ namespace NLoad.App.Features.RunLoadTest
         public ICommand StopLoadTestCommand { get; private set; }
 
         // Display todo: replace with Load Test Result / Heartbeat
+
+        public int ThreadCount
+        {
+            get { return _threadCount; }
+            set
+            {
+                _threadCount = value;
+                OnPropertyChanged();
+            }
+        }
 
         public double Throughput
         {
@@ -134,6 +145,8 @@ namespace NLoad.App.Features.RunLoadTest
         public void HandleHeartbeat(Heartbeat heartbeat)
         {
             Heartbeats.Add(heartbeat);
+
+            ThreadCount = heartbeat.ThreadCount;
 
             Throughput = Math.Round(heartbeat.Throughput, 0, MidpointRounding.AwayFromZero);
 

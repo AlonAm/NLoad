@@ -22,5 +22,8 @@ namespace NLoad
         public long TotalErrors { get; set; }
 
         public double Throughput { get; set; }
+
+        [Obsolete("not in use")]
+        public int ThreadCount { get; set; }
     }
 }

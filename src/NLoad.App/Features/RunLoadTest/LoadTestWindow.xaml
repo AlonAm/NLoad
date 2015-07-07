@@ -58,6 +58,11 @@
                 <Label Content="{Binding TotalErrors}" HorizontalAlignment="Center" FontSize="34"/>
             </StackPanel>
 
+            <StackPanel Height="100" Width="200">
+                <Label Content="Threads" HorizontalAlignment="Center"/>
+                <Label Content="{Binding ThreadCount}" HorizontalAlignment="Center" FontSize="34"/>
+            </StackPanel>
+            
         </WrapPanel>
         
         <oxy:PlotView Grid.Row="1" Model="{Binding ChartModel}" Background="Transparent" />
