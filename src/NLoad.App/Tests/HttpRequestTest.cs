@@ -1,6 +1,6 @@
 ﻿using System.Net;
 
-namespace NLoad.App.Features.RunLoadTest
+namespace NLoad.App.Tests
 {
     class HttpRequestTest:ITest
     {

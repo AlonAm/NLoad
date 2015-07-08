@@ -6,6 +6,8 @@ using System.Linq;
 using System.Threading;
 using NLoad.LoadTest;
 
+// ui -> worker -> load test -> runners -> workers
+
 namespace NLoad
 {
     public sealed class LoadTest<T> : ILoadTest where T : ITest, new()
@@ -20,7 +22,6 @@ namespace NLoad
 
         private CancellationToken _cancellationToken;
         private readonly ManualResetEvent _quitEvent = new ManualResetEvent(false);
-        private int _threadCount1;
 
         public event EventHandler<Heartbeat> Heartbeat;
 
@@ -43,7 +44,10 @@ namespace NLoad
 
         public LoadTestConfiguration Configuration
         {
-            get { return _configuration; }
+            get
+            {
+                return _configuration;
+            }
         }
 
         public long TotalIterations
@@ -88,9 +92,7 @@ namespace NLoad
 
                 _monitor.Heartbeat -= Heartbeat;
 
-                Shutdown();
-
-                WaitForTestRunners();
+                ShutdownTestRunners();
 
                 stopWatch.Stop();
 
@@ -159,15 +161,11 @@ namespace NLoad
             }
         }
 
-        private void Shutdown()
+        private void ShutdownTestRunners()
         {
             _quitEvent.Set();
-        }
 
-        private void WaitForTestRunners()
-        {
-            //todo: replace with Task.WaitAll?
-
+            //todo: replace with Task.WaitAll
             while (_testRunners.Any(w => w.IsBusy))
             {
                 Thread.Sleep(1); //todo: ???
@@ -196,4 +194,3 @@ namespace NLoad
     }
 }
 
-// ui -> worker -> load test -> runners -> workers
