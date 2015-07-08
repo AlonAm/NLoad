@@ -4,7 +4,7 @@
         xmlns:app="clr-namespace:NLoad.App"
         xmlns:runLoadTest="clr-namespace:NLoad.App.Features.RunLoadTest"
         xmlns:oxy="http://oxyplot.org/wpf"
-        Title="NLoad" Height="380" Width="816" MinHeight="200" MinWidth="210">
+        Title="NLoad" Height="644" Width="816" MinHeight="200" MinWidth="210">
     <Window.DataContext>
         <runLoadTest:LoadTestViewModel/>
     </Window.DataContext>

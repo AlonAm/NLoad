@@ -40,13 +40,12 @@ namespace NLoad.LoadTest
                 var heartbeat = new Heartbeat
                 {
                     Timestamp = now,
-                    Throughput = throughput,
                     Elapsed = elapsed,
+                    Throughput = throughput,
+                    TotalIterations = iterations,
                     TotalErrors = _loadTest.TotalErrors,
                     ThreadCount = _loadTest.ThreadCount
                 };
-                    
-                  //  (now, throughput, elapsed, iterations, _loadTest.TotalErrors);
 
                 heartbeats.Add(heartbeat);
 
