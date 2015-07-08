@@ -18,7 +18,7 @@ namespace NLoad.App.Tests
         }
     }
 
-    [AttributeUsage(AttributeTargets.All, Inherited = false, AllowMultiple = true)]
+    [AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
     internal sealed class LoadTestAttribute : Attribute
     {
         public LoadTestAttribute()

@@ -4,6 +4,7 @@ namespace NLoad
     {
         LoadTestResult Run();
 
+
         void IncrementIterationsCounter();
 
         void IncrementErrorsCounter();

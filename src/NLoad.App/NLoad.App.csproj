@@ -72,7 +72,7 @@
   <ItemGroup>
     <Compile Include="Features\RunLoadTest\Commands\RunLoadTestCommandAsync.cs" />
     <Compile Include="Features\RunLoadTest\Commands\StopLoadTestCommand.cs" />
-    <Compile Include="Features\RunLoadTest\TimeSpanExtensions.cs" />
+    <Compile Include="Infrastructure\TimeSpanExtensions.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>

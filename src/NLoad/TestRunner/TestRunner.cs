@@ -9,11 +9,14 @@ namespace NLoad
     {
         private readonly ILoadTest _loadTest;
         private BackgroundWorker _backgroundWorker;
+        private readonly ManualResetEvent _startEvent;
         private readonly ManualResetEvent _quitEvent;
 
-        public TestRunner(ILoadTest loadTest, ManualResetEvent quitEvent)
+
+        public TestRunner(ILoadTest loadTest, ManualResetEvent startEvent, ManualResetEvent quitEvent)
         {
             _loadTest = loadTest;
+            _startEvent = startEvent;
             _quitEvent = quitEvent;
         }
 
@@ -44,6 +47,7 @@ namespace NLoad
         {
             var context = new TestRunContext
             {
+                StartEvent = _startEvent,
                 QuitEvent = _quitEvent
             };
 
@@ -52,9 +56,6 @@ namespace NLoad
 
         private void RunOnBackgroundWorker(object sender, DoWorkEventArgs e)
         {
-            _loadTest.IncrementThreadCount();//todo: move to debug mode?
-
-            long iterations = 0; //todo: remove if unused
             var worker = (BackgroundWorker)sender;
             var context = (TestRunContext)e.Argument;
             var result = new TestRunnerResult(starTime: DateTime.UtcNow);
@@ -63,6 +64,10 @@ namespace NLoad
             var test = new T();
 
             test.Initialize();
+
+            _loadTest.IncrementThreadCount();
+
+            context.StartEvent.WaitOne();
 
             while (!context.QuitEvent.WaitOne(0))
             {
@@ -85,28 +90,26 @@ namespace NLoad
                 }
                 catch
                 {
-                    testRunResult.TestResult = TestResult.Failed;
+                    testRunResult.TestResult = TestResult.Failure;
                 }
                 finally
                 {
                     testRunResult.EndTime = DateTime.UtcNow;
                 }
 
-                if (!testRunResult.TestResult.Passed) //todo: refactor?
+                if (testRunResult.TestResult.Failed) //todo: refactor?
                 {
                     _loadTest.IncrementErrorsCounter();
                 }
 
                 _loadTest.IncrementIterationsCounter();
 
-                iterations++;
-
                 testRunResults.Add(testRunResult);
             }
 
             result.TestRuns = testRunResults;
+
             result.EndTime = DateTime.UtcNow;
-            result.Iterations = iterations;
 
             e.Result = result;
         }

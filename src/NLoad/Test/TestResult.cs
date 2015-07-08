@@ -3,7 +3,7 @@
     public class TestResult
     {
         public static readonly TestResult Success = new TestResult();
-        public static readonly TestResult Failed = new TestResult(false);
+        public static readonly TestResult Failure = new TestResult(false);
 
         public TestResult(bool passed = true, string errorMessage = "")
         {
@@ -12,6 +12,8 @@
         }
 
         public bool Passed { get; private set; }
+        
+        public bool Failed { get { return !Passed; } }
 
         public string ErrorMessage { get; private set; }
     }
