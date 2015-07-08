@@ -17,20 +17,20 @@ namespace NLoad.App.Features.RunLoadTest
         private double _maxThroughput;
         private double _averageThroughput;
         private double _throughput;
-        private int _threadCount;
+        private long _threadCount;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
         public LoadTestViewModel()
         {
             Configuration = new LoadTestConfiguration();
-            
+
             RunLoadTestCommand = new RunLoadTestCommandAsync(this);
 
             StopLoadTestCommand = new StopLoadTestCommand(this);
 
             Heartbeats = new List<Heartbeat>();
-            
+
             ChartModel = new LoadTestChart(Heartbeats);
 
             Defaults();
@@ -50,7 +50,7 @@ namespace NLoad.App.Features.RunLoadTest
 
         // Display todo: replace with Load Test Result / Heartbeat
 
-        public int ThreadCount
+        public long ThreadCount
         {
             get { return _threadCount; }
             set
@@ -181,11 +181,11 @@ namespace NLoad.App.Features.RunLoadTest
                 Heartbeats.Clear();
             }
 
+            //todo: move these to first heartbeat
             Elapsed = "00:00:00";
-
             TotalIterations = 0;
             TotalErrors = 0;
-
+            ThreadCount = 0;
             MinThroughput = 0;
             MaxThroughput = 0;
             AverageThroughput = 0;

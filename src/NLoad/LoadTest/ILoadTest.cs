@@ -10,10 +10,13 @@ namespace NLoad
         
         void IncrementThreadCount();
 
+
+        LoadTestConfiguration Configuration { get; }
+
         long TotalIterations { get; }
 
         long TotalErrors { get; }
 
-        LoadTestConfiguration Configuration { get; }
+        long ThreadCount { get; }
     }
 }

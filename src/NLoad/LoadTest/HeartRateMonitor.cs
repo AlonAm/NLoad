@@ -37,7 +37,16 @@ namespace NLoad.LoadTest
 
                 if (double.IsNaN(throughput) || double.IsInfinity(throughput)) continue; //todo: verify
 
-                var heartbeat = new Heartbeat(now, throughput, elapsed, iterations, _loadTest.TotalErrors);
+                var heartbeat = new Heartbeat
+                {
+                    Timestamp = now,
+                    Throughput = throughput,
+                    Elapsed = elapsed,
+                    TotalErrors = _loadTest.TotalErrors,
+                    ThreadCount = _loadTest.ThreadCount
+                };
+                    
+                  //  (now, throughput, elapsed, iterations, _loadTest.TotalErrors);
 
                 heartbeats.Add(heartbeat);
 

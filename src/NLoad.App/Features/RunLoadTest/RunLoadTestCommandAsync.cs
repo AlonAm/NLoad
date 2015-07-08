@@ -33,26 +33,27 @@ namespace NLoad.App.Features.RunLoadTest
 
             _viewModel.Reset();
 
-            var progress = new Progress<Heartbeat>(_viewModel.HandleHeartbeat);
-
             var cancellationTokenSource = new CancellationTokenSource();
 
             _viewModel.CancellationTokenSource = cancellationTokenSource;
 
+            var progress = new Progress<Heartbeat>(_viewModel.HandleHeartbeat);
+
             var result = await RunLoadTestAsync(_viewModel.Configuration, cancellationTokenSource.Token, progress);
 
-            _viewModel.HandleLoadTestResult(result);
+            _viewModel.HandleLoadTestResult(result);//todo: convert to viewModel.LoadTestResult
 
             SetCanExecute(true);
         }
 
         #region Helpers
 
-        private static Task<LoadTestResult> RunLoadTestAsync(
+        private  Task<LoadTestResult> RunLoadTestAsync(
             LoadTestConfiguration configuration,
             CancellationToken cancellationToken,
             IProgress<Heartbeat> progress)
         {
+
             return Task.Run(() =>
             {
                 var loadTest = NLoad.Test<InMemoryTest>()

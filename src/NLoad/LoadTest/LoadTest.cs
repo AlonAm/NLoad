@@ -20,24 +20,23 @@ namespace NLoad
 
         private CancellationToken _cancellationToken;
         private readonly ManualResetEvent _quitEvent = new ManualResetEvent(false);
+        private int _threadCount1;
 
         public event EventHandler<Heartbeat> Heartbeat;
 
         [ExcludeFromCodeCoverage]
         public LoadTest(LoadTestConfiguration configuration, CancellationToken cancellationToken)
         {
-            if (configuration == null) 
+            if (configuration == null)
                 throw new ArgumentNullException("configuration");
 
-            if (cancellationToken == null) 
+            if (cancellationToken == null)
                 throw new ArgumentNullException("cancellationToken");
 
             _configuration = configuration;
             _cancellationToken = cancellationToken;
 
             _monitor = new HeartRateMonitor(this, _cancellationToken);
-
-            _monitor.Heartbeat += Heartbeat;
         }
 
         #region Properties
@@ -49,12 +48,26 @@ namespace NLoad
 
         public long TotalIterations
         {
-            get { return Interlocked.Read(ref _totalIterations); }
+            get
+            {
+                return Interlocked.Read(ref _totalIterations);
+            }
         }
 
         public long TotalErrors
         {
-            get { return Interlocked.Read(ref _totalErrors); }
+            get
+            {
+                return Interlocked.Read(ref _totalErrors);
+            }
+        }
+
+        public long ThreadCount
+        {
+            get
+            {
+                return Interlocked.Read(ref _threadCount);
+            }
         }
 
         #endregion
@@ -65,11 +78,15 @@ namespace NLoad
             {
                 var stopWatch = Stopwatch.StartNew();
 
-                CreateAndInitializeTestRunners();
+                CreateTestRunners(_configuration.NumberOfThreads);
 
                 StartTestRunners();
 
+                _monitor.Heartbeat += Heartbeat;
+
                 var heartbeats = _monitor.Start();
+
+                _monitor.Heartbeat -= Heartbeat;
 
                 Shutdown();
 
@@ -122,14 +139,12 @@ namespace NLoad
 
         private void StartTestRunners()
         {
-            _testRunners.ForEach(k => k.Run());
-        }
+            _testRunners.ForEach(testRunner =>
+            {
+                testRunner.Initialize();
 
-        private void CreateAndInitializeTestRunners()
-        {
-            CreateTestRunners(_configuration.NumberOfThreads);
-
-            _testRunners.ForEach(k => k.Initialize());
+                testRunner.Run();
+            });
         }
 
         private void CreateTestRunners(int count)
