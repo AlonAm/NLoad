@@ -107,11 +107,6 @@ namespace NLoad
             }
         }
 
-        private void StartLoadTest()
-        {
-            _startEvent.Set();
-        }
-
 
         public void IncrementIterationsCounter()
         {
@@ -128,6 +123,11 @@ namespace NLoad
             Interlocked.Increment(ref _threadCount);
         }
 
+
+        private void StartLoadTest()
+        {
+            _startEvent.Set();
+        }
 
         private List<Heartbeat> MonitorHeartRate()
         {
