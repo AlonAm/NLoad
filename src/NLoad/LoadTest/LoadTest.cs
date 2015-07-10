@@ -192,12 +192,7 @@ namespace NLoad
 
         private void StartTestRunners()
         {
-            _testRunners.ForEach(testRunner =>
-            {
-                testRunner.Initialize();
-
-                testRunner.Run();
-            });
+            _testRunners.ForEach(testRunner => testRunner.Run());
         }
 
         private void CreateTestRunners(int count)

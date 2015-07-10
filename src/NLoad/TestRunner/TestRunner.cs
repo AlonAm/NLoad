@@ -1,20 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace NLoad
 {
     public class TestRunner<T> where T : ITest, new()
     {
         private readonly ILoadTest _loadTest;
-        private BackgroundWorker _backgroundWorker;
         private readonly ManualResetEvent _startEvent;
         private readonly ManualResetEvent _quitEvent;
 
-
         public TestRunner(ILoadTest loadTest, ManualResetEvent startEvent, ManualResetEvent quitEvent)
         {
+            IsBusy = false;
             _loadTest = loadTest;
             _startEvent = startEvent;
             _quitEvent = quitEvent;
@@ -22,43 +21,27 @@ namespace NLoad
 
         public TestRunnerResult Result { get; private set; }
 
-        public bool IsBusy
+        public bool IsBusy { get; private set; }
+
+        public async void Run()
         {
-            get
-            {
-                return _backgroundWorker.IsBusy;
-            }
-        }
+            IsBusy = true;
 
-        public void Initialize()
-        {
-            var backgroundWorker = new BackgroundWorker
-            {
-                WorkerSupportsCancellation = true
-            };
-
-            backgroundWorker.DoWork += RunOnBackgroundWorker;
-            backgroundWorker.RunWorkerCompleted += BindResponseFromWorkerThread;
-
-            _backgroundWorker = backgroundWorker;
-        }
-
-        public void Run()
-        {
             var context = new TestRunContext
             {
                 StartEvent = _startEvent,
                 QuitEvent = _quitEvent
             };
 
-            _backgroundWorker.RunWorkerAsync(context);
+            Result = await Task.Run(() => RunTests(context));
+
+            IsBusy = false;
         }
 
-        private void RunOnBackgroundWorker(object sender, DoWorkEventArgs e)
+        private TestRunnerResult RunTests(TestRunContext context)
         {
-            var worker = (BackgroundWorker)sender;
-            var context = (TestRunContext)e.Argument;
             var result = new TestRunnerResult(starTime: DateTime.UtcNow);
+
             var testRunResults = new List<TestRunResult>();
 
             var test = new T();
@@ -71,14 +54,6 @@ namespace NLoad
 
             while (!context.QuitEvent.WaitOne(0))
             {
-                if (worker.CancellationPending)
-                {
-                    e.Cancel = true;
-                    result.EndTime = DateTime.UtcNow;
-                    e.Result = result;
-                    return;
-                }
-
                 var testRunResult = new TestRunResult
                 {
                     StartTime = DateTime.UtcNow
@@ -111,19 +86,7 @@ namespace NLoad
 
             result.EndTime = DateTime.UtcNow;
 
-            e.Result = result;
-        }
-
-        private void BindResponseFromWorkerThread(object sender, RunWorkerCompletedEventArgs e)
-        {
-            if (e.Cancelled) return;
-
-            var result = e.Result as TestRunnerResult;
-
-            if (result != null)
-            {
-                Result = result;
-            }
+            return result;
         }
     }
 }
