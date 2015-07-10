@@ -23,60 +23,63 @@ namespace NLoad
         {
             IsBusy = true;
 
-            Result = await Task.Run(() => RunTests(_context));
+            Result = await RunTests(_context).ConfigureAwait(false);
 
             IsBusy = false;
         }
 
-        private TestRunnerResult RunTests(TestRunContext context)
+        private Task<TestRunnerResult> RunTests(TestRunContext context)
         {
-            var result = new TestRunnerResult(starTime: DateTime.UtcNow);
-
-            var testRunResults = new List<TestRunResult>();
-
-            var test = new T();
-
-            test.Initialize();
-
-            _loadTest.IncrementThreadCount();
-
-            context.StartEvent.WaitOne();
-
-            while (!context.QuitEvent.WaitOne(0))
+            return Task.Run(() =>
             {
-                var testRunResult = new TestRunResult
-                {
-                    StartTime = DateTime.UtcNow
-                };
+                var result = new TestRunnerResult(starTime: DateTime.UtcNow);
 
-                try
+                var testRunResults = new List<TestRunResult>();
+
+                var test = new T();
+
+                test.Initialize();
+
+                _loadTest.IncrementThreadCount();
+
+                context.StartEvent.WaitOne();
+
+                while (!context.QuitEvent.WaitOne(0))
                 {
-                    testRunResult.TestResult = test.Execute();
+                    var testRunResult = new TestRunResult
+                    {
+                        StartTime = DateTime.UtcNow
+                    };
+
+                    try
+                    {
+                        testRunResult.TestResult = test.Execute();
+                    }
+                    catch
+                    {
+                        testRunResult.TestResult = TestResult.Failure;
+                    }
+                    finally
+                    {
+                        testRunResult.EndTime = DateTime.UtcNow;
+                    }
+
+                    if (testRunResult.TestResult.Failed) //todo: refactor?
+                    {
+                        _loadTest.IncrementErrorsCounter();
+                    }
+
+                    _loadTest.IncrementIterationsCounter();
+
+                    testRunResults.Add(testRunResult);
                 }
-                catch
-                {
-                    testRunResult.TestResult = TestResult.Failure;
-                }
-                finally
-                {
-                    testRunResult.EndTime = DateTime.UtcNow;
-                }
 
-                if (testRunResult.TestResult.Failed) //todo: refactor?
-                {
-                    _loadTest.IncrementErrorsCounter();
-                }
+                result.TestRuns = testRunResults;
 
-                _loadTest.IncrementIterationsCounter();
+                result.EndTime = DateTime.UtcNow;
 
-                testRunResults.Add(testRunResult);
-            }
-
-            result.TestRuns = testRunResults;
-
-            result.EndTime = DateTime.UtcNow;
-
-            return result;
+                return result;
+            });
         }
     }
 }
