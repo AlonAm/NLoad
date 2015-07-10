@@ -1,17 +1,16 @@
 ﻿using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using NLoad.LoadTest;
 using System;
 using System.Threading;
 
 namespace NLoad.Tests
 {
     [TestClass]
-    public class HeartRateMonitorTests
+    public class LoadTestMonitorTests
     {
         [TestMethod]
-        public void TestMethod1()
+        public void MonitorHeartRate()
         {
             var loadTest = new Mock<ILoadTest>();
 
@@ -27,9 +26,9 @@ namespace NLoad.Tests
 
             var cancellationToken = new CancellationTokenSource();
 
-            var heartRateMonitor = new HeartRateMonitor(loadTest.Object, cancellationToken.Token);
+            var heartRateMonitor = new LoadTestMonitor(loadTest.Object, cancellationToken.Token);
 
-            var heartbeats = heartRateMonitor.Start();
+            var heartbeats = heartRateMonitor.Start(TimeSpan.FromSeconds(2));
 
             Assert.IsNotNull(heartbeats);
             Assert.IsTrue(heartbeats.Any());

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -34,17 +35,24 @@ namespace NLoad.App.Features.RunLoadTest
 
             _viewModel.Reset();
 
-            var cancellationTokenSource = new CancellationTokenSource();
-
-            _viewModel.CancellationTokenSource = cancellationTokenSource;
+            _viewModel.CancellationTokenSource = new CancellationTokenSource();;
 
             var progress = new Progress<Heartbeat>(_viewModel.HandleHeartbeat);
 
-            var result = await RunLoadTestAsync(_viewModel.Configuration, cancellationTokenSource.Token, progress);
+            try
+            {
+                var result = await RunLoadTestAsync(_viewModel.Configuration, _viewModel.CancellationTokenSource.Token, progress);
 
-            _viewModel.HandleLoadTestResult(result); //todo: convert to viewModel.LoadTestResult
-
-            SetCanExecute(true);
+                _viewModel.HandleLoadTestResult(result); //todo: convert to viewModel.LoadTestResult
+            }
+            catch (OperationCanceledException e)
+            {
+                Debug.WriteLine("Cancelled");
+            }
+            finally
+            {
+                SetCanExecute(true);
+            }
         }
 
         #region Helpers

@@ -1,8 +1,6 @@
-﻿using NLoad.LoadTest;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
 
@@ -14,7 +12,7 @@ namespace NLoad
         private long _totalErrors;
         private long _totalIterations;
         List<TestRunner<T>> _testRunners;
-        private readonly HeartRateMonitor _monitor;
+        private readonly LoadTestMonitor _monitor;
         private readonly ManualResetEvent _quitEvent;
         private readonly ManualResetEvent _startEvent;
         public event EventHandler<Heartbeat> Heartbeat;
@@ -35,7 +33,7 @@ namespace NLoad
             _startEvent = new ManualResetEvent(false);
             _quitEvent = new ManualResetEvent(false);
 
-            _monitor = new HeartRateMonitor(this, cancellationToken);
+            _monitor = new LoadTestMonitor(this, cancellationToken);
         }
 
         #region Properties
@@ -78,19 +76,19 @@ namespace NLoad
         {
             try
             {
-                CreateTestRunners(_configuration.NumberOfThreads);
+                Initialize();
 
                 StartTestRunners();
 
                 Warmup();
-                
+
                 var stopWatch = Stopwatch.StartNew();
 
                 StartLoadTest();
 
-                var heartbeats = MonitorHeartRate();
+                var heartbeats = MonitorLoadTest();
 
-                ShutdownTestRunners();
+                Shutdown();
 
                 stopWatch.Stop();
 
@@ -98,6 +96,8 @@ namespace NLoad
             }
             catch (Exception e)
             {
+                if (e is OperationCanceledException) throw;
+                
                 throw new NLoadException("An error occurred while running load test. See inner exception for details.", e);
             }
         }
@@ -124,11 +124,11 @@ namespace NLoad
             _startEvent.Set();
         }
 
-        private List<Heartbeat> MonitorHeartRate()
+        private List<Heartbeat> MonitorLoadTest()
         {
             _monitor.Heartbeat += Heartbeat;
 
-            var heartbeats = _monitor.Start();
+            var heartbeats = _monitor.Start(_configuration.Duration);
 
             _monitor.Heartbeat -= Heartbeat;
 
@@ -187,28 +187,28 @@ namespace NLoad
 
         private void StartTestRunners()
         {
-            _testRunners.ForEach(testRunner => testRunner.Run());
+            _testRunners.ForEach(testRunner => testRunner.Start());
         }
 
-        private void CreateTestRunners(int count)
+        private void Initialize()
         {
-            var context = new TestRunContext()
+            var context = new TestRunContext
             {
                 StartEvent = _startEvent,
                 QuitEvent = _quitEvent
             };
 
-            _testRunners = new List<TestRunner<T>>(count);
+            _testRunners = new List<TestRunner<T>>(_configuration.NumberOfThreads);
 
-            for (var i = 0; i < count; i++)
+            for (var i = 0; i < _configuration.NumberOfThreads; i++)
             {
-                var testRunner = new TestRunner<T>(this, context);
+                var testRunner = new TestRunner<T>(this, context, _cancellationToken);
 
                 _testRunners.Add(testRunner);
             }
         }
 
-        private void ShutdownTestRunners()
+        private void Shutdown()
         {
             _quitEvent.Set();
 

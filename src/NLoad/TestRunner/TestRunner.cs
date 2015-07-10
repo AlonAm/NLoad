@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace NLoad
@@ -8,27 +9,29 @@ namespace NLoad
     {
         private readonly ILoadTest _loadTest;
         private readonly TestRunContext _context;
+        private readonly CancellationToken _cancellationToken;
 
-        public TestRunner(ILoadTest loadTest, TestRunContext context)
+        public TestRunner(ILoadTest loadTest, TestRunContext context, CancellationToken cancellationToken)
         {
             _loadTest = loadTest;
             _context = context;
+            _cancellationToken = cancellationToken;
         }
 
         public TestRunnerResult Result { get; private set; }
 
         public bool IsBusy { get; private set; }
 
-        public async void Run()
+        public async void Start()
         {
             IsBusy = true;
 
-            Result = await RunTests(_context).ConfigureAwait(false);
+            Result = await RunTestsAsync(_context).ConfigureAwait(false);
 
             IsBusy = false;
         }
 
-        private Task<TestRunnerResult> RunTests(TestRunContext context)
+        private Task<TestRunnerResult> RunTestsAsync(TestRunContext context)
         {
             return Task.Run(() =>
             {
@@ -44,7 +47,7 @@ namespace NLoad
 
                 context.StartEvent.WaitOne();
 
-                while (!context.QuitEvent.WaitOne(0))
+                while (!context.QuitEvent.WaitOne(0) && !_cancellationToken.IsCancellationRequested)
                 {
                     var testRunResult = new TestRunResult
                     {
@@ -79,6 +82,7 @@ namespace NLoad
                 result.EndTime = DateTime.UtcNow;
 
                 return result;
+
             });
         }
     }

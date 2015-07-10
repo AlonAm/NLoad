@@ -2,22 +2,22 @@
 using System.Collections.Generic;
 using System.Threading;
 
-namespace NLoad.LoadTest
+namespace NLoad
 {
-    public class HeartRateMonitor
+    public class LoadTestMonitor
     {
         private readonly ILoadTest _loadTest;
         private readonly CancellationToken _cancellationToken;
 
         public event EventHandler<Heartbeat> Heartbeat;
 
-        public HeartRateMonitor(ILoadTest loadTest, CancellationToken cancellationToken)
+        public LoadTestMonitor(ILoadTest loadTest, CancellationToken cancellationToken)
         {
             _loadTest = loadTest;
             _cancellationToken = cancellationToken;
         }
 
-        public List<Heartbeat> Start()
+        public List<Heartbeat> Start(TimeSpan duration)
         {
             var running = true;
 
@@ -35,7 +35,7 @@ namespace NLoad.LoadTest
 
                 var throughput = iterations / elapsed.TotalSeconds;
 
-                if (double.IsNaN(throughput) || double.IsInfinity(throughput)) continue; //todo: verify
+                if (double.IsNaN(throughput) || double.IsInfinity(throughput)) continue;
 
                 var heartbeat = new Heartbeat
                 {
@@ -51,11 +51,11 @@ namespace NLoad.LoadTest
 
                 OnHeartbeat(heartbeat);
 
-                if (elapsed >= _loadTest.Configuration.Duration || _cancellationToken.IsCancellationRequested)
+                if (elapsed >= duration || _cancellationToken.IsCancellationRequested)
                 {
                     running = false;
                 }
-                else if (DateTime.UtcNow - start < _loadTest.Configuration.Duration)
+                else if (DateTime.UtcNow - start < duration)
                 {
                     Thread.Sleep(1000);
                 }
