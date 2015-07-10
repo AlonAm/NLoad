@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Windows.Input;
 
 namespace NLoad.App.Features.RunLoadTest
@@ -16,28 +17,30 @@ namespace NLoad.App.Features.RunLoadTest
         private double _maxThroughput;
         private double _averageThroughput;
         private double _throughput;
+        private long _threadCount;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
         public LoadTestViewModel()
         {
-            Heartbeats = new List<Heartbeat>();
-            ChartModel = new LoadTestChart(Heartbeats);
+            Configuration = new LoadTestConfiguration();
 
-            RunLoadTestCommand = new RunLoadTestCommand(this);
+            RunLoadTestCommand = new RunLoadTestCommandAsync(this);
+
             StopLoadTestCommand = new StopLoadTestCommand(this);
 
-            Elapsed = "00:00:00";
-            NumberOfThreads = 10;
-            Duration = TimeSpan.FromSeconds(30);
-            DeleyBetweenThreadStart = TimeSpan.Zero;
+            Heartbeats = new List<Heartbeat>();
+
+            ChartModel = new LoadTestChart(Heartbeats);
+
+            Defaults();
+
+            Reset();
         }
 
         #region Properties
 
         public List<Heartbeat> Heartbeats { get; set; }
-
-        public ILoadTest LoadTest { get; set; } //todo: replace with cancellationtoken
 
         // Commands
 
@@ -45,7 +48,17 @@ namespace NLoad.App.Features.RunLoadTest
 
         public ICommand StopLoadTestCommand { get; private set; }
 
-        // Display
+        // Display todo: replace with Load Test Result / Heartbeat
+
+        public long ThreadCount
+        {
+            get { return _threadCount; }
+            set
+            {
+                _threadCount = value;
+                OnPropertyChanged();
+            }
+        }
 
         public double Throughput
         {
@@ -119,24 +132,46 @@ namespace NLoad.App.Features.RunLoadTest
 
         // Toolbar
 
-        public int NumberOfThreads { get; set; }
-
-        public TimeSpan Duration { get; set; }
-
-        public TimeSpan DeleyBetweenThreadStart { get; set; }
+        public LoadTestConfiguration Configuration { get; set; }
 
         // Chart
 
         public PlotModel ChartModel { get; set; }
 
+        public CancellationTokenSource CancellationTokenSource { get; set; }
+
         #endregion
 
-        public void Cancel()
+        public void HandleHeartbeat(Heartbeat heartbeat)
         {
-            if (LoadTest != null)
-            {
-                LoadTest.Cancel();
-            }
+            Heartbeats.Add(heartbeat);
+
+            ThreadCount = heartbeat.ThreadCount;
+
+            Throughput = Math.Round(heartbeat.Throughput, 0, MidpointRounding.AwayFromZero);
+
+            Elapsed = heartbeat.Elapsed.ToTimeString();
+
+            TotalIterations = heartbeat.TotalIterations;
+
+            TotalErrors = heartbeat.TotalErrors;
+
+            ChartModel.InvalidatePlot(true);
+        }
+
+        public void HandleLoadTestResult(LoadTestResult result)
+        {
+            Elapsed = result.TotalRuntime.ToTimeString();
+
+            TotalIterations = result.TotalIterations;
+
+            MinThroughput = result.MinThroughput;
+
+            MaxThroughput = result.MaxThroughput;
+
+            AverageThroughput = result.AverageThroughput;
+
+            TotalErrors = result.TotalErrors;
         }
 
         public void Reset()
@@ -145,6 +180,15 @@ namespace NLoad.App.Features.RunLoadTest
             {
                 Heartbeats.Clear();
             }
+
+            //todo: move these to first heartbeat
+            Elapsed = "00:00:00";
+            TotalIterations = 0;
+            TotalErrors = 0;
+            ThreadCount = 0;
+            MinThroughput = 0;
+            MaxThroughput = 0;
+            AverageThroughput = 0;
         }
 
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
@@ -155,6 +199,15 @@ namespace NLoad.App.Features.RunLoadTest
             {
                 handler(this, new PropertyChangedEventArgs(propertyName));
             }
+        }
+
+        private void Defaults()
+        {
+            Configuration.NumberOfThreads = 10;
+
+            Configuration.Duration = TimeSpan.FromSeconds(30);
+
+            Configuration.DelayBetweenThreadStart = TimeSpan.Zero;
         }
     }
 }

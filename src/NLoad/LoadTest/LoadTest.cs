@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
 
@@ -9,194 +8,100 @@ namespace NLoad
 {
     public sealed class LoadTest<T> : ILoadTest where T : ITest, new()
     {
-        private long _totalIterations;
+        private long _threadCount;
         private long _totalErrors;
-        private bool _cancelled;
+        private long _totalIterations;
         List<TestRunner<T>> _testRunners;
-        private readonly LoadTestConfiguration _configuration;
-        private readonly List<Heartbeat> _heartbeat = new List<Heartbeat>();
-        private readonly ManualResetEvent _quitEvent = new ManualResetEvent(false);
-
+        private readonly LoadTestMonitor _monitor;
+        private readonly ManualResetEvent _quitEvent;
+        private readonly ManualResetEvent _startEvent;
         public event EventHandler<Heartbeat> Heartbeat;
+        private readonly LoadTestConfiguration _configuration;
+        private readonly CancellationToken _cancellationToken;
 
-        [ExcludeFromCodeCoverage]
-        public LoadTest(LoadTestConfiguration configuration)
+        public LoadTest(LoadTestConfiguration configuration, CancellationToken cancellationToken)
         {
             if (configuration == null)
-            {
                 throw new ArgumentNullException("configuration");
-            }
+
+            if (cancellationToken == null)
+                throw new ArgumentNullException("cancellationToken");
 
             _configuration = configuration;
+            _cancellationToken = cancellationToken;
+
+            _startEvent = new ManualResetEvent(false);
+            _quitEvent = new ManualResetEvent(false);
+
+            _monitor = new LoadTestMonitor(this, cancellationToken);
         }
+
+        #region Properties
 
         public LoadTestConfiguration Configuration
         {
-            get { return _configuration; }
+            get
+            {
+                return _configuration;
+            }
         }
+
+        public long TotalIterations
+        {
+            get
+            {
+                return Interlocked.Read(ref _totalIterations);
+            }
+        }
+
+        public long TotalErrors
+        {
+            get
+            {
+                return Interlocked.Read(ref _totalErrors);
+            }
+        }
+
+        public long ThreadCount
+        {
+            get
+            {
+                return Interlocked.Read(ref _threadCount);
+            }
+        }
+
+        #endregion
 
         public LoadTestResult Run()
         {
             try
             {
-                var stopWatch = Stopwatch.StartNew();
-
                 Initialize();
 
                 StartTestRunners();
 
-                MonitorHeartRate();
+                Warmup();
+
+                var stopWatch = Stopwatch.StartNew();
+
+                StartLoadTest();
+
+                var heartbeats = MonitorLoadTest();
 
                 Shutdown();
 
-                WaitForTestRunners();
-
                 stopWatch.Stop();
 
-                #region Move to function
-
-                var testRuns = _testRunners.Where(k => k.Result != null && k.Result.TestRuns != null)
-                    .SelectMany(k => k.Result.TestRuns)
-                    .ToList();
-
-                var result = new LoadTestResult
-                {
-                    TestRunnersResults = _testRunners.Where(k => k.Result != null).Select(k => k.Result),
-                    TotalIterations = _totalIterations,
-                    TotalRuntime = stopWatch.Elapsed,
-                    TotalErrors = _totalErrors,
-                    Heartbeat = _heartbeat,
-                    TestRuns = testRuns
-                };
-
-                if (testRuns.Any())
-                {
-                    result.MaxResponseTime = testRuns.Max(k => k.ResponseTime);
-                    result.MinResponseTime = testRuns.Min(k => k.ResponseTime);
-                    result.AverageResponseTime =
-                        new TimeSpan(Convert.ToInt64((testRuns.Average(k => k.ResponseTime.Ticks))));
-                }
-
-                if (_heartbeat.Any())
-                {
-                    result.MaxThroughput = _heartbeat.Where(k => !double.IsNaN(k.Throughput)).Max(k => k.Throughput);
-                    result.MinThroughput = _heartbeat.Where(k => !double.IsNaN(k.Throughput)).Min(k => k.Throughput);
-                    result.AverageThroughput = _heartbeat.Where(k => !double.IsNaN(k.Throughput)).Average(k => k.Throughput);
-                }
-
-                #endregion
-
-                return result;
+                return LoadTestResult(stopWatch.Elapsed, heartbeats);
             }
             catch (Exception e)
             {
+                if (e is OperationCanceledException) throw;
+                
                 throw new NLoadException("An error occurred while running load test. See inner exception for details.", e);
             }
         }
 
-        public void Cancel()
-        {
-            if (_testRunners != null && _testRunners.Any())
-            {
-                foreach (var testRunner in _testRunners)
-                {
-                    testRunner.Cancel();
-                }
-            }
-
-            _cancelled = true;
-        }
-
-        private void Initialize()
-        {
-            CreateTestRunners(_configuration.NumberOfThreads);
-
-            _testRunners.ForEach(k => k.Initialize());
-        }
-
-        private void StartTestRunners()
-        {
-            //todo: add error handling
-
-            _testRunners.ForEach(k => k.Run());
-        }
-
-        private void CreateTestRunners(int count)
-        {
-            _testRunners = new List<TestRunner<T>>(count);
-
-            for (var i = 0; i < count; i++)
-            {
-                var testRunner = new TestRunner<T>(this, _quitEvent);
-
-                _testRunners.Add(testRunner);
-            }
-        }
-
-        private void MonitorHeartRate()
-        {
-            var running = true;
-
-            var start = DateTime.UtcNow;
-
-            while (running)
-            {
-                var elapsed = DateTime.UtcNow - start;
-
-                if (elapsed >= _configuration.Duration || _cancelled)
-                {
-                    running = false;
-                }
-                else
-                {
-                    var iterations = Interlocked.Read(ref _totalIterations);
-                    
-                    var errors = Interlocked.Read(ref _totalErrors);
-
-                    var throughput = iterations / elapsed.TotalSeconds;
-
-                    if (double.IsNaN(throughput) || double.IsInfinity(throughput)) continue;
-
-                    OnHeartbeat(throughput, elapsed, iterations, errors);
-
-                    if (DateTime.UtcNow - start < _configuration.Duration) Thread.Sleep(1000);
-                }
-            }
-        }
-
-        private void Shutdown()
-        {
-            _quitEvent.Set();
-        }
-
-        private void WaitForTestRunners()
-        {
-            while (true)
-            {
-                if (_testRunners.Any(w => w.IsBusy))
-                {
-                    Thread.Sleep(1); //todo: ???
-                }
-                else
-                {
-                    break;
-                }
-            }
-        }
-
-        private void OnHeartbeat(double throughput, TimeSpan delta, long totalIterations, long totalErrors)
-        {
-            var heartbeat = new Heartbeat(DateTime.UtcNow, throughput, delta, totalIterations, totalErrors);
-
-            _heartbeat.Add(heartbeat);
-
-            var handler = Heartbeat;
-
-            if (handler != null)
-            {
-                handler(this, heartbeat); //todo: add try catch?
-            }
-        }
 
         public void IncrementIterationsCounter()
         {
@@ -207,7 +112,111 @@ namespace NLoad
         {
             Interlocked.Increment(ref _totalErrors);
         }
+
+        public void IncrementThreadCount()
+        {
+            Interlocked.Increment(ref _threadCount);
+        }
+
+
+        private void StartLoadTest()
+        {
+            _startEvent.Set();
+        }
+
+        private List<Heartbeat> MonitorLoadTest()
+        {
+            _monitor.Heartbeat += Heartbeat;
+
+            var heartbeats = _monitor.Start(_configuration.Duration);
+
+            _monitor.Heartbeat -= Heartbeat;
+
+            return heartbeats;
+        }
+
+        private void Warmup()
+        {
+            while (ThreadCount < _configuration.NumberOfThreads && !_cancellationToken.IsCancellationRequested)
+            {
+                if (Heartbeat != null)
+                {
+                    Heartbeat(this, new Heartbeat
+                    {
+                        TotalIterations = _totalIterations,
+                        ThreadCount = ThreadCount
+                    });
+                }
+
+                Thread.Sleep(1000);
+            }
+        }
+
+        private LoadTestResult LoadTestResult(TimeSpan elapsed, List<Heartbeat> heartbeats)
+        {
+            var testRuns = _testRunners.Where(k => k.Result != null && k.Result.TestRuns != null)
+                                       .SelectMany(k => k.Result.TestRuns)
+                                       .ToList();
+
+            var result = new LoadTestResult
+            {
+                TestRunnersResults = _testRunners.Where(k => k.Result != null).Select(k => k.Result),
+                TotalIterations = _totalIterations,
+                TotalRuntime = elapsed,
+                TotalErrors = _totalErrors,
+                Heartbeat = heartbeats,
+                TestRuns = testRuns
+            };
+
+            if (testRuns.Any())
+            {
+                result.MaxResponseTime = testRuns.Max(k => k.ResponseTime);
+                result.MinResponseTime = testRuns.Min(k => k.ResponseTime);
+                result.AverageResponseTime = new TimeSpan(Convert.ToInt64((testRuns.Average(k => k.ResponseTime.Ticks))));
+            }
+
+            if (heartbeats.Any())
+            {
+                result.MaxThroughput = heartbeats.Where(k => !double.IsNaN(k.Throughput)).Max(k => k.Throughput);
+                result.MinThroughput = heartbeats.Where(k => !double.IsNaN(k.Throughput)).Min(k => k.Throughput);
+                result.AverageThroughput = heartbeats.Where(k => !double.IsNaN(k.Throughput)).Average(k => k.Throughput);
+            }
+
+            return result;
+        }
+
+        private void StartTestRunners()
+        {
+            _testRunners.ForEach(testRunner => testRunner.Start());
+        }
+
+        private void Initialize()
+        {
+            var context = new TestRunContext
+            {
+                StartEvent = _startEvent,
+                QuitEvent = _quitEvent
+            };
+
+            _testRunners = new List<TestRunner<T>>(_configuration.NumberOfThreads);
+
+            for (var i = 0; i < _configuration.NumberOfThreads; i++)
+            {
+                var testRunner = new TestRunner<T>(this, context, _cancellationToken);
+
+                _testRunners.Add(testRunner);
+            }
+        }
+
+        private void Shutdown()
+        {
+            _quitEvent.Set();
+
+            while (_testRunners.Any(w => w.IsBusy)) //todo: replace with Task.WaitAll
+            {
+                Thread.Sleep(1);
+            }
+        }
     }
 }
 
-// ui -> worker -> load test -> runners -> workers

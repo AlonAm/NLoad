@@ -4,6 +4,7 @@ namespace NLoad
 {
     public class LoadTestConfiguration
     {
+        //todo: is this needed?
         public LoadTestConfiguration()
         {
             NumberOfThreads = 1;

@@ -4,13 +4,13 @@
         xmlns:app="clr-namespace:NLoad.App"
         xmlns:runLoadTest="clr-namespace:NLoad.App.Features.RunLoadTest"
         xmlns:oxy="http://oxyplot.org/wpf"
-        Title="NLoad" Height="380" Width="816" MinHeight="200" MinWidth="210">
+        Title="NLoad" Height="644" Width="816" MinHeight="200" MinWidth="210">
     <Window.DataContext>
         <runLoadTest:LoadTestViewModel/>
     </Window.DataContext>
-    
+
     <Grid>
-        
+
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
@@ -21,13 +21,16 @@
                 <Label FontWeight="Bold" Content="Load Test"/>
                 <ComboBox>
                     <ComboBoxItem Content="In Memory" IsSelected="True"></ComboBoxItem>
+                    <ComboBoxItem Content="Http Request"></ComboBoxItem>
                 </ComboBox>
-                <Label FontWeight="Bold" Content="# Threads"/>
-                <TextBox Text="{Binding NumberOfThreads}" />
+                <Label FontWeight="Bold" Content="# Threads" />
+                <TextBox Text="{Binding Configuration.NumberOfThreads}" ToolTip="Number of threads" />
                 <Label FontWeight="Bold" Content="Duration" />
-                <TextBox Text="{Binding Duration}" />
-                <Button Content="Start" Command="{Binding RunLoadTestCommand}" Width="50"/>
-                <Button Content="Stop" Command="{Binding StopLoadTestCommand}" Width="50"/>
+                <TextBox Text="{Binding Configuration.Duration}" ToolTip="Load test run duration" />
+                <Label FontWeight="Bold" Content="Delay"  />
+                <TextBox Text="{Binding Configuration.DelayBetweenThreadStart}" ToolTip="Delay between thread start" />
+                <Button Content="Run" Command="{Binding RunLoadTestCommand}" Width="50" ToolTip="Start load test"/>
+                <Button Content="Cancel" Command="{Binding StopLoadTestCommand}" Width="50"  ToolTip="Stop load test"/>
             </ToolBar>
         </ToolBarTray>
 
@@ -53,9 +56,14 @@
                 <Label Content="{Binding TotalErrors}" HorizontalAlignment="Center" FontSize="34"/>
             </StackPanel>
 
+            <StackPanel Height="100" Width="200">
+                <Label Content="Threads" HorizontalAlignment="Center"/>
+                <Label Content="{Binding ThreadCount}" HorizontalAlignment="Center" FontSize="34"/>
+            </StackPanel>
+
         </WrapPanel>
-        
+
         <oxy:PlotView Grid.Row="1" Model="{Binding ChartModel}" Background="Transparent" />
-        
+
     </Grid>
 </Window>
