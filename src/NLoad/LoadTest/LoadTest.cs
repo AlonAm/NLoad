@@ -21,6 +21,7 @@ namespace NLoad
         private readonly ManualResetEvent _startEvent;
         public event EventHandler<Heartbeat> Heartbeat;
         private readonly LoadTestConfiguration _configuration;
+        private readonly CancellationToken _cancellationToken;
 
         [ExcludeFromCodeCoverage]
         public LoadTest(LoadTestConfiguration configuration, CancellationToken cancellationToken)
@@ -32,12 +33,14 @@ namespace NLoad
                 throw new ArgumentNullException("cancellationToken");
 
             _configuration = configuration;
+            _cancellationToken = cancellationToken;
 
             _startEvent = new ManualResetEvent(false);
             _quitEvent = new ManualResetEvent(false);
 
             _monitor = new HeartRateMonitor(this, cancellationToken);
         }
+
 
         #region Properties
 
@@ -88,7 +91,7 @@ namespace NLoad
                 
                 var stopWatch = Stopwatch.StartNew();
 
-                _startEvent.Set();
+                StartLoadTest();
 
                 var heartbeats = MonitorHeartRate();
 
@@ -102,6 +105,11 @@ namespace NLoad
             {
                 throw new NLoadException("An error occurred while running load test. See inner exception for details.", e);
             }
+        }
+
+        private void StartLoadTest()
+        {
+            _startEvent.Set();
         }
 
 
@@ -134,12 +142,13 @@ namespace NLoad
 
         private void Warmup()
         {
-            while (ThreadCount < _configuration.NumberOfThreads)
+            while (ThreadCount < _configuration.NumberOfThreads && !_cancellationToken.IsCancellationRequested)
             {
                 if (Heartbeat != null)
                 {
                     Heartbeat(this, new Heartbeat
                     {
+                        TotalIterations = _totalIterations,
                         ThreadCount = ThreadCount
                     });
                 }
