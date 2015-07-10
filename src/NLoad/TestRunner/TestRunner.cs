@@ -1,129 +1,89 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace NLoad
 {
     public class TestRunner<T> where T : ITest, new()
     {
         private readonly ILoadTest _loadTest;
-        private BackgroundWorker _backgroundWorker;
-        private readonly ManualResetEvent _quitEvent;
+        private readonly TestRunContext _context;
+        private readonly CancellationToken _cancellationToken;
 
-        public TestRunner(ILoadTest loadTest, ManualResetEvent quitEvent)
+        public TestRunner(ILoadTest loadTest, TestRunContext context, CancellationToken cancellationToken)
         {
             _loadTest = loadTest;
-            _quitEvent = quitEvent;
+            _context = context;
+            _cancellationToken = cancellationToken;
         }
 
         public TestRunnerResult Result { get; private set; }
 
-        public bool IsBusy
+        public bool IsBusy { get; private set; }
+
+        public async void Start()
         {
-            get
-            {
-                return _backgroundWorker.IsBusy;
-            }
+            IsBusy = true;
+
+            Result = await RunTestsAsync(_context).ConfigureAwait(false);
+
+            IsBusy = false;
         }
 
-        public void Initialize()
+        private Task<TestRunnerResult> RunTestsAsync(TestRunContext context)
         {
-            var backgroundWorker = new BackgroundWorker
+            return Task.Run(() =>
             {
-                WorkerSupportsCancellation = true
-            };
+                var result = new TestRunnerResult(starTime: DateTime.UtcNow);
 
-            backgroundWorker.DoWork += RunOnBackgroundWorker;
-            backgroundWorker.RunWorkerCompleted += BindResponseFromWorkerThread;
+                var testRunResults = new List<TestRunResult>();
 
-            _backgroundWorker = backgroundWorker;
-        }
+                var test = new T();
 
-        public void Run()
-        {
-            var context = new TestRunContext
-            {
-                QuitEvent = _quitEvent
-            };
+                test.Initialize();
 
-            _backgroundWorker.RunWorkerAsync(context);
-        }
+                _loadTest.IncrementThreadCount();
 
-        private void RunOnBackgroundWorker(object sender, DoWorkEventArgs e)
-        {
-            long iterations = 0; //todo: is this needed?
-            var worker = (BackgroundWorker)sender;
-            var context = (TestRunContext)e.Argument;
-            var result = new TestRunnerResult(starTime: DateTime.UtcNow);
-            var testRunResults = new List<TestRunResult>();
+                context.StartEvent.WaitOne();
 
-            var test = new T();
-
-            test.Initialize();
-
-            while (!context.QuitEvent.WaitOne(0))
-            {
-                if (worker.CancellationPending)
+                while (!context.QuitEvent.WaitOne(0) && !_cancellationToken.IsCancellationRequested)
                 {
-                    e.Cancel = true;
-                    result.EndTime = DateTime.UtcNow;
-                    e.Result = result;
-                    return;
+                    var testRunResult = new TestRunResult
+                    {
+                        StartTime = DateTime.UtcNow
+                    };
+
+                    try
+                    {
+                        testRunResult.TestResult = test.Execute();
+                    }
+                    catch
+                    {
+                        testRunResult.TestResult = TestResult.Failure;
+                    }
+                    finally
+                    {
+                        testRunResult.EndTime = DateTime.UtcNow;
+                    }
+
+                    if (testRunResult.TestResult.Failed) //todo: refactor?
+                    {
+                        _loadTest.IncrementErrorsCounter();
+                    }
+
+                    _loadTest.IncrementIterationsCounter();
+
+                    testRunResults.Add(testRunResult);
                 }
 
-                var testRunResult = new TestRunResult
-                {
-                    StartTime = DateTime.UtcNow
-                };
+                result.TestRuns = testRunResults;
 
-                try
-                {
-                    testRunResult.TestResult = test.Execute();
-                }
-                catch
-                {
-                    testRunResult.TestResult = TestResult.Failed;
-                }
-                finally
-                {
-                    testRunResult.EndTime = DateTime.UtcNow;
-                }
+                result.EndTime = DateTime.UtcNow;
 
-                if (!testRunResult.TestResult.Passed) //todo: refactor?
-                {
-                    _loadTest.IncrementErrorsCounter();
-                }
+                return result;
 
-                _loadTest.IncrementIterationsCounter();
-
-                iterations++;
-
-                testRunResults.Add(testRunResult);
-            }
-
-            result.TestRuns = testRunResults;
-            result.EndTime = DateTime.UtcNow;
-            result.Iterations = iterations;
-
-            e.Result = result;
-        }
-
-        private void BindResponseFromWorkerThread(object sender, RunWorkerCompletedEventArgs e)
-        {
-            if (e.Cancelled) return;
-
-            var result = e.Result as TestRunnerResult;
-
-            if (result != null)
-            {
-                Result = result;
-            }
-        }
-
-        public void Cancel()
-        {
-            _backgroundWorker.CancelAsync();
+            });
         }
     }
 }

@@ -1,8 +1,8 @@
 ﻿using System.Net;
 
-namespace NLoad.App.Features.RunLoadTest
+namespace NLoad.App.Tests
 {
-    class HttpRequestTest:ITest
+    class HttpRequestTest : ITest
     {
         readonly WebClient _webClient = new WebClient();
 
@@ -14,7 +14,7 @@ namespace NLoad.App.Features.RunLoadTest
         {
             var str = _webClient.DownloadString("http://localhost:49276/");
 
-            return str.Contains("Test") ? TestResult.Success : TestResult.Failed;
+            return str.Contains("Test") ? TestResult.Success : TestResult.Failure;
         }
     }
 }

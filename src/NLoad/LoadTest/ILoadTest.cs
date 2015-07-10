@@ -2,11 +2,22 @@ namespace NLoad
 {
     public interface ILoadTest
     {
-        void IncrementIterationsCounter();
-        void IncrementErrorsCounter();
-
         LoadTestResult Run();
 
-        void Cancel();
+
+        void IncrementIterationsCounter();
+
+        void IncrementErrorsCounter();
+        
+        void IncrementThreadCount();
+
+
+        LoadTestConfiguration Configuration { get; }
+
+        long TotalIterations { get; }
+
+        long TotalErrors { get; }
+
+        long ThreadCount { get; }
     }
 }
