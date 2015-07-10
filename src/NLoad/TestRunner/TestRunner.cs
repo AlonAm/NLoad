@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace NLoad
@@ -8,15 +7,12 @@ namespace NLoad
     public class TestRunner<T> where T : ITest, new()
     {
         private readonly ILoadTest _loadTest;
-        private readonly ManualResetEvent _startEvent;
-        private readonly ManualResetEvent _quitEvent;
+        private readonly TestRunContext _context;
 
-        public TestRunner(ILoadTest loadTest, ManualResetEvent startEvent, ManualResetEvent quitEvent)
+        public TestRunner(ILoadTest loadTest, TestRunContext context)
         {
-            IsBusy = false;
             _loadTest = loadTest;
-            _startEvent = startEvent;
-            _quitEvent = quitEvent;
+            _context = context;
         }
 
         public TestRunnerResult Result { get; private set; }
@@ -27,13 +23,7 @@ namespace NLoad
         {
             IsBusy = true;
 
-            var context = new TestRunContext
-            {
-                StartEvent = _startEvent,
-                QuitEvent = _quitEvent
-            };
-
-            Result = await Task.Run(() => RunTests(context));
+            Result = await Task.Run(() => RunTests(_context));
 
             IsBusy = false;
         }

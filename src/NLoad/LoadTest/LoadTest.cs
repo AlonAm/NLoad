@@ -1,12 +1,10 @@
-﻿using System;
+﻿using NLoad.LoadTest;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
-using NLoad.LoadTest;
-
-// ui -> worker -> load test -> runners -> workers
 
 namespace NLoad
 {
@@ -23,7 +21,6 @@ namespace NLoad
         private readonly LoadTestConfiguration _configuration;
         private readonly CancellationToken _cancellationToken;
 
-        [ExcludeFromCodeCoverage]
         public LoadTest(LoadTestConfiguration configuration, CancellationToken cancellationToken)
         {
             if (configuration == null)
@@ -40,7 +37,6 @@ namespace NLoad
 
             _monitor = new HeartRateMonitor(this, cancellationToken);
         }
-
 
         #region Properties
 
@@ -77,7 +73,6 @@ namespace NLoad
         }
 
         #endregion
-
 
         public LoadTestResult Run()
         {
@@ -197,11 +192,17 @@ namespace NLoad
 
         private void CreateTestRunners(int count)
         {
+            var context = new TestRunContext()
+            {
+                StartEvent = _startEvent,
+                QuitEvent = _quitEvent
+            };
+
             _testRunners = new List<TestRunner<T>>(count);
 
             for (var i = 0; i < count; i++)
             {
-                var testRunner = new TestRunner<T>(this, _startEvent, _quitEvent);
+                var testRunner = new TestRunner<T>(this, context);
 
                 _testRunners.Add(testRunner);
             }
@@ -211,10 +212,9 @@ namespace NLoad
         {
             _quitEvent.Set();
 
-            //todo: replace with Task.WaitAll
-            while (_testRunners.Any(w => w.IsBusy))
+            while (_testRunners.Any(w => w.IsBusy)) //todo: replace with Task.WaitAll
             {
-                Thread.Sleep(1); //todo: ???
+                Thread.Sleep(1);
             }
         }
     }
