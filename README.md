@@ -11,9 +11,9 @@ NLoad is used for load testing websites, WCF services, CPU intensive algorithms 
 Using NLoad is as simple as
 ```csharp
 var loadTest = NLoad.Test<MyTest>()
-                      .WithNumberOfThreads(500)
+                      .WithNumberOfThreads(100)
                       .WithDurationOf(TimeSpan.FromMinutes(5))
-                      .WithDeleyBetweenThreadStart(TimeSpan.FromMilliseconds(100))
+                      .WithDeleyBetweenThreadStart(TimeSpan.FromMilliseconds(50))
                       .OnHeartbeat((s, e) => Console.WriteLine(e.Throughput))
                     .Build();
 
