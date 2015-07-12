@@ -27,6 +27,8 @@ namespace NLoad
 
             while (running)
             {
+                _cancellationToken.ThrowIfCancellationRequested();
+
                 var now = DateTime.UtcNow;
 
                 var elapsed = now - start;
@@ -51,7 +53,7 @@ namespace NLoad
 
                 OnHeartbeat(heartbeat);
 
-                if (elapsed >= duration || _cancellationToken.IsCancellationRequested)
+                if (elapsed >= duration)
                 {
                     running = false;
                 }

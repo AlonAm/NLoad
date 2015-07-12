@@ -1,9 +1,9 @@
-﻿using System;
+﻿using NLoad.App.Tests;
+using System;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using NLoad.App.Tests;
 
 namespace NLoad.App.Features.RunLoadTest
 {
@@ -43,7 +43,7 @@ namespace NLoad.App.Features.RunLoadTest
             {
                 var result = await RunLoadTestAsync(_viewModel.Configuration, _viewModel.CancellationTokenSource.Token, progress);
 
-                _viewModel.HandleLoadTestResult(result); //todo: convert to viewModel.LoadTestResult
+                _viewModel.LoadTestResult = result;
             }
             catch (OperationCanceledException e)
             {
@@ -58,9 +58,9 @@ namespace NLoad.App.Features.RunLoadTest
         #region Helpers
 
         private  Task<LoadTestResult> RunLoadTestAsync(
-            LoadTestConfiguration configuration,
-            CancellationToken cancellationToken,
-            IProgress<Heartbeat> progress)
+                    LoadTestConfiguration configuration,
+                    CancellationToken cancellationToken,
+                    IProgress<Heartbeat> progress)
         {
             return Task.Run(() =>
             {

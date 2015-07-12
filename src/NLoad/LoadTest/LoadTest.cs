@@ -8,16 +8,20 @@ namespace NLoad
 {
     public sealed class LoadTest<T> : ILoadTest where T : ITest, new()
     {
+        #region Fields
+
         private long _threadCount;
         private long _totalErrors;
         private long _totalIterations;
-        List<TestRunner<T>> _testRunners;
+        private List<TestRunner<T>> _testRunners;
         private readonly LoadTestMonitor _monitor;
         private readonly ManualResetEvent _quitEvent;
         private readonly ManualResetEvent _startEvent;
         public event EventHandler<Heartbeat> Heartbeat;
         private readonly LoadTestConfiguration _configuration;
         private readonly CancellationToken _cancellationToken;
+
+        #endregion
 
         public LoadTest(LoadTestConfiguration configuration, CancellationToken cancellationToken)
         {
@@ -102,22 +106,22 @@ namespace NLoad
             }
         }
 
-
-        public void IncrementIterationsCounter()
+        public void IncrementTotalIterations()
         {
             Interlocked.Increment(ref _totalIterations);
         }
 
-        public void IncrementErrorsCounter()
+        public void IncrementTotalErrors()
         {
             Interlocked.Increment(ref _totalErrors);
         }
 
-        public void IncrementThreadCount()
+        public void IncrementTotalThreads()
         {
             Interlocked.Increment(ref _threadCount);
         }
 
+        // helpers
 
         private void StartLoadTest()
         {
@@ -187,7 +191,7 @@ namespace NLoad
 
         private void StartTestRunners()
         {
-            _testRunners.ForEach(testRunner => testRunner.Start());
+            _testRunners.ForEach(testRunner => testRunner.StartAsync());
         }
 
         private void Initialize()
