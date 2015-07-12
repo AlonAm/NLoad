@@ -1,6 +1,5 @@
 ﻿using NLoad.App.Tests;
 using System;
-using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -45,9 +44,8 @@ namespace NLoad.App.Features.RunLoadTest
 
                 _viewModel.LoadTestResult = result;
             }
-            catch (OperationCanceledException e)
+            catch (OperationCanceledException)
             {
-                Debug.WriteLine("Cancelled");
             }
             finally
             {

@@ -2,6 +2,7 @@
 
 namespace NLoad.App.Tests
 {
+    [LoadTest]
     class HttpRequestTest : ITest
     {
         readonly WebClient _webClient = new WebClient();

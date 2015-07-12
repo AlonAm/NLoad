@@ -2,6 +2,7 @@ using OxyPlot;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Windows.Input;
@@ -10,6 +11,7 @@ namespace NLoad.App.Features.RunLoadTest
 {
     public class LoadTestViewModel : INotifyPropertyChanged
     {
+        private readonly IEnumerable<Type> _loadTests;
         private LoadTestResult _loadTestResult;
         private Heartbeat _lastHeartbeat;
 
@@ -28,6 +30,19 @@ namespace NLoad.App.Features.RunLoadTest
             Defaults();
 
             Reset();
+        }
+
+        public LoadTestViewModel(IEnumerable<Type> loadTests)
+            : this()
+        {
+            if (loadTests == null)
+            {
+                throw new ArgumentNullException("loadTests");
+            }
+
+            _loadTests = loadTests;
+
+            LoadTest = _loadTests.FirstOrDefault();
         }
 
         #region Properties
@@ -60,7 +75,17 @@ namespace NLoad.App.Features.RunLoadTest
                 OnPropertyChanged();
             }
         }
-        
+
+        public IEnumerable<Type> LoadTests
+        {
+            get
+            {
+                return _loadTests;
+            }
+        }
+
+        public Type LoadTest { get; set; }
+
         // Toolbar
 
         public LoadTestConfiguration Configuration { get; set; }

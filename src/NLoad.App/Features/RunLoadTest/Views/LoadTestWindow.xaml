@@ -22,10 +22,7 @@
         <ToolBarTray  Background="Transparent">
             <ToolBar  Background="Transparent">
                 <Label FontWeight="Bold" Content="Load Test"/>
-                <ComboBox>
-                    <ComboBoxItem Content="In Memory" IsSelected="True"></ComboBoxItem>
-                    <ComboBoxItem Content="Http Request"></ComboBoxItem>
-                </ComboBox>
+                <ComboBox IsEnabled="False" ItemsSource="{Binding LoadTests}" DisplayMemberPath="Name" SelectedValue="{Binding Path=LoadTest}"/>
                 <Label FontWeight="Bold" Content="# Threads" />
                 <TextBox Text="{Binding Configuration.NumberOfThreads}" ToolTip="Number of threads" />
                 <Label FontWeight="Bold" Content="Duration" />
@@ -96,7 +93,7 @@
                 <Label Content="Min. Throughput" HorizontalAlignment="Center"/>
                 <Label Content="{Binding LoadTestResult.MinThroughput}" HorizontalAlignment="Center" FontSize="34"/>
             </StackPanel>-->
-            
+
         </WrapPanel>
 
         <oxy:PlotView Grid.Row="1" Model="{Binding ChartModel}" Background="Transparent" />
