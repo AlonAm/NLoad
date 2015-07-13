@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -22,68 +23,76 @@ namespace NLoad
 
         public bool IsBusy { get; private set; }
 
-        public async void Start()
+        public async void StartAsync()
         {
             IsBusy = true;
 
-            Result = await RunTestsAsync(_context).ConfigureAwait(false);
+            var testRunnerResult = Task.Run(() => Start(_context), _cancellationToken)
+                                       .ConfigureAwait(false);
 
-            IsBusy = false;
+            try
+            {
+                Result = await testRunnerResult;
+            }
+            catch (TaskCanceledException)
+            {
+                Result = new TestRunnerResult();
+            }
+            finally
+            {
+                IsBusy = false;
+            }
         }
 
-        private Task<TestRunnerResult> RunTestsAsync(TestRunContext context)
+        private TestRunnerResult Start(TestRunContext context)
         {
-            return Task.Run(() =>
+            var result = new TestRunnerResult(starTime: DateTime.UtcNow);
+
+            var testRunResults = new List<TestRunResult>();
+
+            var test = new T();
+
+            test.Initialize();
+
+            _loadTest.IncrementTotalThreads();
+
+            context.StartEvent.WaitOne();
+
+            while (!context.QuitEvent.WaitOne(0))
             {
-                var result = new TestRunnerResult(starTime: DateTime.UtcNow);
-
-                var testRunResults = new List<TestRunResult>();
-
-                var test = new T();
-
-                test.Initialize();
-
-                _loadTest.IncrementThreadCount();
-
-                context.StartEvent.WaitOne();
-
-                while (!context.QuitEvent.WaitOne(0) && !_cancellationToken.IsCancellationRequested)
+                var testRunResult = new TestRunResult
                 {
-                    var testRunResult = new TestRunResult
-                    {
-                        StartTime = DateTime.UtcNow
-                    };
+                    StartTime = DateTime.UtcNow
+                };
 
-                    try
-                    {
-                        testRunResult.TestResult = test.Execute();
-                    }
-                    catch
-                    {
-                        testRunResult.TestResult = TestResult.Failure;
-                    }
-                    finally
-                    {
-                        testRunResult.EndTime = DateTime.UtcNow;
-                    }
+                try
+                {
+                    testRunResult.TestResult = test.Execute();
+                }
+                catch
+                {
+                    testRunResult.TestResult = TestResult.Failure;
+                }
+                finally
+                {
+                    testRunResult.EndTime = DateTime.UtcNow;
 
-                    if (testRunResult.TestResult.Failed) //todo: refactor?
+                    _loadTest.IncrementTotalIterations();
+
+                    if (testRunResult.TestResult.Failed) //todo: ?
                     {
-                        _loadTest.IncrementErrorsCounter();
+                        _loadTest.IncrementTotalErrors();
                     }
-
-                    _loadTest.IncrementIterationsCounter();
-
-                    testRunResults.Add(testRunResult);
                 }
 
-                result.TestRuns = testRunResults;
+                testRunResults.Add(testRunResult);
+            }
 
-                result.EndTime = DateTime.UtcNow;
+            result.TestRuns = testRunResults;
 
-                return result;
+            result.EndTime = DateTime.UtcNow;
 
-            });
+            return result;
         }
     }
 }

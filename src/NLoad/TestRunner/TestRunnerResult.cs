@@ -5,6 +5,10 @@ namespace NLoad
 {
     public class TestRunnerResult
     {
+        public TestRunnerResult()
+        {
+        }
+
         public TestRunnerResult(DateTime starTime)
         {
             StartTime = starTime;
@@ -13,6 +17,7 @@ namespace NLoad
         public long Iterations { get; set; }
 
         public DateTime StartTime { get; set; }
+
         public DateTime EndTime { get; set; }
 
         public List<TestRunResult> TestRuns { get; set; }

@@ -5,11 +5,11 @@ namespace NLoad
         LoadTestResult Run();
 
 
-        void IncrementIterationsCounter();
+        void IncrementTotalIterations();
 
-        void IncrementErrorsCounter();
+        void IncrementTotalErrors();
         
-        void IncrementThreadCount();
+        void IncrementTotalThreads();
 
 
         LoadTestConfiguration Configuration { get; }

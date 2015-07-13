@@ -57,22 +57,22 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
-    <Page Include="Features\RunLoadTest\LoadTestWindow.xaml">
+    <Page Include="Features\RunLoadTest\Views\LoadTestWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Compile Include="Tests\HttpRequestTest.cs" />
+    <Compile Include="Features\RunLoadTest\ElapsedTimeConverter.cs" />
+    <Compile Include="LoadTests\HttpRequestTest.cs" />
     <Compile Include="Features\RunLoadTest\LoadTestChart.cs" />
-    <Compile Include="Tests\InMemoryTest.cs" />
+    <Compile Include="LoadTests\InMemoryTest.cs" />
     <Compile Include="Features\RunLoadTest\LoadTestViewModel.cs" />
-    <Compile Include="Features\RunLoadTest\LoadTestWindow.xaml.cs">
+    <Compile Include="Features\RunLoadTest\Views\LoadTestWindow.xaml.cs">
       <DependentUpon>LoadTestWindow.xaml</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Features\RunLoadTest\Commands\RunLoadTestCommandAsync.cs" />
-    <Compile Include="Features\RunLoadTest\Commands\StopLoadTestCommand.cs" />
-    <Compile Include="Infrastructure\TimeSpanExtensions.cs" />
+    <Compile Include="Features\RunLoadTest\Commands\CancelLoadTestCommand.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>

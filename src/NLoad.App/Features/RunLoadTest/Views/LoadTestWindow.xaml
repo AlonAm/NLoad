@@ -1,0 +1,102 @@
+﻿<Window x:Class="NLoad.App.Features.RunLoadTest.LoadTestWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:runLoadTest="clr-namespace:NLoad.App.Features.RunLoadTest"
+        xmlns:oxy="http://oxyplot.org/wpf"
+        Title="NLoad" Height="644" Width="816" MinHeight="200" MinWidth="210">
+    <Window.DataContext>
+        <runLoadTest:LoadTestViewModel/>
+    </Window.DataContext>
+
+    <Grid>
+
+        <Grid.Resources>
+            <runLoadTest:ElapsedTimeConverter x:Key="ElapsedTimeConverter" />
+        </Grid.Resources>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <ToolBarTray  Background="Transparent">
+            <ToolBar  Background="Transparent">
+                <Label FontWeight="Bold" Content="Load Test"/>
+                <ComboBox IsEnabled="False" ItemsSource="{Binding LoadTests}" DisplayMemberPath="Name" SelectedValue="{Binding Path=LoadTest}"/>
+                <Label FontWeight="Bold" Content="# Threads" />
+                <TextBox Text="{Binding Configuration.NumberOfThreads}" ToolTip="Number of threads" />
+                <Label FontWeight="Bold" Content="Duration" />
+                <TextBox Text="{Binding Configuration.Duration}" ToolTip="Load test run duration" />
+                <Label FontWeight="Bold" Content="Delay"  />
+                <TextBox Text="{Binding Configuration.DelayBetweenThreadStart}" ToolTip="Delay between thread start" />
+                <Button Content="Run" Command="{Binding RunLoadTestCommand}" Width="50" ToolTip="Start load test"/>
+                <Button Content="Cancel" Command="{Binding CancelLoadTestCommand}" Width="50"  ToolTip="Stop load test"/>
+            </ToolBar>
+        </ToolBarTray>
+
+        <WrapPanel Grid.Row="0" Margin="0,35,0,0" Background="Transparent">
+
+            <StackPanel Height="100" Width="200">
+                <Label Content="Throughput" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+                <Label Content="{Binding Heartbeat.Throughput}" ContentStringFormat="{}{0:N1}" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="34"/>
+            </StackPanel>
+
+            <StackPanel Height="100" Width="200">
+                <Label Content="Iterations" HorizontalAlignment="Center"/>
+                <Label Content="{Binding Heartbeat.TotalIterations}" HorizontalAlignment="Center" FontSize="34"/>
+            </StackPanel>
+
+            <StackPanel Height="100" Width="200">
+                <Label Content="Elapsed" HorizontalAlignment="Center"/>
+                <Label Content="{Binding Heartbeat.Elapsed, Converter={StaticResource ElapsedTimeConverter}}"  HorizontalAlignment="Center" FontSize="34" />
+            </StackPanel>
+
+            <StackPanel Height="100" Width="200">
+                <Label Content="Errors" HorizontalAlignment="Center"/>
+                <Label Content="{Binding Heartbeat.TotalErrors}" HorizontalAlignment="Center" FontSize="34"/>
+            </StackPanel>
+
+            <StackPanel Height="100" Width="200">
+                <Label Content="Threads" HorizontalAlignment="Center"/>
+                <Label Content="{Binding Heartbeat.ThreadCount}" HorizontalAlignment="Center" FontSize="34"/>
+            </StackPanel>
+
+
+            <!--<StackPanel Height="100" Width="200">
+                <Label Content="Avg. Response Time" HorizontalAlignment="Center"/>
+                <Label Content="{Binding LoadTestResult.AverageResponseTime}" HorizontalAlignment="Center" FontSize="34"/>
+            </StackPanel>
+
+            <StackPanel Height="100" Width="200">
+                <Label Content="Max. Response Time" HorizontalAlignment="Center"/>
+                <Label Content="{Binding LoadTestResult.MaxResponseTime}" HorizontalAlignment="Center" FontSize="34"/>
+            </StackPanel>
+            
+            <StackPanel Height="100" Width="200">
+                <Label Content="Min. Response Time" HorizontalAlignment="Center"/>
+                <Label Content="{Binding LoadTestResult.MinResponseTime}" HorizontalAlignment="Center" FontSize="34"/>
+            </StackPanel>
+
+
+            <StackPanel Height="100" Width="200">
+                <Label Content="Avg. Throughput" HorizontalAlignment="Center"/>
+                <Label Content="{Binding LoadTestResult.AverageThroughput}" HorizontalAlignment="Center" FontSize="34"/>
+            </StackPanel>
+
+
+            <StackPanel Height="100" Width="200">
+                <Label Content="Max. Throughput" HorizontalAlignment="Center"/>
+                <Label Content="{Binding LoadTestResult.MaxThroughput}" HorizontalAlignment="Center" FontSize="34"/>
+            </StackPanel>
+
+            <StackPanel Height="100" Width="200">
+                <Label Content="Min. Throughput" HorizontalAlignment="Center"/>
+                <Label Content="{Binding LoadTestResult.MinThroughput}" HorizontalAlignment="Center" FontSize="34"/>
+            </StackPanel>-->
+
+        </WrapPanel>
+
+        <oxy:PlotView Grid.Row="1" Model="{Binding ChartModel}" Background="Transparent" />
+
+    </Grid>
+</Window>
