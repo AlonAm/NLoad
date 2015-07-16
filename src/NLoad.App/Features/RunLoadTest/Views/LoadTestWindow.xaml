@@ -29,8 +29,7 @@
                 <TextBox Text="{Binding Configuration.Duration}" ToolTip="Load test run duration" />
                 <Label FontWeight="Bold" Content="Delay"  />
                 <TextBox Text="{Binding Configuration.DelayBetweenThreadStart}" ToolTip="Delay between thread start" />
-                <Button Content="Run" Command="{Binding RunLoadTestCommand}" Width="50" ToolTip="Start load test"/>
-                <Button Content="Cancel" Command="{Binding CancelLoadTestCommand}" Width="50"  ToolTip="Stop load test"/>
+                <Button Name="RunButton" Content="Run" Click="ButtonBase_OnClick" Command="{Binding RunLoadTestCommand}" Width="50" ToolTip="Start load test"/>
             </ToolBar>
         </ToolBarTray>
 

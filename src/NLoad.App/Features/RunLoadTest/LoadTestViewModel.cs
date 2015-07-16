@@ -21,8 +21,6 @@ namespace NLoad.App.Features.RunLoadTest
 
             RunLoadTestCommand = new RunLoadTestCommandAsync(this);
 
-            CancelLoadTestCommand = new CancelLoadTestCommand(this);
-
             Heartbeats = new List<Heartbeat>();
 
             ChartModel = new LoadTestChart(Heartbeats);
@@ -52,7 +50,6 @@ namespace NLoad.App.Features.RunLoadTest
         // Commands
 
         public ICommand RunLoadTestCommand { get; private set; }
-        public ICommand CancelLoadTestCommand { get; private set; }
 
         // Display todo: replace with Load Test Result / Heartbeat
 

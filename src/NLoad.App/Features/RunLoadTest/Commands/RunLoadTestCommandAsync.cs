@@ -8,8 +8,9 @@ namespace NLoad.App.Features.RunLoadTest
 {
     public class RunLoadTestCommandAsync : ICommand
     {
-        private bool _canExecute = true;
+        private bool _isRunning;
         private readonly LoadTestViewModel _viewModel;
+        private CancellationTokenSource _cancellationTokenSource;
 
         public event EventHandler CanExecuteChanged;
 
@@ -25,40 +26,43 @@ namespace NLoad.App.Features.RunLoadTest
 
         public bool CanExecute(object parameter)
         {
-            return _canExecute;
+            return true;
         }
 
         public async void Execute(object parameter)
         {
-            SetCanExecute(false);
+            if (_isRunning)
+            {
+                CancelLoadTest();
+
+                return;
+            }
 
             _viewModel.Reset();
 
-            _viewModel.CancellationTokenSource = new CancellationTokenSource();;
+            _cancellationTokenSource = new CancellationTokenSource();
 
             var progress = new Progress<Heartbeat>(_viewModel.HandleHeartbeat);
 
+            _isRunning = true;
+
             try
             {
-                var result = await RunLoadTestAsync(_viewModel.Configuration, _viewModel.CancellationTokenSource.Token, progress);
+                var result = await RunLoadTestAsync(_viewModel.Configuration, _cancellationTokenSource.Token, progress);
 
                 _viewModel.LoadTestResult = result;
             }
             catch (OperationCanceledException)
             {
+                // Canceled
             }
             finally
             {
-                SetCanExecute(true);
+                _isRunning = false;
             }
         }
 
-        #region Helpers
-
-        private  Task<LoadTestResult> RunLoadTestAsync(
-                    LoadTestConfiguration configuration,
-                    CancellationToken cancellationToken,
-                    IProgress<Heartbeat> progress)
+        private static Task<LoadTestResult> RunLoadTestAsync(LoadTestConfiguration configuration, CancellationToken cancellationToken, IProgress<Heartbeat> progress)
         {
             return Task.Run(() =>
             {
@@ -75,16 +79,14 @@ namespace NLoad.App.Features.RunLoadTest
             }, cancellationToken);
         }
 
-        private void SetCanExecute(bool canExecute)
+        private void CancelLoadTest()
         {
-            _canExecute = canExecute;
-
-            if (CanExecuteChanged != null)
+            if (_cancellationTokenSource == null)
             {
-                CanExecuteChanged(this, EventArgs.Empty);
+                throw new NullReferenceException("Invalid cancellation token source");
             }
-        }
 
-        #endregion
+            _cancellationTokenSource.Cancel();
+        }
     }
 }
