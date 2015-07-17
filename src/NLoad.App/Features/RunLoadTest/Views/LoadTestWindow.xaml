@@ -57,7 +57,7 @@
 
             <StackPanel Height="100" Width="200">
                 <Label Content="Threads" HorizontalAlignment="Center"/>
-                <Label Content="{Binding Heartbeat.ThreadCount}" HorizontalAlignment="Center" FontSize="34"/>
+                <Label Content="{Binding Heartbeat.TotalThreads}" HorizontalAlignment="Center" FontSize="34"/>
             </StackPanel>
 
 

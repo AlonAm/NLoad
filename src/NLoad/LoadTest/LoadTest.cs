@@ -66,7 +66,7 @@ namespace NLoad
             }
         }
 
-        public long ThreadCount
+        public long TotalThreads
         {
             get
             {
@@ -141,14 +141,14 @@ namespace NLoad
 
         private void Warmup()
         {
-            while (ThreadCount < _configuration.NumberOfThreads && !_cancellationToken.IsCancellationRequested)
+            while (TotalThreads < _configuration.NumberOfThreads && !_cancellationToken.IsCancellationRequested)
             {
                 if (Heartbeat != null)
                 {
                     Heartbeat(this, new Heartbeat
                     {
                         TotalIterations = _totalIterations,
-                        ThreadCount = ThreadCount
+                        TotalThreads = TotalThreads
                     });
                 }
 

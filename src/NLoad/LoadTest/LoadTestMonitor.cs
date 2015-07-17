@@ -46,7 +46,7 @@ namespace NLoad
                     Throughput = throughput,
                     TotalIterations = iterations,
                     TotalErrors = _loadTest.TotalErrors,
-                    ThreadCount = _loadTest.ThreadCount
+                    TotalThreads = _loadTest.TotalThreads
                 };
 
                 heartbeats.Add(heartbeat);

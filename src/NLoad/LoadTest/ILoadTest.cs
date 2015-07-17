@@ -18,6 +18,6 @@ namespace NLoad
 
         long TotalErrors { get; }
 
-        long ThreadCount { get; }
+        long TotalThreads { get; }
     }
 }

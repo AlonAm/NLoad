@@ -71,7 +71,7 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Features\RunLoadTest\Commands\RunLoadTestCommandAsync.cs" />
+    <Compile Include="Features\RunLoadTest\Commands\RunLoadTestCommand.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>

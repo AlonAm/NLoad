@@ -19,7 +19,7 @@ namespace NLoad.App.Features.RunLoadTest
         {
             Configuration = new LoadTestConfiguration();
 
-            RunLoadTestCommand = new RunLoadTestCommandAsync(this);
+            RunLoadTestCommand = new RunLoadTestCommand(this);
 
             Heartbeats = new List<Heartbeat>();
 

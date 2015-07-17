@@ -14,6 +14,6 @@ namespace NLoad
 
         public double Throughput { get; set; }
 
-        public long ThreadCount { get; set; }
+        public long TotalThreads { get; set; }
     }
 }

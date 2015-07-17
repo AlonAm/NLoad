@@ -6,7 +6,7 @@ using System.Windows.Input;
 
 namespace NLoad.App.Features.RunLoadTest
 {
-    public class RunLoadTestCommandAsync : ICommand
+    public class RunLoadTestCommand : ICommand
     {
         private bool _isRunning;
         private readonly LoadTestViewModel _viewModel;
@@ -14,7 +14,7 @@ namespace NLoad.App.Features.RunLoadTest
 
         public event EventHandler CanExecuteChanged;
 
-        public RunLoadTestCommandAsync(LoadTestViewModel viewModel)
+        public RunLoadTestCommand(LoadTestViewModel viewModel)
         {
             if (viewModel == null)
             {
