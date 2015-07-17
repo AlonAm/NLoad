@@ -11,16 +11,12 @@ namespace NLoad.App.Features.RunLoadTest
         private bool _isRunning;
         private readonly LoadTestViewModel _viewModel;
         private CancellationTokenSource _cancellationTokenSource;
-
         public event EventHandler CanExecuteChanged;
 
         public RunLoadTestCommand(LoadTestViewModel viewModel)
         {
-            if (viewModel == null)
-            {
-                throw new ArgumentNullException("viewModel");
-            }
-
+            if (viewModel == null) throw new ArgumentNullException("viewModel");
+            
             _viewModel = viewModel;
         }
 
@@ -62,7 +58,10 @@ namespace NLoad.App.Features.RunLoadTest
             }
         }
 
-        private static Task<LoadTestResult> RunLoadTestAsync(LoadTestConfiguration configuration, CancellationToken cancellationToken, IProgress<Heartbeat> progress)
+        private static Task<LoadTestResult> RunLoadTestAsync(
+            LoadTestConfiguration configuration, 
+            CancellationToken cancellationToken, 
+            IProgress<Heartbeat> progress)
         {
             return Task.Run(() =>
             {

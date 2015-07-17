@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NLoad.App.Features.RunLoadTest;
 
@@ -25,7 +24,7 @@ namespace NLoad.App.Tests
         public void ThrowIfViewModelIsNull()
         {
             var runLoadTestCommand = new RunLoadTestCommand(null);
-            
+
             Assert.IsNull(runLoadTestCommand);
         }
 
@@ -45,11 +44,23 @@ namespace NLoad.App.Tests
 
             runLoadTestCommand.Execute(null);
 
-            Thread.Sleep(TimeSpan.FromSeconds(1));
+            WaitForLoadTestResult(viewModel);
 
             Assert.IsNotNull(viewModel.Heartbeat);
             Assert.IsNotNull(viewModel.Heartbeats);
             Assert.IsTrue(viewModel.Heartbeats.Any());
+        }
+
+        private static void WaitForLoadTestResult(LoadTestViewModel viewModel)
+        {
+            var start = DateTime.Now;
+
+            while (viewModel.LoadTestResult == null)
+            {
+                if (DateTime.Now.Subtract(start) > TimeSpan.FromSeconds(5)) throw new TimeoutException();
+
+                Thread.Sleep(TimeSpan.FromMilliseconds(1));
+            }
         }
     }
 }
