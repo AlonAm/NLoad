@@ -10,7 +10,7 @@ namespace NLoad.App.Features.RunLoadTest
         {
             if ((!(value is TimeSpan))) return value.ToString();
 
-            var elapsed = (TimeSpan) value;
+            var elapsed = (TimeSpan)value;
 
             return string.Format("{0}:{1}:{2}", elapsed.ToString("hh"), elapsed.ToString("mm"), elapsed.ToString("ss")); ;
         }
