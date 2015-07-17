@@ -21,7 +21,7 @@ namespace NLoad.App.Features.RunLoadTest
                 DataFieldY = "Throughput",
                 Color = OxyColors.DodgerBlue,
                 Title = "Throughput",
-                Smooth = true
+                Smooth = false
             });
 
             Series.Add(new LineSeries
@@ -31,7 +31,7 @@ namespace NLoad.App.Features.RunLoadTest
                 DataFieldY = "TotalErrors",
                 Color = OxyColors.Red,
                 Title = "Errors",
-                Smooth = true
+                Smooth = false
             });
         }
     }
