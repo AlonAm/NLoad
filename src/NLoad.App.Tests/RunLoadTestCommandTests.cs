@@ -33,6 +33,7 @@ namespace NLoad.App.Tests
         {
             var viewModel = new LoadTestViewModel
             {
+                SelectedLoadTest = typeof(InMemoryTest100),
                 Configuration = new LoadTestConfiguration
                 {
                     NumberOfThreads = 1,

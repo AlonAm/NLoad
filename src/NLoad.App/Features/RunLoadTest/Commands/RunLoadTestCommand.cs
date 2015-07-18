@@ -1,5 +1,5 @@
-﻿using NLoad.App.Tests;
-using System;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -9,14 +9,16 @@ namespace NLoad.App.Features.RunLoadTest
     public class RunLoadTestCommand : ICommand
     {
         private bool _isRunning;
+        Progress<Heartbeat> _progress;
         private readonly LoadTestViewModel _viewModel;
         private CancellationTokenSource _cancellationTokenSource;
+        
         public event EventHandler CanExecuteChanged;
 
         public RunLoadTestCommand(LoadTestViewModel viewModel)
         {
             if (viewModel == null) throw new ArgumentNullException("viewModel");
-            
+
             _viewModel = viewModel;
         }
 
@@ -34,17 +36,15 @@ namespace NLoad.App.Features.RunLoadTest
                 return;
             }
 
-            _viewModel.Reset();
+            Initialize();
 
-            _cancellationTokenSource = new CancellationTokenSource();
-
-            var progress = new Progress<Heartbeat>(_viewModel.HandleHeartbeat);
-
-            _isRunning = true;
+            IsRunning(true);
 
             try
             {
-                var result = await RunLoadTestAsync(_viewModel.Configuration, _cancellationTokenSource.Token, progress);
+                var task = RunLoadTestAsync(_viewModel.SelectedLoadTest, _viewModel.Configuration, _cancellationTokenSource.Token, _progress);
+
+                var result = await task;
 
                 _viewModel.LoadTestResult = result;
             }
@@ -54,20 +54,37 @@ namespace NLoad.App.Features.RunLoadTest
             }
             finally
             {
-                _isRunning = false;
+                IsRunning(false);
+            }
+        }
+
+        private void Initialize()
+        {
+            _cancellationTokenSource = new CancellationTokenSource();
+
+            _progress = new Progress<Heartbeat>(_viewModel.HandleHeartbeat);
+
+            if (_viewModel.Heartbeats != null)
+            {
+                _viewModel.Heartbeats.Clear();
+            }
+            else
+            {
+                _viewModel.Heartbeats = new List<Heartbeat>();
             }
         }
 
         private static Task<LoadTestResult> RunLoadTestAsync(
-            LoadTestConfiguration configuration, 
-            CancellationToken cancellationToken, 
+            Type testType,
+            LoadTestConfiguration configuration,
+            CancellationToken cancellationToken,
             IProgress<Heartbeat> progress)
         {
             return Task.Run(() =>
             {
-                var loadTest = NLoad.Test<InMemoryTest>()
+                var loadTest = NLoad.Test(testType)
                                         .WithNumberOfThreads(configuration.NumberOfThreads)
-                                        .WithDurationOf(configuration.Duration)
+                                        .WithRunDurationOf(configuration.Duration)
                                         .WithDeleyBetweenThreadStart(configuration.DelayBetweenThreadStart)
                                         .WithCancellationToken(cancellationToken)
                                         .OnHeartbeat((s, e) => progress.Report(e))
@@ -80,12 +97,17 @@ namespace NLoad.App.Features.RunLoadTest
 
         private void CancelLoadTest()
         {
-            if (_cancellationTokenSource == null)
+            if (_cancellationTokenSource != null)
             {
-                throw new NullReferenceException("Invalid cancellation token source");
+                _cancellationTokenSource.Cancel();
             }
+        }
 
-            _cancellationTokenSource.Cancel();
+        private void IsRunning(bool isRunning)
+        {
+            _isRunning = isRunning;
+            _viewModel.IsRunning = isRunning;
+            _viewModel.RunButtonText = isRunning ? "Cancel" : "Run";
         }
     }
 }

@@ -1,34 +1,46 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace NLoad
 {
-    public class TestRunner<T> where T : ITest, new()
+    //public class TestRunner<T> : TestRunner where T : ITest, new()
+    //{
+    //    public TestRunner(ILoadTest loadTest, TestRunContext context, CancellationToken cancellationToken)
+    //        : base(loadTest, typeof(T), context, cancellationToken)
+    //    {
+    //    }
+    //}
+
+    public class TestRunner
     {
+        private readonly Type _testType;
         private readonly ILoadTest _loadTest;
         private readonly TestRunContext _context;
         private readonly CancellationToken _cancellationToken;
 
-        public TestRunner(ILoadTest loadTest, TestRunContext context, CancellationToken cancellationToken)
+        public TestRunner(ILoadTest loadTest, Type testType, TestRunContext context, CancellationToken cancellationToken)
         {
             _loadTest = loadTest;
+            _testType = testType;
             _context = context;
             _cancellationToken = cancellationToken;
         }
+
+        #region Properties
 
         public TestRunnerResult Result { get; private set; }
 
         public bool IsBusy { get; private set; }
 
+        #endregion
+
         public async void StartAsync()
         {
             IsBusy = true;
 
-            var testRunnerResult = Task.Run(() => Start(_context), _cancellationToken)
-                                       .ConfigureAwait(false);
+            var testRunnerResult = Task.Run(() => Start(_context), _cancellationToken).ConfigureAwait(false);
 
             try
             {
@@ -50,7 +62,7 @@ namespace NLoad
 
             var testRunResults = new List<TestRunResult>();
 
-            var test = new T();
+            var test = (ITest)Activator.CreateInstance(_testType);
 
             test.Initialize();
 

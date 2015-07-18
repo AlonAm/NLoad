@@ -1,5 +1,4 @@
-﻿using System.Windows;
-using System.Windows.Input;
+﻿using System.Windows.Input;
 
 namespace NLoad.App.Features.RunLoadTest
 {
@@ -21,11 +20,6 @@ namespace NLoad.App.Features.RunLoadTest
             {
                 DragMove();
             }
-        }
-
-        private void ButtonBase_OnClick(object sender, RoutedEventArgs e)
-        {
-            RunButton.Content = (string)RunButton.Content == "Run" ? "Cancel" : "Run";
         }
     }
 }

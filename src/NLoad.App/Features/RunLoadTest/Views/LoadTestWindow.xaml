@@ -12,6 +12,7 @@
 
         <Grid.Resources>
             <runLoadTest:ElapsedTimeConverter x:Key="ElapsedTimeConverter" />
+            <runLoadTest:BooleanInverter x:Key="BooleanInverter"/>
         </Grid.Resources>
 
         <Grid.RowDefinitions>
@@ -21,15 +22,25 @@
 
         <ToolBarTray  Background="Transparent">
             <ToolBar  Background="Transparent">
+                
                 <Label FontWeight="Bold" Content="Load Test"/>
-                <ComboBox IsEnabled="False" ItemsSource="{Binding LoadTests}" DisplayMemberPath="Name" SelectedValue="{Binding Path=LoadTest}"/>
+                <ComboBox ItemsSource="{Binding LoadTests}" DisplayMemberPath="Name" SelectedValue="{Binding Path=SelectedLoadTest}"
+                          IsEnabled="{Binding IsRunning, Mode=TwoWay, Converter={StaticResource BooleanInverter}}"/>
+                
                 <Label FontWeight="Bold" Content="# Threads" />
-                <TextBox Text="{Binding Configuration.NumberOfThreads}" ToolTip="Number of threads" />
+                <TextBox Text="{Binding Configuration.NumberOfThreads}" ToolTip="Number of threads"
+                         IsEnabled="{Binding IsRunning, Mode=TwoWay, Converter={StaticResource BooleanInverter}}"/>
+                
                 <Label FontWeight="Bold" Content="Duration" />
-                <TextBox Text="{Binding Configuration.Duration}" ToolTip="Load test run duration" />
+                <TextBox Text="{Binding Configuration.Duration}" ToolTip="Load test run duration"
+                         IsEnabled="{Binding IsRunning, Mode=TwoWay, Converter={StaticResource BooleanInverter}}"/>
+                
                 <Label FontWeight="Bold" Content="Delay"  />
-                <TextBox Text="{Binding Configuration.DelayBetweenThreadStart}" ToolTip="Delay between thread start" />
-                <Button Name="RunButton" Content="Run" Click="ButtonBase_OnClick" Command="{Binding RunLoadTestCommand}" Width="50" ToolTip="Start load test"/>
+                <TextBox Text="{Binding Configuration.DelayBetweenThreadStart}" ToolTip="Delay between thread start"
+                         IsEnabled="{Binding IsRunning, Mode=TwoWay, Converter={StaticResource BooleanInverter}}"/>
+                
+                <Button Name="RunButton" Content="{Binding RunButtonText, Mode=TwoWay}" Command="{Binding RunLoadTestCommand}" Width="50"/>
+                
             </ToolBar>
         </ToolBarTray>
 
@@ -61,7 +72,8 @@
             </StackPanel>
 
 
-            <!--<StackPanel Height="100" Width="200">
+            <!--
+            <StackPanel Height="100" Width="200">
                 <Label Content="Avg. Response Time" HorizontalAlignment="Center"/>
                 <Label Content="{Binding LoadTestResult.AverageResponseTime}" HorizontalAlignment="Center" FontSize="34"/>
             </StackPanel>
@@ -91,7 +103,8 @@
             <StackPanel Height="100" Width="200">
                 <Label Content="Min. Throughput" HorizontalAlignment="Center"/>
                 <Label Content="{Binding LoadTestResult.MinThroughput}" HorizontalAlignment="Center" FontSize="34"/>
-            </StackPanel>-->
+            </StackPanel>
+            -->
 
         </WrapPanel>
 

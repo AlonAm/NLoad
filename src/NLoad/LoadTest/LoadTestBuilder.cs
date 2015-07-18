@@ -4,8 +4,9 @@ namespace NLoad
 {
     using System;
 
-    public class LoadTestBuilder<T> where T : ITest, new()
+    public class LoadTestBuilder : ILoadTestBuilder
     {
+        private Type _testType;
         private EventHandler<Heartbeat> _handler;
         private CancellationToken _cancellationToken;
         private readonly LoadTestConfiguration _configuration;
@@ -20,9 +21,9 @@ namespace NLoad
             _configuration = configuration;
         }
 
-        public LoadTest<T> Build()
+        public ILoadTest Build()
         {
-            var loadTest = new LoadTest<T>(_configuration, _cancellationToken);
+            var loadTest = new LoadTest(_testType, _configuration, _cancellationToken);
 
             if (_handler != null)
             {
@@ -32,37 +33,44 @@ namespace NLoad
             return loadTest;
         }
 
-        public LoadTestBuilder<T> WithNumberOfThreads(int numberOfThreads)
+        public ILoadTestBuilder WithNumberOfThreads(int numberOfThreads)
         {
             _configuration.NumberOfThreads = numberOfThreads;
 
             return this;
         }
 
-        public LoadTestBuilder<T> WithDurationOf(TimeSpan duration)
+        public ILoadTestBuilder WithRunDurationOf(TimeSpan duration)
         {
             _configuration.Duration = duration;
 
             return this;
         }
 
-        public LoadTestBuilder<T> WithDeleyBetweenThreadStart(TimeSpan delay)
+        public ILoadTestBuilder WithDeleyBetweenThreadStart(TimeSpan delay)
         {
             _configuration.DelayBetweenThreadStart = delay;
 
             return this;
         }
 
-        public LoadTestBuilder<T> OnHeartbeat(EventHandler<Heartbeat> handler)
+        public ILoadTestBuilder OnHeartbeat(EventHandler<Heartbeat> handler)
         {
             _handler = handler;
 
             return this;
         }
 
-        public LoadTestBuilder<T> WithCancellationToken(CancellationToken cancellationToken)
+        public ILoadTestBuilder WithCancellationToken(CancellationToken cancellationToken)
         {
             _cancellationToken = cancellationToken;
+
+            return this;
+        }
+
+        public ILoadTestBuilder OfType(Type testType)
+        {
+            _testType = testType;
 
             return this;
         }

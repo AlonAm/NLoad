@@ -1,3 +1,5 @@
+using System.Windows.Data;
+using System.Windows.Documents;
 using OxyPlot;
 using System;
 using System.Collections.Generic;
@@ -14,6 +16,8 @@ namespace NLoad.App.Features.RunLoadTest
         private readonly IEnumerable<Type> _loadTests;
         private LoadTestResult _loadTestResult;
         private Heartbeat _lastHeartbeat;
+        private string _runButtonText;
+        private bool _isRunning;
 
         public LoadTestViewModel()
         {
@@ -26,8 +30,6 @@ namespace NLoad.App.Features.RunLoadTest
             ChartModel = new LoadTestChart(Heartbeats);
 
             Defaults();
-
-            Reset();
         }
 
         public LoadTestViewModel(IEnumerable<Type> loadTests)
@@ -40,7 +42,7 @@ namespace NLoad.App.Features.RunLoadTest
 
             _loadTests = loadTests;
 
-            LoadTest = _loadTests.FirstOrDefault();
+            SelectedLoadTest = _loadTests.FirstOrDefault();
         }
 
         #region Properties
@@ -51,7 +53,7 @@ namespace NLoad.App.Features.RunLoadTest
 
         public ICommand RunLoadTestCommand { get; private set; }
 
-        // Display todo: replace with Load Test Result / Heartbeat
+        // UI
 
         public LoadTestResult LoadTestResult
         {
@@ -73,25 +75,37 @@ namespace NLoad.App.Features.RunLoadTest
             }
         }
 
-        public IEnumerable<Type> LoadTests
+        public IEnumerable<Type> LoadTests { get { return _loadTests; } }
+
+        public Type SelectedLoadTest { get; set; }
+
+        public string RunButtonText
         {
-            get
+            get { return _runButtonText; }
+            set
             {
-                return _loadTests;
+                _runButtonText = value;
+                OnPropertyChanged();
             }
         }
 
-        public Type LoadTest { get; set; }
+        public CancellationTokenSource CancellationTokenSource { get; set; }
 
-        // Toolbar
+        public bool IsRunning
+        {
+            get { return _isRunning; }
+            set
+            {
+                _isRunning = value;
+                OnPropertyChanged();
+            }
+        }
 
         public LoadTestConfiguration Configuration { get; set; }
 
         // Chart
 
         public PlotModel ChartModel { get; set; }
-
-        public CancellationTokenSource CancellationTokenSource { get; set; }
 
         #endregion
 
@@ -104,21 +118,13 @@ namespace NLoad.App.Features.RunLoadTest
             ChartModel.InvalidatePlot(true);
         }
 
-        public void Reset()
-        {
-            if (Heartbeats != null)
-            {
-                Heartbeats.Clear();
-            }
-        }
-
         private void Defaults()
         {
             Configuration.NumberOfThreads = 5;
-
             Configuration.Duration = TimeSpan.FromSeconds(30);
-
             Configuration.DelayBetweenThreadStart = TimeSpan.Zero;
+
+            RunButtonText = "Run";
         }
 
         #region INotifyPropertyChanged Members
@@ -136,5 +142,18 @@ namespace NLoad.App.Features.RunLoadTest
         }
 
         #endregion
+    }
+
+    public class BooleanInverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            return !(bool)value;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            return !(bool)value;
+        }
     }
 }

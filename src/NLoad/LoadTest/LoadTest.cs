@@ -6,24 +6,43 @@ using System.Threading;
 
 namespace NLoad
 {
-    public sealed class LoadTest<T> : ILoadTest where T : ITest, new()
+    public class LoadTest<T> : LoadTest where T : ITest, new()
+    {
+        public LoadTest(LoadTestConfiguration configuration, CancellationToken cancellationToken)
+            : base(typeof(T), configuration, cancellationToken)
+        {
+        }
+    }
+
+    public class LoadTest : ILoadTest
     {
         #region Fields
 
         private long _threadCount;
+
         private long _totalErrors;
+
         private long _totalIterations;
-        private List<TestRunner<T>> _testRunners;
+
+        private readonly Type _testType;
+
+        private List<TestRunner> _testRunners;
+
         private readonly LoadTestMonitor _monitor;
+
         private readonly ManualResetEvent _quitEvent;
+
         private readonly ManualResetEvent _startEvent;
+
         public event EventHandler<Heartbeat> Heartbeat;
+
         private readonly LoadTestConfiguration _configuration;
+
         private readonly CancellationToken _cancellationToken;
 
         #endregion
 
-        public LoadTest(LoadTestConfiguration configuration, CancellationToken cancellationToken)
+        public LoadTest(Type testType, LoadTestConfiguration configuration, CancellationToken cancellationToken)
         {
             if (configuration == null)
                 throw new ArgumentNullException("configuration");
@@ -31,6 +50,7 @@ namespace NLoad
             if (cancellationToken == null)
                 throw new ArgumentNullException("cancellationToken");
 
+            _testType = testType;
             _configuration = configuration;
             _cancellationToken = cancellationToken;
 
@@ -101,7 +121,7 @@ namespace NLoad
             catch (Exception e)
             {
                 if (e is OperationCanceledException) throw;
-                
+
                 throw new NLoadException("An error occurred while running load test. See inner exception for details.", e);
             }
         }
@@ -202,11 +222,16 @@ namespace NLoad
                 QuitEvent = _quitEvent
             };
 
-            _testRunners = new List<TestRunner<T>>(_configuration.NumberOfThreads);
+            CreateTestRunners(context);
+        }
+
+        private void CreateTestRunners(TestRunContext context)
+        {
+            _testRunners = new List<TestRunner>(_configuration.NumberOfThreads);
 
             for (var i = 0; i < _configuration.NumberOfThreads; i++)
             {
-                var testRunner = new TestRunner<T>(this, context, _cancellationToken);
+                var testRunner = new TestRunner(this, _testType, context, _cancellationToken);
 
                 _testRunners.Add(testRunner);
             }
@@ -223,4 +248,3 @@ namespace NLoad
         }
     }
 }
-
