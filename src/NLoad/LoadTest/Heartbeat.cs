@@ -6,7 +6,9 @@ namespace NLoad
     {
         public DateTime Timestamp { get; set; }
 
-        public TimeSpan Elapsed { get; set; }
+        public TimeSpan Runtime { get; set; }
+
+        public TimeSpan TotalRuntime { get; set; }
 
         public long TotalIterations { get; set; }
 

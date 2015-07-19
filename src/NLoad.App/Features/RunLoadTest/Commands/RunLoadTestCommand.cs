@@ -61,7 +61,7 @@ namespace NLoad.App.Features.RunLoadTest
 
             return Task.Run(() =>
             {
-                var loadTest = NLoad.Test(_viewModel.SelectedLoadTest)
+                var loadTest = NLoad.Test(_viewModel.SelectedTestType)
                                         .WithNumberOfThreads(_viewModel.Configuration.NumberOfThreads)
                                         .WithRunDurationOf(_viewModel.Configuration.Duration)
                                         .WithDeleyBetweenThreadStart(_viewModel.Configuration.DelayBetweenThreadStart)

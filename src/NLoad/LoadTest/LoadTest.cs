@@ -100,17 +100,19 @@ namespace NLoad
         {
             try
             {
+                var startTime = DateTime.Now;
+
                 Initialize();
 
                 StartTestRunners();
 
-                Warmup();
+                Warmup(startTime);
 
                 var stopWatch = Stopwatch.StartNew();
 
                 StartLoadTest();
 
-                var heartbeats = MonitorLoadTest();
+                var heartbeats = MonitorLoadTest(startTime);
 
                 Shutdown();
 
@@ -148,18 +150,18 @@ namespace NLoad
             _startEvent.Set();
         }
 
-        private List<Heartbeat> MonitorLoadTest()
+        private List<Heartbeat> MonitorLoadTest(DateTime startTime)
         {
             _monitor.Heartbeat += Heartbeat;
 
-            var heartbeats = _monitor.Start(_configuration.Duration);
+            var heartbeats = _monitor.Start(startTime, _configuration.Duration);
 
             _monitor.Heartbeat -= Heartbeat;
 
             return heartbeats;
         }
 
-        private void Warmup()
+        private void Warmup(DateTime startTime)
         {
             while (TotalThreads < _configuration.NumberOfThreads && !_cancellationToken.IsCancellationRequested)
             {
@@ -168,6 +170,7 @@ namespace NLoad
                     Heartbeat(this, new Heartbeat
                     {
                         TotalIterations = _totalIterations,
+                        TotalRuntime = DateTime.Now - startTime,
                         TotalThreads = TotalThreads
                     });
                 }

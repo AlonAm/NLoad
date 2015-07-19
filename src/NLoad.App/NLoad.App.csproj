@@ -63,9 +63,9 @@
     </Page>
     <Compile Include="Features\RunLoadTest\ElapsedTimeConverter.cs" />
     <Compile Include="Features\RunLoadTest\ResponseTimeConverter.cs" />
-    <Compile Include="LoadTests\HttpRequestTest.cs" />
+    <Compile Include="Tests\HttpRequestTest.cs" />
     <Compile Include="Features\RunLoadTest\LoadTestChart.cs" />
-    <Compile Include="LoadTests\InMemoryTest.cs" />
+    <Compile Include="Tests\InMemoryTest.cs" />
     <Compile Include="Features\RunLoadTest\LoadTestViewModel.cs" />
     <Compile Include="Features\RunLoadTest\Views\LoadTestWindow.xaml.cs">
       <DependentUpon>LoadTestWindow.xaml</DependentUpon>

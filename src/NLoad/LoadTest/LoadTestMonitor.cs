@@ -17,7 +17,7 @@ namespace NLoad
             _cancellationToken = cancellationToken;
         }
 
-        public List<Heartbeat> Start(TimeSpan duration)
+        public List<Heartbeat> Start(DateTime startTime, TimeSpan duration)
         {
             var running = true;
 
@@ -42,7 +42,8 @@ namespace NLoad
                 var heartbeat = new Heartbeat
                 {
                     Timestamp = now,
-                    Elapsed = elapsed,
+                    Runtime = elapsed, // Run Duration
+                    TotalRuntime = DateTime.Now - startTime,
                     Throughput = throughput,
                     TotalIterations = iterations,
                     TotalErrors = _loadTest.TotalErrors,

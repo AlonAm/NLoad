@@ -12,7 +12,7 @@ namespace NLoad.App.Features.RunLoadTest
 {
     public class LoadTestViewModel : NotifyPropertyChanged
     {
-        private readonly IEnumerable<Type> _loadTestTypes;
+        private readonly IEnumerable<Type> _testTypes;
         private LoadTestResult _result;
         private Heartbeat _lastHeartbeat;
         private string _runButtonText;
@@ -31,17 +31,17 @@ namespace NLoad.App.Features.RunLoadTest
             Defaults();
         }
 
-        public LoadTestViewModel(IEnumerable<Type> loadTestTypes)
+        public LoadTestViewModel(IEnumerable<Type> testTypes)
             : this()
         {
-            if (loadTestTypes == null)
+            if (testTypes == null)
             {
-                throw new ArgumentNullException("loadTestTypes");
+                throw new ArgumentNullException("testTypes");
             }
 
-            _loadTestTypes = loadTestTypes;
+            _testTypes = testTypes;
 
-            SelectedLoadTest = _loadTestTypes.FirstOrDefault();
+            SelectedTestType = _testTypes.FirstOrDefault();
         }
 
         #region Properties
@@ -74,9 +74,15 @@ namespace NLoad.App.Features.RunLoadTest
             }
         }
 
-        public IEnumerable<Type> LoadTestTypes { get { return _loadTestTypes; } }
+        public IEnumerable<Type> TestTypes
+        {
+            get
+            {
+                return _testTypes;
+            }
+        }
 
-        public Type SelectedLoadTest { get; set; }
+        public Type SelectedTestType { get; set; }
 
         public string RunButtonText
         {

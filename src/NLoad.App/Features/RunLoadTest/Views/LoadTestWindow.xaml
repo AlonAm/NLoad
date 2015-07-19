@@ -24,8 +24,8 @@
         <ToolBarTray  Background="Transparent">
             <ToolBar  Background="Transparent">
                 
-                <Label FontWeight="Bold" Content="Load Test"/>
-                <ComboBox ItemsSource="{Binding LoadTestTypes}" DisplayMemberPath="Name" SelectedValue="{Binding Path=SelectedLoadTest}"
+                <Label FontWeight="Bold" Content="Test"/>
+                <ComboBox ItemsSource="{Binding TestTypes}" DisplayMemberPath="Name" SelectedValue="{Binding Path=SelectedTestType}"
                           IsEnabled="{Binding IsRunning, Mode=TwoWay, Converter={StaticResource BooleanInverter}}"/>
                 
                 <Label FontWeight="Bold" Content="# Threads" />
@@ -60,8 +60,13 @@
             </StackPanel>
 
             <StackPanel Height="100" Width="200">
-                <Label Content="Elapsed" HorizontalAlignment="Center"/>
-                <Label Content="{Binding Heartbeat.Elapsed, Converter={StaticResource ElapsedTimeConverter}}"  HorizontalAlignment="Center" FontSize="34" />
+                <Label Content="Total Runtime" HorizontalAlignment="Center"/>
+                <Label Content="{Binding Heartbeat.TotalRuntime, Converter={StaticResource ElapsedTimeConverter}}"  HorizontalAlignment="Center" FontSize="34" />
+            </StackPanel>
+            
+            <StackPanel Height="100" Width="200">
+                <Label Content="Runtime" HorizontalAlignment="Center"/>
+                <Label Content="{Binding Heartbeat.Runtime, Converter={StaticResource ElapsedTimeConverter}}"  HorizontalAlignment="Center" FontSize="34" />
             </StackPanel>
 
             <StackPanel Height="100" Width="200">
