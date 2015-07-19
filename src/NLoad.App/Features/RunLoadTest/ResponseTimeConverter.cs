@@ -4,7 +4,7 @@ using System.Windows.Data;
 
 namespace NLoad.App.Features.RunLoadTest
 {
-    public class ElapsedTimeConverter : IValueConverter
+    public class ResponseTimeConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
@@ -12,7 +12,7 @@ namespace NLoad.App.Features.RunLoadTest
 
             var elapsed = (TimeSpan)value;
 
-            return string.Format("{0:hh\\:mm\\:ss}", elapsed);
+            return string.Format("{0:mm\\:ss\\.fff}", elapsed);
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

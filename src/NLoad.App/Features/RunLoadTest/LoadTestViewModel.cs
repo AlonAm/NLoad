@@ -1,5 +1,3 @@
-using System.Windows.Data;
-using System.Windows.Documents;
 using OxyPlot;
 using System;
 using System.Collections.Generic;
@@ -7,13 +5,14 @@ using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using System.Windows.Data;
 using System.Windows.Input;
 
 namespace NLoad.App.Features.RunLoadTest
 {
-    public class LoadTestViewModel : INotifyPropertyChanged
+    public class LoadTestViewModel : NotifyPropertyChanged
     {
-        private readonly IEnumerable<Type> _loadTests;
+        private readonly IEnumerable<Type> _loadTestTypes;
         private LoadTestResult _loadTestResult;
         private Heartbeat _lastHeartbeat;
         private string _runButtonText;
@@ -32,17 +31,17 @@ namespace NLoad.App.Features.RunLoadTest
             Defaults();
         }
 
-        public LoadTestViewModel(IEnumerable<Type> loadTests)
+        public LoadTestViewModel(IEnumerable<Type> loadTestTypes)
             : this()
         {
-            if (loadTests == null)
+            if (loadTestTypes == null)
             {
-                throw new ArgumentNullException("loadTests");
+                throw new ArgumentNullException("loadTestTypes");
             }
 
-            _loadTests = loadTests;
+            _loadTestTypes = loadTestTypes;
 
-            SelectedLoadTest = _loadTests.FirstOrDefault();
+            SelectedLoadTest = _loadTestTypes.FirstOrDefault();
         }
 
         #region Properties
@@ -75,7 +74,7 @@ namespace NLoad.App.Features.RunLoadTest
             }
         }
 
-        public IEnumerable<Type> LoadTests { get { return _loadTests; } }
+        public IEnumerable<Type> LoadTestTypes { get { return _loadTestTypes; } }
 
         public Type SelectedLoadTest { get; set; }
 
@@ -120,28 +119,12 @@ namespace NLoad.App.Features.RunLoadTest
 
         private void Defaults()
         {
-            Configuration.NumberOfThreads = 5;
-            Configuration.Duration = TimeSpan.FromSeconds(30);
+            Configuration.NumberOfThreads = 2;
+            Configuration.Duration = TimeSpan.FromSeconds(5);
             Configuration.DelayBetweenThreadStart = TimeSpan.Zero;
 
             RunButtonText = "Run";
         }
-
-        #region INotifyPropertyChanged Members
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        {
-            var handler = PropertyChanged;
-
-            if (handler != null)
-            {
-                handler(this, new PropertyChangedEventArgs(propertyName));
-            }
-        }
-
-        #endregion
     }
 
     public class BooleanInverter : IValueConverter
@@ -154,6 +137,21 @@ namespace NLoad.App.Features.RunLoadTest
         public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
             return !(bool)value;
+        }
+    }
+
+    public class NotifyPropertyChanged : INotifyPropertyChanged
+    {
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            var handler = PropertyChanged;
+
+            if (handler != null)
+            {
+                handler(this, new PropertyChangedEventArgs(propertyName));
+            }
         }
     }
 }

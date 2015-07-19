@@ -12,6 +12,7 @@
 
         <Grid.Resources>
             <runLoadTest:ElapsedTimeConverter x:Key="ElapsedTimeConverter" />
+            <runLoadTest:ResponseTimeConverter x:Key="ResponseTimeConverter" />
             <runLoadTest:BooleanInverter x:Key="BooleanInverter"/>
         </Grid.Resources>
 
@@ -24,7 +25,7 @@
             <ToolBar  Background="Transparent">
                 
                 <Label FontWeight="Bold" Content="Load Test"/>
-                <ComboBox ItemsSource="{Binding LoadTests}" DisplayMemberPath="Name" SelectedValue="{Binding Path=SelectedLoadTest}"
+                <ComboBox ItemsSource="{Binding LoadTestTypes}" DisplayMemberPath="Name" SelectedValue="{Binding Path=SelectedLoadTest}"
                           IsEnabled="{Binding IsRunning, Mode=TwoWay, Converter={StaticResource BooleanInverter}}"/>
                 
                 <Label FontWeight="Bold" Content="# Threads" />
@@ -46,9 +47,11 @@
 
         <WrapPanel Grid.Row="0" Margin="0,35,0,0" Background="Transparent">
 
+            <!-- Load Test Heartbeat -->
+
             <StackPanel Height="100" Width="200">
                 <Label Content="Throughput" HorizontalAlignment="Center" VerticalAlignment="Top"/>
-                <Label Content="{Binding Heartbeat.Throughput}" ContentStringFormat="{}{0:N1}" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="34"/>
+                <Label Content="{Binding Heartbeat.Throughput}" ContentStringFormat="{}{0:F1}" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="34"/>
             </StackPanel>
 
             <StackPanel Height="100" Width="200">
@@ -71,40 +74,37 @@
                 <Label Content="{Binding Heartbeat.TotalThreads}" HorizontalAlignment="Center" FontSize="34"/>
             </StackPanel>
 
-
-            <!--
-            <StackPanel Height="100" Width="200">
-                <Label Content="Avg. Response Time" HorizontalAlignment="Center"/>
-                <Label Content="{Binding LoadTestResult.AverageResponseTime}" HorizontalAlignment="Center" FontSize="34"/>
-            </StackPanel>
-
-            <StackPanel Height="100" Width="200">
-                <Label Content="Max. Response Time" HorizontalAlignment="Center"/>
-                <Label Content="{Binding LoadTestResult.MaxResponseTime}" HorizontalAlignment="Center" FontSize="34"/>
-            </StackPanel>
+            <!-- Load Test Result -->
             
-            <StackPanel Height="100" Width="200">
+            <StackPanel IsEnabled="False" Height="100" Width="200">
+                <Label Content="Avg. Response Time" HorizontalAlignment="Center"/>
+                <Label Content="{Binding LoadTestResult.AverageResponseTime, Converter={StaticResource ResponseTimeConverter}}" HorizontalAlignment="Center" FontSize="34"/>
+            </StackPanel>
+
+            <StackPanel IsEnabled="False" Height="100" Width="200">
+                <Label Content="Max. Response Time" HorizontalAlignment="Center"/>
+                <Label Content="{Binding LoadTestResult.MaxResponseTime, Converter={StaticResource ResponseTimeConverter}}" HorizontalAlignment="Center" FontSize="34"/>
+            </StackPanel>
+
+            <StackPanel IsEnabled="False" Height="100" Width="200">
                 <Label Content="Min. Response Time" HorizontalAlignment="Center"/>
-                <Label Content="{Binding LoadTestResult.MinResponseTime}" HorizontalAlignment="Center" FontSize="34"/>
+                <Label Content="{Binding LoadTestResult.MinResponseTime, Converter={StaticResource ResponseTimeConverter}}" HorizontalAlignment="Center" FontSize="34"/>
             </StackPanel>
 
-
-            <StackPanel Height="100" Width="200">
+            <StackPanel IsEnabled="False" Height="100" Width="200">
                 <Label Content="Avg. Throughput" HorizontalAlignment="Center"/>
-                <Label Content="{Binding LoadTestResult.AverageThroughput}" HorizontalAlignment="Center" FontSize="34"/>
+                <Label Content="{Binding LoadTestResult.AverageThroughput}" ContentStringFormat="{}{0:F1}" HorizontalAlignment="Center" FontSize="34"/>
             </StackPanel>
 
-
-            <StackPanel Height="100" Width="200">
+            <StackPanel IsEnabled="False" Height="100" Width="200">
                 <Label Content="Max. Throughput" HorizontalAlignment="Center"/>
-                <Label Content="{Binding LoadTestResult.MaxThroughput}" HorizontalAlignment="Center" FontSize="34"/>
+                <Label Content="{Binding LoadTestResult.MaxThroughput}" ContentStringFormat="{}{0:F1}" HorizontalAlignment="Center" FontSize="34"/>
             </StackPanel>
 
-            <StackPanel Height="100" Width="200">
+            <StackPanel IsEnabled="False" Height="100" Width="200">
                 <Label Content="Min. Throughput" HorizontalAlignment="Center"/>
-                <Label Content="{Binding LoadTestResult.MinThroughput}" HorizontalAlignment="Center" FontSize="34"/>
+                <Label Content="{Binding LoadTestResult.MinThroughput}" ContentStringFormat="{}{0:F1}" HorizontalAlignment="Center" FontSize="34"/>
             </StackPanel>
-            -->
 
         </WrapPanel>
 

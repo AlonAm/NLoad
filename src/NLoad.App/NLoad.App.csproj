@@ -62,6 +62,7 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Compile Include="Features\RunLoadTest\ElapsedTimeConverter.cs" />
+    <Compile Include="Features\RunLoadTest\ResponseTimeConverter.cs" />
     <Compile Include="LoadTests\HttpRequestTest.cs" />
     <Compile Include="Features\RunLoadTest\LoadTestChart.cs" />
     <Compile Include="LoadTests\InMemoryTest.cs" />
