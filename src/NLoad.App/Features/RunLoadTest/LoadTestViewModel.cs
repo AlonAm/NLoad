@@ -5,42 +5,43 @@ using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using System.Windows.Data;
 using System.Windows.Input;
 
 namespace NLoad.App.Features.RunLoadTest
 {
-    public class LoadTestViewModel : INotifyPropertyChanged
+    public class LoadTestViewModel : NotifyPropertyChanged
     {
-        private readonly IEnumerable<Type> _loadTests;
-        private LoadTestResult _loadTestResult;
+        private readonly IEnumerable<Type> _testTypes;
+        private LoadTestResult _result;
         private Heartbeat _lastHeartbeat;
+        private string _runButtonText;
+        private bool _isRunning;
 
         public LoadTestViewModel()
         {
             Configuration = new LoadTestConfiguration();
 
-            RunLoadTestCommand = new RunLoadTestCommandAsync(this);
+            RunLoadTestCommand = new RunLoadTestCommand(this);
 
             Heartbeats = new List<Heartbeat>();
 
             ChartModel = new LoadTestChart(Heartbeats);
 
             Defaults();
-
-            Reset();
         }
 
-        public LoadTestViewModel(IEnumerable<Type> loadTests)
+        public LoadTestViewModel(IEnumerable<Type> testTypes)
             : this()
         {
-            if (loadTests == null)
+            if (testTypes == null)
             {
-                throw new ArgumentNullException("loadTests");
+                throw new ArgumentNullException("testTypes");
             }
 
-            _loadTests = loadTests;
+            _testTypes = testTypes;
 
-            LoadTest = _loadTests.FirstOrDefault();
+            SelectedTestType = _testTypes.FirstOrDefault();
         }
 
         #region Properties
@@ -51,14 +52,14 @@ namespace NLoad.App.Features.RunLoadTest
 
         public ICommand RunLoadTestCommand { get; private set; }
 
-        // Display todo: replace with Load Test Result / Heartbeat
+        // UI
 
-        public LoadTestResult LoadTestResult
+        public LoadTestResult Result
         {
-            get { return _loadTestResult; }
+            get { return _result; }
             set
             {
-                _loadTestResult = value;
+                _result = value;
                 OnPropertyChanged();
             }
         }
@@ -73,25 +74,43 @@ namespace NLoad.App.Features.RunLoadTest
             }
         }
 
-        public IEnumerable<Type> LoadTests
+        public IEnumerable<Type> TestTypes
         {
             get
             {
-                return _loadTests;
+                return _testTypes;
             }
         }
 
-        public Type LoadTest { get; set; }
+        public Type SelectedTestType { get; set; }
 
-        // Toolbar
+        public string RunButtonText
+        {
+            get { return _runButtonText; }
+            set
+            {
+                _runButtonText = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public CancellationTokenSource CancellationTokenSource { get; set; }
+
+        public bool IsRunning
+        {
+            get { return _isRunning; }
+            set
+            {
+                _isRunning = value;
+                OnPropertyChanged();
+            }
+        }
 
         public LoadTestConfiguration Configuration { get; set; }
 
         // Chart
 
         public PlotModel ChartModel { get; set; }
-
-        public CancellationTokenSource CancellationTokenSource { get; set; }
 
         #endregion
 
@@ -104,25 +123,31 @@ namespace NLoad.App.Features.RunLoadTest
             ChartModel.InvalidatePlot(true);
         }
 
-        public void Reset()
-        {
-            if (Heartbeats != null)
-            {
-                Heartbeats.Clear();
-            }
-        }
-
         private void Defaults()
         {
-            Configuration.NumberOfThreads = 5;
-
-            Configuration.Duration = TimeSpan.FromSeconds(30);
-
+            Configuration.NumberOfThreads = 2;
+            Configuration.Duration = TimeSpan.FromSeconds(5);
             Configuration.DelayBetweenThreadStart = TimeSpan.Zero;
+
+            RunButtonText = "Run";
+        }
+    }
+
+    public class BooleanInverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            return !(bool)value;
         }
 
-        #region INotifyPropertyChanged Members
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            return !(bool)value;
+        }
+    }
 
+    public class NotifyPropertyChanged : INotifyPropertyChanged
+    {
         public event PropertyChangedEventHandler PropertyChanged;
 
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
@@ -134,7 +159,5 @@ namespace NLoad.App.Features.RunLoadTest
                 handler(this, new PropertyChangedEventArgs(propertyName));
             }
         }
-
-        #endregion
     }
 }

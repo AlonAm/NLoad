@@ -62,16 +62,17 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Compile Include="Features\RunLoadTest\ElapsedTimeConverter.cs" />
-    <Compile Include="LoadTests\HttpRequestTest.cs" />
+    <Compile Include="Features\RunLoadTest\ResponseTimeConverter.cs" />
+    <Compile Include="Tests\SlowHttpRequestTest.cs" />
     <Compile Include="Features\RunLoadTest\LoadTestChart.cs" />
-    <Compile Include="LoadTests\InMemoryTest.cs" />
+    <Compile Include="Tests\InMemoryTest.cs" />
     <Compile Include="Features\RunLoadTest\LoadTestViewModel.cs" />
     <Compile Include="Features\RunLoadTest\Views\LoadTestWindow.xaml.cs">
       <DependentUpon>LoadTestWindow.xaml</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Features\RunLoadTest\Commands\RunLoadTestCommandAsync.cs" />
+    <Compile Include="Features\RunLoadTest\Commands\RunLoadTestCommand.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>

@@ -17,10 +17,10 @@ namespace NLoad.Tests
             var duration = TimeSpan.FromSeconds(3);
 
             var loadTest = NLoad.Test<OneSecondDelayTest>()
-                                    .WithNumberOfThreads(1)
-                                    .WithDurationOf(duration)
-                                    .WithDeleyBetweenThreadStart(TimeSpan.Zero)
-                                        .Build();
+                                .WithNumberOfThreads(1)
+                                .WithDurationOf(duration)
+                                .WithDeleyBetweenThreadStart(TimeSpan.Zero)
+                                .Build();
 
             var result = loadTest.Run();
 
@@ -47,10 +47,10 @@ namespace NLoad.Tests
             var duration = TimeSpan.FromSeconds(3);
 
             var loadTest = NLoad.Test<OneSecondDelayTest>()
-                                    .WithNumberOfThreads(10)
-                                    .WithDurationOf(duration)
-                                    .WithDeleyBetweenThreadStart(TimeSpan.Zero)
-                                        .Build();
+                                .WithNumberOfThreads(10)
+                                .WithDurationOf(duration)
+                                .WithDeleyBetweenThreadStart(TimeSpan.Zero)
+                                .Build();
 
             var result = loadTest.Run();
 
@@ -81,12 +81,12 @@ namespace NLoad.Tests
                 var duration = TimeSpan.FromSeconds(durationInSeconds);
 
                 var result = NLoad.Test<TestMock>()
-                                    .WithNumberOfThreads(1)
-                                    .WithDurationOf(duration)
-                                    .WithDeleyBetweenThreadStart(TimeSpan.Zero)
-                                        .Build()
-                                            .Run();
-
+                                  .WithNumberOfThreads(1)
+                                  .WithDurationOf(duration)
+                                  .WithDeleyBetweenThreadStart(TimeSpan.Zero)
+                                  .Build()
+                                  .Run();
+                
                 Assert.AreEqual(durationInSeconds, result.Heartbeat.Count - 1);
             }
         }

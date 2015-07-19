@@ -28,7 +28,7 @@ namespace NLoad.Tests
 
             var heartRateMonitor = new LoadTestMonitor(loadTest.Object, cancellationToken.Token);
 
-            var heartbeats = heartRateMonitor.Start(TimeSpan.FromSeconds(2));
+            var heartbeats = heartRateMonitor.Start(DateTime.Now, TimeSpan.FromSeconds(2));
 
             Assert.IsNotNull(heartbeats);
             Assert.IsTrue(heartbeats.Any());

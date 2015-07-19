@@ -17,21 +17,31 @@ namespace NLoad.App.Features.RunLoadTest
             Series.Add(new LineSeries
             {
                 ItemsSource = heartbeats,
-                DataFieldX = "Elapsed",
+                DataFieldX = "TotalRuntime",
                 DataFieldY = "Throughput",
                 Color = OxyColors.DodgerBlue,
                 Title = "Throughput",
-                Smooth = true
+                Smooth = false
             });
 
             Series.Add(new LineSeries
             {
                 ItemsSource = heartbeats,
-                DataFieldX = "Elapsed",
+                DataFieldX = "TotalRuntime",
                 DataFieldY = "TotalErrors",
                 Color = OxyColors.Red,
                 Title = "Errors",
-                Smooth = true
+                Smooth = false
+            });
+
+            Series.Add(new LineSeries
+            {
+                ItemsSource = heartbeats,
+                DataFieldX = "TotalRuntime",
+                DataFieldY = "TotalThreads",
+                Color = OxyColors.Green,
+                Title = "Threads",
+                Smooth = false
             });
         }
     }
