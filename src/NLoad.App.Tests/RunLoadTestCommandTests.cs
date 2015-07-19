@@ -56,7 +56,7 @@ namespace NLoad.App.Tests
         {
             var start = DateTime.Now;
 
-            while (viewModel.LoadTestResult == null)
+            while (viewModel.Result == null)
             {
                 if (DateTime.Now.Subtract(start) > TimeSpan.FromSeconds(5)) throw new TimeoutException();
 

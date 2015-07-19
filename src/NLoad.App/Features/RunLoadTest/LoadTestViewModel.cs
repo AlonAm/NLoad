@@ -13,7 +13,7 @@ namespace NLoad.App.Features.RunLoadTest
     public class LoadTestViewModel : NotifyPropertyChanged
     {
         private readonly IEnumerable<Type> _loadTestTypes;
-        private LoadTestResult _loadTestResult;
+        private LoadTestResult _result;
         private Heartbeat _lastHeartbeat;
         private string _runButtonText;
         private bool _isRunning;
@@ -54,12 +54,12 @@ namespace NLoad.App.Features.RunLoadTest
 
         // UI
 
-        public LoadTestResult LoadTestResult
+        public LoadTestResult Result
         {
-            get { return _loadTestResult; }
+            get { return _result; }
             set
             {
-                _loadTestResult = value;
+                _result = value;
                 OnPropertyChanged();
             }
         }
