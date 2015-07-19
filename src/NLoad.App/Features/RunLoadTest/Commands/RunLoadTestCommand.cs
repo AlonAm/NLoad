@@ -63,7 +63,7 @@ namespace NLoad.App.Features.RunLoadTest
             {
                 var loadTest = NLoad.Test(_viewModel.SelectedTestType)
                                         .WithNumberOfThreads(_viewModel.Configuration.NumberOfThreads)
-                                        .WithRunDurationOf(_viewModel.Configuration.Duration)
+                                        .WithDurationOf(_viewModel.Configuration.Duration)
                                         .WithDeleyBetweenThreadStart(_viewModel.Configuration.DelayBetweenThreadStart)
                                         .WithCancellationToken(_cancellationTokenSource.Token)
                                         .OnHeartbeat((s, e) => progress.Report(e))

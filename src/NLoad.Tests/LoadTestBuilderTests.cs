@@ -15,7 +15,7 @@ namespace NLoad.Tests
 
             var loadTest = NLoad.Test<TestMock>()
                             .WithNumberOfThreads(numberOfThreads)
-                            .WithRunDurationOf(duration)
+                            .WithDurationOf(duration)
                             .WithDeleyBetweenThreadStart(delayBetweenThreadStart)
                             .Build();
 

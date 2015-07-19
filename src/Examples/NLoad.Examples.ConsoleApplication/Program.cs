@@ -9,7 +9,7 @@ namespace NLoad.Examples.ConsoleApplication
         {
             var loadTest = NLoad.Test<MyTest>()
                                     .WithNumberOfThreads(10)
-                                    .WithRunDurationOf(TimeSpan.FromSeconds(10))
+                                    .WithDurationOf(TimeSpan.FromSeconds(10))
                                     .OnHeartbeat((s, e) => Console.WriteLine(e.Throughput))
                                 .Build();
 

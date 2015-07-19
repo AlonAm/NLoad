@@ -40,7 +40,7 @@ namespace NLoad
             return this;
         }
 
-        public ILoadTestBuilder WithRunDurationOf(TimeSpan duration)
+        public ILoadTestBuilder WithDurationOf(TimeSpan duration)
         {
             _configuration.Duration = duration;
 

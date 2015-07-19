@@ -18,7 +18,7 @@ namespace NLoad.Tests
 
             var loadTest = NLoad.Test<OneSecondDelayTest>()
                                 .WithNumberOfThreads(1)
-                                .WithRunDurationOf(duration)
+                                .WithDurationOf(duration)
                                 .WithDeleyBetweenThreadStart(TimeSpan.Zero)
                                 .Build();
 
@@ -48,7 +48,7 @@ namespace NLoad.Tests
 
             var loadTest = NLoad.Test<OneSecondDelayTest>()
                                 .WithNumberOfThreads(10)
-                                .WithRunDurationOf(duration)
+                                .WithDurationOf(duration)
                                 .WithDeleyBetweenThreadStart(TimeSpan.Zero)
                                 .Build();
 
@@ -82,7 +82,7 @@ namespace NLoad.Tests
 
                 var result = NLoad.Test<TestMock>()
                                   .WithNumberOfThreads(1)
-                                  .WithRunDurationOf(duration)
+                                  .WithDurationOf(duration)
                                   .WithDeleyBetweenThreadStart(TimeSpan.Zero)
                                   .Build()
                                   .Run();
@@ -115,7 +115,7 @@ namespace NLoad.Tests
 
             var result = NLoad.Test<OneSecondDelayTest>()
                 .WithNumberOfThreads(numThreads)
-                .WithRunDurationOf(duration)
+                .WithDurationOf(duration)
                 .WithDeleyBetweenThreadStart(TimeSpan.Zero)
                 .Build()
                 .Run();
@@ -130,7 +130,7 @@ namespace NLoad.Tests
 
             var loadTest = NLoad.Test<ThreadCounter>()
                                     .WithNumberOfThreads(numberOfThreads)
-                                    .WithRunDurationOf(TimeSpan.Zero)
+                                    .WithDurationOf(TimeSpan.Zero)
                                     .WithDeleyBetweenThreadStart(TimeSpan.Zero)
                                         .Build();
 
@@ -146,7 +146,7 @@ namespace NLoad.Tests
 
             NLoad.Test<TestMock>()
                     .WithNumberOfThreads(1)
-                    .WithRunDurationOf(TimeSpan.FromSeconds(1))
+                    .WithDurationOf(TimeSpan.FromSeconds(1))
                     .OnHeartbeat((s, hearbeat) =>
                         {
                             eventFired = true;
@@ -164,7 +164,7 @@ namespace NLoad.Tests
 
             NLoad.Test<TestMock>()
                     .WithNumberOfThreads(1)
-                    .WithRunDurationOf(TimeSpan.FromSeconds(2))
+                    .WithDurationOf(TimeSpan.FromSeconds(2))
                     .OnHeartbeat((s, hearbeat) => throughput.Add(hearbeat.Throughput))
                     .Build()
                     .Run();
@@ -175,7 +175,7 @@ namespace NLoad.Tests
 
             NLoad.Test<TestMock>()
                     .WithNumberOfThreads(1)
-                    .WithRunDurationOf(TimeSpan.FromSeconds(1))
+                    .WithDurationOf(TimeSpan.FromSeconds(1))
                     .OnHeartbeat((s, hearbeat) => throughput.Add(hearbeat.Throughput))
                     .Build()
                     .Run();
@@ -192,7 +192,7 @@ namespace NLoad.Tests
 
         //    var loadTest = NLoad.Test<TestMock>()
         //        .WithNumberOfThreads(1)
-        //        .WithRunDurationOf(TimeSpan.FromSeconds(2))
+        //        .WithDurationOf(TimeSpan.FromSeconds(2))
         //        //.OnHeartbeat((s, hearbeat) => throughput.Add(hearbeat.Throughput))
         //        .Build();
 
@@ -213,7 +213,7 @@ namespace NLoad.Tests
         {
             var result = NLoad.Test<FailedTest>()
                                 .WithNumberOfThreads(1)
-                                .WithRunDurationOf(TimeSpan.FromSeconds(1))
+                                .WithDurationOf(TimeSpan.FromSeconds(1))
                                 .Build()
                                 .Run();
 
@@ -265,7 +265,7 @@ namespace NLoad.Tests
 
                 var result = NLoad.Test<TestMock>()
                                     .WithNumberOfThreads(1)
-                                    .WithRunDurationOf(TimeSpan.FromSeconds(2))
+                                    .WithDurationOf(TimeSpan.FromSeconds(2))
                                     .OnHeartbeat((s, e) => progress.Report(e))
                                     .Build()
                                     .Run();

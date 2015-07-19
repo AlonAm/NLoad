@@ -9,7 +9,7 @@ namespace NLoad
 
         ILoadTestBuilder OfType(Type type);
 
-        ILoadTestBuilder WithRunDurationOf(TimeSpan duration);
+        ILoadTestBuilder WithDurationOf(TimeSpan duration);
 
         ILoadTestBuilder WithNumberOfThreads(int numberOfThreads);
 
