@@ -63,7 +63,7 @@
     </Page>
     <Compile Include="Features\RunLoadTest\ElapsedTimeConverter.cs" />
     <Compile Include="Features\RunLoadTest\ResponseTimeConverter.cs" />
-    <Compile Include="Tests\HttpRequestTest.cs" />
+    <Compile Include="Tests\SlowHttpRequestTest.cs" />
     <Compile Include="Features\RunLoadTest\LoadTestChart.cs" />
     <Compile Include="Tests\InMemoryTest.cs" />
     <Compile Include="Features\RunLoadTest\LoadTestViewModel.cs" />

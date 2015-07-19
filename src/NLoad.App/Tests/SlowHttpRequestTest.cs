@@ -3,7 +3,7 @@
 namespace NLoad.App.Tests
 {
     [LoadTest]
-    class HttpRequestTest : ITest
+    class SlowHttpRequestTest : ITest
     {
         readonly WebClient _webClient = new WebClient();
 
