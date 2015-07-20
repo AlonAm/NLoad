@@ -19,26 +19,24 @@ namespace NLoad
         #region Fields
 
         private long _threadCount;
-
         private long _totalErrors;
-
         private long _totalIterations;
-
         private readonly Type _testType;
-
         private List<TestRunner> _testRunners;
-
         private readonly LoadTestMonitor _monitor;
-
         private readonly ManualResetEvent _quitEvent;
-
         private readonly ManualResetEvent _startEvent;
+        private readonly LoadTestConfiguration _configuration;
+        private CancellationToken _cancellationToken;
+
+        #endregion
+
+        #region Events
 
         public event EventHandler<Heartbeat> Heartbeat;
-
-        private readonly LoadTestConfiguration _configuration;
-
-        private readonly CancellationToken _cancellationToken;
+        public event EventHandler<EventArgs> Starting;
+        public event EventHandler<EventArgs> Finished;
+        public event EventHandler<EventArgs> Aborted;
 
         #endregion
 
@@ -58,6 +56,14 @@ namespace NLoad
             _quitEvent = new ManualResetEvent(false);
 
             _monitor = new LoadTestMonitor(this, cancellationToken);
+
+            _cancellationToken.Register(() =>
+            {
+                if (Aborted != null)
+                {
+                    Aborted(this, new EventArgs());
+                }
+            });
         }
 
         #region Properties
@@ -100,6 +106,8 @@ namespace NLoad
         {
             try
             {
+                if (Starting != null) Starting(this, new EventArgs());
+
                 var startTime = DateTime.Now;
 
                 Initialize();
@@ -117,6 +125,8 @@ namespace NLoad
                 Shutdown();
 
                 stopWatch.Stop();
+
+                if (Finished != null) Finished(this, new EventArgs());
 
                 return LoadTestResult(stopWatch.Elapsed, heartbeats);
             }
@@ -214,27 +224,27 @@ namespace NLoad
 
         private void StartTestRunners()
         {
-            _testRunners.ForEach(testRunner => testRunner.StartAsync());
+            _testRunners.ForEach(testRunner => testRunner.Start());
         }
 
         private void Initialize()
         {
-            var context = new TestRunContext
+            var loadTestContext = new LoadTestContext
             {
                 StartEvent = _startEvent,
                 QuitEvent = _quitEvent
             };
 
-            CreateTestRunners(context);
+            CreateTestRunners(loadTestContext);
         }
 
-        private void CreateTestRunners(TestRunContext context)
+        private void CreateTestRunners(LoadTestContext loadTestContext)
         {
             _testRunners = new List<TestRunner>(_configuration.NumberOfThreads);
 
             for (var i = 0; i < _configuration.NumberOfThreads; i++)
             {
-                var testRunner = new TestRunner(this, _testType, context, _cancellationToken);
+                var testRunner = new TestRunner(this, _testType, loadTestContext, _cancellationToken);
 
                 _testRunners.Add(testRunner);
             }

@@ -38,7 +38,6 @@
     <Compile Include="LoadTest\ILoadTestBuilder.cs" />
     <Compile Include="LoadTest\LoadTestMonitor.cs" />
     <Compile Include="LoadTest\ILoadTest.cs" />
-    <Compile Include="Test\ITest.cs" />
     <Compile Include="LoadTest\LoadTest.cs" />
     <Compile Include="LoadTest\LoadTestBuilder.cs" />
     <Compile Include="LoadTest\LoadTestConfiguration.cs" />
@@ -46,17 +45,20 @@
     <Compile Include="LoadTest\LoadTestResult.cs" />
     <Compile Include="NLoad.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Test\TestContext.cs" />
-    <Compile Include="Test\TestResult.cs" />
-    <Compile Include="TestRun\TestRunContext.cs" />
+    <Compile Include="LoadTest\LoadTestContext.cs" />
     <Compile Include="TestRunner\TestRunner.cs">
       <ExcludeFromStyleCop>False</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="TestRunner\TestRunnerResult.cs" />
     <Compile Include="TestRun\TestRunResult.cs" />
+    <Compile Include="Test\ITest.cs" />
+    <Compile Include="Test\TestResult.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="NLoad.nuspec" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Scenario\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

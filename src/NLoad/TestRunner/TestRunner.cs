@@ -5,22 +5,14 @@ using System.Threading.Tasks;
 
 namespace NLoad
 {
-    //public class TestRunner<T> : TestRunner where T : ITest, new()
-    //{
-    //    public TestRunner(ILoadTest loadTest, TestRunContext context, CancellationToken cancellationToken)
-    //        : base(loadTest, typeof(T), context, cancellationToken)
-    //    {
-    //    }
-    //}
-
     public class TestRunner
     {
         private readonly Type _testType;
         private readonly ILoadTest _loadTest;
-        private readonly TestRunContext _context;
+        private readonly LoadTestContext _context;
         private readonly CancellationToken _cancellationToken;
 
-        public TestRunner(ILoadTest loadTest, Type testType, TestRunContext context, CancellationToken cancellationToken)
+        public TestRunner(ILoadTest loadTest, Type testType, LoadTestContext context, CancellationToken cancellationToken)
         {
             _loadTest = loadTest;
             _testType = testType;
@@ -36,27 +28,27 @@ namespace NLoad
 
         #endregion
 
-        public async void StartAsync()
+        public void Start()
         {
             IsBusy = true;
 
-            var testRunnerResult = Task.Run(() => Start(_context), _cancellationToken).ConfigureAwait(false);
+            Task.Run(() => Start(_context), _cancellationToken)
+                .ContinueWith((task) =>
+                {
+                    if (task.IsFaulted || task.IsCanceled)
+                    {
+                        Result = new TestRunnerResult();
+                    }
+                    else
+                    {
+                        Result = task.Result;
+                    }
 
-            try
-            {
-                Result = await testRunnerResult;
-            }
-            catch (TaskCanceledException)
-            {
-                Result = new TestRunnerResult();
-            }
-            finally
-            {
-                IsBusy = false;
-            }
+                    IsBusy = false;
+                }, _cancellationToken);
         }
 
-        private TestRunnerResult Start(TestRunContext context)
+        private TestRunnerResult Start(LoadTestContext context)
         {
             var result = new TestRunnerResult(starTime: DateTime.UtcNow);
 

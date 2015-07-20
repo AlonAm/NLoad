@@ -2,7 +2,7 @@
 
 namespace NLoad
 {
-    public class TestRunContext
+    public class LoadTestContext
     {
         public ManualResetEvent StartEvent { get; set; }
         public ManualResetEvent QuitEvent { get; set; }

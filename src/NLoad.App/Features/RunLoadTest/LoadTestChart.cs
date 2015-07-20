@@ -18,16 +18,6 @@ namespace NLoad.App.Features.RunLoadTest
             {
                 ItemsSource = heartbeats,
                 DataFieldX = "TotalRuntime",
-                DataFieldY = "Throughput",
-                Color = OxyColors.DodgerBlue,
-                Title = "Throughput",
-                Smooth = false
-            });
-
-            Series.Add(new LineSeries
-            {
-                ItemsSource = heartbeats,
-                DataFieldX = "TotalRuntime",
                 DataFieldY = "TotalErrors",
                 Color = OxyColors.Red,
                 Title = "Errors",
@@ -41,6 +31,16 @@ namespace NLoad.App.Features.RunLoadTest
                 DataFieldY = "TotalThreads",
                 Color = OxyColors.Green,
                 Title = "Threads",
+                Smooth = false
+            });
+
+            Series.Add(new LineSeries
+            {
+                ItemsSource = heartbeats,
+                DataFieldX = "TotalRuntime",
+                DataFieldY = "Throughput",
+                Color = OxyColors.DodgerBlue,
+                Title = "Throughput",
                 Smooth = false
             });
         }
