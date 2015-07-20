@@ -51,15 +51,13 @@
     </Compile>
     <Compile Include="TestRunner\TestRunnerResult.cs" />
     <Compile Include="TestRun\TestRunResult.cs" />
-    <Compile Include="Test\ITest.cs" />
-    <Compile Include="Test\TestResult.cs" />
+    <Compile Include="Scenario\ITest.cs" />
+    <Compile Include="Scenario\TestResult.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="NLoad.nuspec" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Scenario\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
