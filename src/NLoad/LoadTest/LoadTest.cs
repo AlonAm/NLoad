@@ -42,28 +42,30 @@ namespace NLoad
 
         public LoadTest(Type testType, LoadTestConfiguration configuration, CancellationToken cancellationToken)
         {
-            if (configuration == null)
-                throw new ArgumentNullException("configuration");
+            if (testType == null)
+            {
+                throw new ArgumentNullException("testType");
+            }
 
-            if (cancellationToken == null)
-                throw new ArgumentNullException("cancellationToken");
+            if (configuration == null)
+            {
+                throw new ArgumentNullException("configuration");
+            }
 
             _testType = testType;
             _configuration = configuration;
             _cancellationToken = cancellationToken;
-
             _startEvent = new ManualResetEvent(false);
             _quitEvent = new ManualResetEvent(false);
-
             _monitor = new LoadTestMonitor(this, cancellationToken);
 
-            _cancellationToken.Register(() =>
+            if (_cancellationToken != null)
             {
-                if (Aborted != null)
+                _cancellationToken.Register(() =>
                 {
-                    Aborted(this, new EventArgs());
-                }
-            });
+                    if (Aborted != null) Aborted(this, new EventArgs());
+                });
+            }
         }
 
         #region Properties
