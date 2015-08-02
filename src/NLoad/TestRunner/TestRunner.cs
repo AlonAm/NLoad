@@ -20,32 +20,22 @@ namespace NLoad
             _cancellationToken = cancellationToken;
         }
 
-        #region Properties
-
         public TestRunnerResult Result { get; private set; }
 
         public bool IsBusy { get; private set; }
-
-        #endregion
 
         public void Start()
         {
             IsBusy = true;
 
             Task.Run(() => Start(_context), _cancellationToken)
-                .ContinueWith((task) =>
-                {
-                    if (task.IsFaulted || task.IsCanceled)
-                    {
-                        Result = new TestRunnerResult();
-                    }
-                    else
-                    {
-                        Result = task.Result;
-                    }
+                            .ContinueWith((task) =>
+                            {
+                                Result = task.IsFaulted || task.IsCanceled ? new TestRunnerResult() : task.Result;
 
-                    IsBusy = false;
-                }, _cancellationToken);
+                                IsBusy = false;
+                            },
+                            _cancellationToken);
         }
 
         private TestRunnerResult Start(LoadTestContext context)

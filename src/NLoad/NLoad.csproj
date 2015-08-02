@@ -34,7 +34,7 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="LoadTest\Heartbeat.cs" />
+    <Compile Include="Events\Heartbeat.cs" />
     <Compile Include="LoadTest\ILoadTestBuilder.cs" />
     <Compile Include="LoadTest\LoadTestMonitor.cs" />
     <Compile Include="LoadTest\ILoadTest.cs" />
