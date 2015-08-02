@@ -21,52 +21,71 @@ namespace NLoad
         private long _threadCount;
         private long _totalErrors;
         private long _totalIterations;
+
         private readonly Type _testType;
-        private List<TestRunner> _testRunners;
         private readonly LoadTestMonitor _monitor;
-        private readonly ManualResetEvent _quitEvent;
-        private readonly ManualResetEvent _startEvent;
+        //private readonly ManualResetEvent _quitEvent;
+        //private readonly ManualResetEvent _startEvent;
+        private readonly LoadTestContext _loadTestContext;
         private readonly LoadTestConfiguration _configuration;
+
+        private List<TestRunner> _testRunners;
         private CancellationToken _cancellationToken;
+
 
         #endregion
 
-        #region Events
+        #region Public Events
 
         public event EventHandler<Heartbeat> Heartbeat;
+
         public event EventHandler<EventArgs> Starting;
+
         public event EventHandler<EventArgs> Finished;
+
         public event EventHandler<EventArgs> Aborted;
 
         #endregion
 
-        public LoadTest(Type testType, LoadTestConfiguration configuration, CancellationToken cancellationToken)
-        {
-            if (testType == null)
-            {
-                throw new ArgumentNullException("testType");
-            }
+        #region Ctor
 
-            if (configuration == null)
-            {
+        public LoadTest(Type testType, LoadTestConfiguration configuration)
+        {
+            if (testType == null) 
+                throw new ArgumentNullException("testType");
+
+            if (configuration == null) 
                 throw new ArgumentNullException("configuration");
-            }
 
             _testType = testType;
             _configuration = configuration;
-            _cancellationToken = cancellationToken;
-            _startEvent = new ManualResetEvent(false);
-            _quitEvent = new ManualResetEvent(false);
-            _monitor = new LoadTestMonitor(this, cancellationToken);
 
-            if (_cancellationToken != null)
+            _loadTestContext = new LoadTestContext
             {
-                _cancellationToken.Register(() =>
-                {
-                    if (Aborted != null) Aborted(this, new EventArgs());
-                });
-            }
+                StartEvent = new ManualResetEvent(false),
+                QuitEvent = new ManualResetEvent(false)
+            };
+
+            _monitor = new LoadTestMonitor(this);
         }
+
+        public LoadTest(Type testType, LoadTestConfiguration configuration, CancellationToken cancellationToken)
+            : this(testType, configuration)
+        {
+            _cancellationToken = cancellationToken;
+
+            _monitor.CancellationToken = _cancellationToken;
+
+            _cancellationToken.Register(() =>
+            {
+                if (Aborted != null)
+                {
+                    Aborted(this, new EventArgs());
+                }
+            });
+        }
+
+        #endregion
 
         #region Properties
 
@@ -108,11 +127,14 @@ namespace NLoad
         {
             try
             {
-                if (Starting != null) Starting(this, new EventArgs());
+                if (Starting != null)
+                {
+                    Starting(this, new EventArgs());
+                }
 
                 var startTime = DateTime.Now;
 
-                Initialize();
+                CreateTestRunners();
 
                 StartTestRunners();
 
@@ -128,7 +150,10 @@ namespace NLoad
 
                 stopWatch.Stop();
 
-                if (Finished != null) Finished(this, new EventArgs());
+                if (Finished != null)
+                {
+                    Finished(this, new EventArgs());
+                }
 
                 return LoadTestResult(stopWatch.Elapsed, heartbeats);
             }
@@ -159,7 +184,7 @@ namespace NLoad
 
         private void StartLoadTest()
         {
-            _startEvent.Set();
+            _loadTestContext.StartEvent.Set();
         }
 
         private List<Heartbeat> MonitorLoadTest(DateTime startTime)
@@ -229,24 +254,13 @@ namespace NLoad
             _testRunners.ForEach(testRunner => testRunner.Start());
         }
 
-        private void Initialize()
-        {
-            var loadTestContext = new LoadTestContext
-            {
-                StartEvent = _startEvent,
-                QuitEvent = _quitEvent
-            };
-
-            CreateTestRunners(loadTestContext);
-        }
-
-        private void CreateTestRunners(LoadTestContext loadTestContext)
+        private void CreateTestRunners()
         {
             _testRunners = new List<TestRunner>(_configuration.NumberOfThreads);
 
             for (var i = 0; i < _configuration.NumberOfThreads; i++)
             {
-                var testRunner = new TestRunner(this, _testType, loadTestContext, _cancellationToken);
+                var testRunner = new TestRunner(this, _testType, _loadTestContext, _cancellationToken);
 
                 _testRunners.Add(testRunner);
             }
@@ -254,7 +268,7 @@ namespace NLoad
 
         private void Shutdown()
         {
-            _quitEvent.Set();
+            _loadTestContext.QuitEvent.Set();
 
             while (_testRunners.Any(w => w.IsBusy)) //todo: replace with Task.WaitAll
             {

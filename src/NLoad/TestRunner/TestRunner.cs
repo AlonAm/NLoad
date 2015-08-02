@@ -29,10 +29,9 @@ namespace NLoad
             IsBusy = true;
 
             Task.Run(() => Start(_context), _cancellationToken)
-                            .ContinueWith((task) =>
+                            .ContinueWith(task =>
                             {
                                 Result = task.IsFaulted || task.IsCanceled ? new TestRunnerResult() : task.Result;
-
                                 IsBusy = false;
                             },
                             _cancellationToken);
