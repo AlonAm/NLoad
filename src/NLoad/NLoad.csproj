@@ -50,7 +50,7 @@
       <ExcludeFromStyleCop>False</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="LoadGenerator\LoadGeneratorResult.cs" />
-    <Compile Include="TestRun\TestRunResult.cs" />
+    <Compile Include="Scenario\TestRunResult.cs" />
     <Compile Include="Scenario\ITest.cs" />
     <Compile Include="Scenario\TestResult.cs" />
   </ItemGroup>
