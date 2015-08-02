@@ -29,7 +29,7 @@ namespace NLoad
         private readonly LoadTestContext _loadTestContext;
         private readonly LoadTestConfiguration _configuration;
 
-        private List<TestRunner> _testRunners;
+        private List<LoadGenerator> _testRunners;
         private CancellationToken _cancellationToken;
 
 
@@ -58,13 +58,10 @@ namespace NLoad
                 throw new ArgumentNullException("configuration");
 
             _testType = testType;
+
             _configuration = configuration;
 
-            _loadTestContext = new LoadTestContext
-            {
-                StartEvent = new ManualResetEvent(false),
-                QuitEvent = new ManualResetEvent(false)
-            };
+            _loadTestContext = new LoadTestContext();
 
             _monitor = new LoadTestMonitor(this);
         }
@@ -256,11 +253,11 @@ namespace NLoad
 
         private void CreateTestRunners()
         {
-            _testRunners = new List<TestRunner>(_configuration.NumberOfThreads);
+            _testRunners = new List<LoadGenerator>(_configuration.NumberOfThreads);
 
             for (var i = 0; i < _configuration.NumberOfThreads; i++)
             {
-                var testRunner = new TestRunner(this, _testType, _loadTestContext, _cancellationToken);
+                var testRunner = new LoadGenerator(this, _testType, _loadTestContext, _cancellationToken);
 
                 _testRunners.Add(testRunner);
             }

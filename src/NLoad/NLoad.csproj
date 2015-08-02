@@ -46,10 +46,10 @@
     <Compile Include="NLoad.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="LoadTest\LoadTestContext.cs" />
-    <Compile Include="TestRunner\TestRunner.cs">
+    <Compile Include="LoadGenerator\LoadGenerator.cs">
       <ExcludeFromStyleCop>False</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="TestRunner\TestRunnerResult.cs" />
+    <Compile Include="LoadGenerator\LoadGeneratorResult.cs" />
     <Compile Include="TestRun\TestRunResult.cs" />
     <Compile Include="Scenario\ITest.cs" />
     <Compile Include="Scenario\TestResult.cs" />

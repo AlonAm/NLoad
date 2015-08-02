@@ -5,7 +5,7 @@ namespace NLoad
 {
     public class LoadTestResult
     {
-        public IEnumerable<TestRunnerResult> TestRunnersResults { get; set; }
+        public IEnumerable<LoadGeneratorResult> TestRunnersResults { get; set; }
 
         public List<TestRunResult> TestRuns { get; set; }
 

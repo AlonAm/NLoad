@@ -4,8 +4,14 @@ namespace NLoad
 {
     public class LoadTestContext
     {
-        public ManualResetEvent StartEvent { get; set; }
+        public LoadTestContext()
+        {
+            StartEvent = new ManualResetEvent(false);
+            QuitEvent = new ManualResetEvent(false);
+        }
 
-        public ManualResetEvent QuitEvent { get; set; }
+        public ManualResetEvent StartEvent { get; private set; }
+
+        public ManualResetEvent QuitEvent { get; private set; }
     }
 }
