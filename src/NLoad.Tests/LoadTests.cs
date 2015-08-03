@@ -220,6 +220,7 @@ namespace NLoad.Tests
             Assert.AreEqual(result.TotalErrors, result.TotalIterations);
         }
 
+        [Ignore]
         [TestMethod]
         public void AsyncTest()
         {
