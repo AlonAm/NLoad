@@ -20,7 +20,7 @@ namespace NLoad.Tests
 
             context.StartEvent.Set();
             
-            Thread.Sleep(1);
+            Thread.Sleep(100);
 
             context.QuitEvent.Set();
 
