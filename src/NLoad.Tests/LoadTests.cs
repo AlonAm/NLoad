@@ -1,10 +1,10 @@
-﻿using System.Diagnostics;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace NLoad.Tests
 {
@@ -55,14 +55,9 @@ namespace NLoad.Tests
             var result = loadTest.Run();
 
             Assert.AreNotEqual(0, result.TotalIterations);
-
             Assert.AreNotEqual(TimeSpan.Zero, result.TotalRuntime);
-
             Assert.IsTrue(result.TotalRuntime > duration);
-
             Assert.IsTrue(result.Heartbeat.Any());
-
-            //Assert.IsTrue(result.MinThroughput > 0);
             Assert.IsTrue(result.MaxThroughput > 0);
             Assert.IsTrue(result.AverageThroughput > 0);
 
@@ -74,7 +69,6 @@ namespace NLoad.Tests
         }
 
         [TestMethod]
-        [Ignore]
         public void HeartbeatCountEqualsDurationInSeconds()
         {
             for (var durationInSeconds = 1; durationInSeconds < 3; durationInSeconds++)
@@ -221,9 +215,8 @@ namespace NLoad.Tests
             Assert.AreEqual(result.TotalErrors, result.TotalIterations);
         }
 
-        [Ignore]
         [TestMethod]
-        public void AsyncTest()
+        public void CanRunAsynchronously()
         {
             Debug.WriteLine("Before");
             Debug.WriteLine("Task Id: {0}", Task.CurrentId);

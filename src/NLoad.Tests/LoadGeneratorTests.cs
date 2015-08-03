@@ -8,7 +8,6 @@ namespace NLoad.Tests
     public class LoadGeneratorTests
     {
         [TestMethod]
-        [Ignore]
         public void ShouldSetResultWhenCompleted()
         {
             var loadTest = new Mock<ILoadTest>();
@@ -20,6 +19,8 @@ namespace NLoad.Tests
             loadGenerator.Start();
 
             context.StartEvent.Set();
+            
+            Thread.Sleep(1);
 
             context.QuitEvent.Set();
 
