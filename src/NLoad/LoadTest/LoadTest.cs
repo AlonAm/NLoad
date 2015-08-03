@@ -19,46 +19,70 @@ namespace NLoad
         #region Fields
 
         private long _threadCount;
-
         private long _totalErrors;
-
         private long _totalIterations;
 
         private readonly Type _testType;
-
-        private List<TestRunner> _testRunners;
-
         private readonly LoadTestMonitor _monitor;
-
-        private readonly ManualResetEvent _quitEvent;
-
-        private readonly ManualResetEvent _startEvent;
-
-        public event EventHandler<Heartbeat> Heartbeat;
-
+        //private readonly ManualResetEvent _quitEvent;
+        //private readonly ManualResetEvent _startEvent;
+        private readonly LoadTestContext _loadTestContext;
         private readonly LoadTestConfiguration _configuration;
 
-        private readonly CancellationToken _cancellationToken;
+        private List<LoadGenerator> _testRunners;
+        private CancellationToken _cancellationToken;
+
 
         #endregion
 
-        public LoadTest(Type testType, LoadTestConfiguration configuration, CancellationToken cancellationToken)
+        #region Public Events
+
+        public event EventHandler<Heartbeat> Heartbeat;
+
+        public event EventHandler<EventArgs> Starting;
+
+        public event EventHandler<EventArgs> Finished;
+
+        public event EventHandler<EventArgs> Aborted;
+
+        #endregion
+
+        #region Ctor
+
+        public LoadTest(Type testType, LoadTestConfiguration configuration)
         {
-            if (configuration == null)
+            if (testType == null) 
+                throw new ArgumentNullException("testType");
+
+            if (configuration == null) 
                 throw new ArgumentNullException("configuration");
 
-            if (cancellationToken == null)
-                throw new ArgumentNullException("cancellationToken");
-
             _testType = testType;
+
             _configuration = configuration;
+
+            _loadTestContext = new LoadTestContext();
+
+            _monitor = new LoadTestMonitor(this);
+        }
+
+        public LoadTest(Type testType, LoadTestConfiguration configuration, CancellationToken cancellationToken)
+            : this(testType, configuration)
+        {
             _cancellationToken = cancellationToken;
 
-            _startEvent = new ManualResetEvent(false);
-            _quitEvent = new ManualResetEvent(false);
+            _monitor.CancellationToken = _cancellationToken;
 
-            _monitor = new LoadTestMonitor(this, cancellationToken);
+            _cancellationToken.Register(() =>
+            {
+                if (Aborted != null)
+                {
+                    Aborted(this, new EventArgs());
+                }
+            });
         }
+
+        #endregion
 
         #region Properties
 
@@ -100,9 +124,14 @@ namespace NLoad
         {
             try
             {
+                if (Starting != null)
+                {
+                    Starting(this, new EventArgs());
+                }
+
                 var startTime = DateTime.Now;
 
-                Initialize();
+                CreateTestRunners();
 
                 StartTestRunners();
 
@@ -117,6 +146,11 @@ namespace NLoad
                 Shutdown();
 
                 stopWatch.Stop();
+
+                if (Finished != null)
+                {
+                    Finished(this, new EventArgs());
+                }
 
                 return LoadTestResult(stopWatch.Elapsed, heartbeats);
             }
@@ -147,7 +181,7 @@ namespace NLoad
 
         private void StartLoadTest()
         {
-            _startEvent.Set();
+            _loadTestContext.StartEvent.Set();
         }
 
         private List<Heartbeat> MonitorLoadTest(DateTime startTime)
@@ -214,27 +248,16 @@ namespace NLoad
 
         private void StartTestRunners()
         {
-            _testRunners.ForEach(testRunner => testRunner.StartAsync());
+            _testRunners.ForEach(testRunner => testRunner.Start());
         }
 
-        private void Initialize()
+        private void CreateTestRunners()
         {
-            var context = new TestRunContext
-            {
-                StartEvent = _startEvent,
-                QuitEvent = _quitEvent
-            };
-
-            CreateTestRunners(context);
-        }
-
-        private void CreateTestRunners(TestRunContext context)
-        {
-            _testRunners = new List<TestRunner>(_configuration.NumberOfThreads);
+            _testRunners = new List<LoadGenerator>(_configuration.NumberOfThreads);
 
             for (var i = 0; i < _configuration.NumberOfThreads; i++)
             {
-                var testRunner = new TestRunner(this, _testType, context, _cancellationToken);
+                var testRunner = new LoadGenerator(this, _testType, _loadTestContext, _cancellationToken);
 
                 _testRunners.Add(testRunner);
             }
@@ -242,7 +265,7 @@ namespace NLoad
 
         private void Shutdown()
         {
-            _quitEvent.Set();
+            _loadTestContext.QuitEvent.Set();
 
             while (_testRunners.Any(w => w.IsBusy)) //todo: replace with Task.WaitAll
             {

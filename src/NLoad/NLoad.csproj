@@ -34,11 +34,10 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="LoadTest\Heartbeat.cs" />
+    <Compile Include="Events\Heartbeat.cs" />
     <Compile Include="LoadTest\ILoadTestBuilder.cs" />
     <Compile Include="LoadTest\LoadTestMonitor.cs" />
     <Compile Include="LoadTest\ILoadTest.cs" />
-    <Compile Include="Test\ITest.cs" />
     <Compile Include="LoadTest\LoadTest.cs" />
     <Compile Include="LoadTest\LoadTestBuilder.cs" />
     <Compile Include="LoadTest\LoadTestConfiguration.cs" />
@@ -46,18 +45,19 @@
     <Compile Include="LoadTest\LoadTestResult.cs" />
     <Compile Include="NLoad.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Test\TestContext.cs" />
-    <Compile Include="Test\TestResult.cs" />
-    <Compile Include="TestRun\TestRunContext.cs" />
-    <Compile Include="TestRunner\TestRunner.cs">
+    <Compile Include="LoadTest\LoadTestContext.cs" />
+    <Compile Include="LoadGenerator\LoadGenerator.cs">
       <ExcludeFromStyleCop>False</ExcludeFromStyleCop>
     </Compile>
-    <Compile Include="TestRunner\TestRunnerResult.cs" />
-    <Compile Include="TestRun\TestRunResult.cs" />
+    <Compile Include="LoadGenerator\LoadGeneratorResult.cs" />
+    <Compile Include="Scenario\TestRunResult.cs" />
+    <Compile Include="Scenario\ITest.cs" />
+    <Compile Include="Scenario\TestResult.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="NLoad.nuspec" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

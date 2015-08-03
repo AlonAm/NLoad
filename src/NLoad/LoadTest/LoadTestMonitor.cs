@@ -7,15 +7,18 @@ namespace NLoad
     public class LoadTestMonitor
     {
         private readonly ILoadTest _loadTest;
-        private readonly CancellationToken _cancellationToken;
 
         public event EventHandler<Heartbeat> Heartbeat;
 
-        public LoadTestMonitor(ILoadTest loadTest, CancellationToken cancellationToken)
+        public LoadTestMonitor(ILoadTest loadTest)
         {
+            if (loadTest == null)
+                throw new ArgumentNullException("loadTest");
+
             _loadTest = loadTest;
-            _cancellationToken = cancellationToken;
         }
+
+        public CancellationToken CancellationToken { get; set; }
 
         public List<Heartbeat> Start(DateTime startTime, TimeSpan duration)
         {
@@ -27,7 +30,7 @@ namespace NLoad
 
             while (running)
             {
-                _cancellationToken.ThrowIfCancellationRequested();
+                CancellationToken.ThrowIfCancellationRequested();
 
                 var now = DateTime.UtcNow;
 

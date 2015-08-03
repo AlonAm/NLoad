@@ -5,22 +5,14 @@ using System.Threading.Tasks;
 
 namespace NLoad
 {
-    //public class TestRunner<T> : TestRunner where T : ITest, new()
-    //{
-    //    public TestRunner(ILoadTest loadTest, TestRunContext context, CancellationToken cancellationToken)
-    //        : base(loadTest, typeof(T), context, cancellationToken)
-    //    {
-    //    }
-    //}
-
-    public class TestRunner
+    public class LoadGenerator
     {
         private readonly Type _testType;
         private readonly ILoadTest _loadTest;
-        private readonly TestRunContext _context;
+        private readonly LoadTestContext _context;
         private readonly CancellationToken _cancellationToken;
 
-        public TestRunner(ILoadTest loadTest, Type testType, TestRunContext context, CancellationToken cancellationToken)
+        public LoadGenerator(ILoadTest loadTest, Type testType, LoadTestContext context, CancellationToken cancellationToken)
         {
             _loadTest = loadTest;
             _testType = testType;
@@ -28,37 +20,26 @@ namespace NLoad
             _cancellationToken = cancellationToken;
         }
 
-        #region Properties
-
-        public TestRunnerResult Result { get; private set; }
-
         public bool IsBusy { get; private set; }
 
-        #endregion
+        public LoadGeneratorResult Result { get; private set; }
 
-        public async void StartAsync()
+        public void Start()
         {
             IsBusy = true;
 
-            var testRunnerResult = Task.Run(() => Start(_context), _cancellationToken).ConfigureAwait(false);
-
-            try
-            {
-                Result = await testRunnerResult;
-            }
-            catch (TaskCanceledException)
-            {
-                Result = new TestRunnerResult();
-            }
-            finally
-            {
-                IsBusy = false;
-            }
+            Task.Run(() => Start(_context), _cancellationToken)
+                            .ContinueWith(task =>
+                            {
+                                Result = task.IsFaulted || task.IsCanceled ? new LoadGeneratorResult() : task.Result;
+                                IsBusy = false;
+                            },
+                            _cancellationToken);
         }
 
-        private TestRunnerResult Start(TestRunContext context)
+        private LoadGeneratorResult Start(LoadTestContext context)
         {
-            var result = new TestRunnerResult(starTime: DateTime.UtcNow);
+            var result = new LoadGeneratorResult(starTime: DateTime.UtcNow);
 
             var testRunResults = new List<TestRunResult>();
 

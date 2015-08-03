@@ -3,13 +3,13 @@ using System.Collections.Generic;
 
 namespace NLoad
 {
-    public class TestRunnerResult
+    public class LoadGeneratorResult
     {
-        public TestRunnerResult()
+        public LoadGeneratorResult()
         {
         }
 
-        public TestRunnerResult(DateTime starTime)
+        public LoadGeneratorResult(DateTime starTime)
         {
             StartTime = starTime;
         }
