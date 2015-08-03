@@ -74,6 +74,7 @@ namespace NLoad.Tests
         }
 
         [TestMethod]
+        [Ignore]
         public void HeartbeatCountEqualsDurationInSeconds()
         {
             for (var durationInSeconds = 1; durationInSeconds < 3; durationInSeconds++)
