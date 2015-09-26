@@ -23,15 +23,18 @@ namespace NLoad
         private long _totalIterations;
 
         private readonly Type _testType;
+
         private readonly LoadTestMonitor _monitor;
-        //private readonly ManualResetEvent _quitEvent;
-        //private readonly ManualResetEvent _startEvent;
-        private readonly LoadTestContext _loadTestContext;
+
+        private readonly LoadTestContext _context;
+
         private readonly LoadTestConfiguration _configuration;
 
-        private List<LoadGenerator> _testRunners;
+        private List<LoadGenerator> _loadGenerators;
+
         private CancellationToken _cancellationToken;
 
+        DateTime _startTime;
 
         #endregion
 
@@ -51,17 +54,17 @@ namespace NLoad
 
         public LoadTest(Type testType, LoadTestConfiguration configuration)
         {
-            if (testType == null) 
+            if (testType == null)
                 throw new ArgumentNullException("testType");
 
-            if (configuration == null) 
+            if (configuration == null)
                 throw new ArgumentNullException("configuration");
 
             _testType = testType;
 
             _configuration = configuration;
 
-            _loadTestContext = new LoadTestContext();
+            _context = new LoadTestContext();
 
             _monitor = new LoadTestMonitor(this);
         }
@@ -120,6 +123,9 @@ namespace NLoad
 
         #endregion
 
+        /// <summary>
+        /// Run Load Test
+        /// </summary>
         public LoadTestResult Run()
         {
             try
@@ -129,21 +135,21 @@ namespace NLoad
                     Starting(this, new EventArgs());
                 }
 
-                var startTime = DateTime.Now;
+                _startTime = DateTime.Now;
 
-                CreateTestRunners();
+                TryCreateLoadGenerators();
 
-                StartTestRunners();
+                TryStartLoadGenerators();
 
-                Warmup(startTime);
+                TryWarmup();
 
                 var stopWatch = Stopwatch.StartNew();
 
-                StartLoadTest();
+                TryStart();
 
-                var heartbeats = MonitorLoadTest(startTime);
+                var heartbeats = TryMonitorHeartbeat();
 
-                Shutdown();
+                TryShutdown();
 
                 stopWatch.Stop();
 
@@ -177,25 +183,105 @@ namespace NLoad
             Interlocked.Increment(ref _threadCount);
         }
 
-        // helpers
+        #region Error Handling
 
-        private void StartLoadTest()
+        private void TryStart()
         {
-            _loadTestContext.StartEvent.Set();
+            Start();
         }
 
-        private List<Heartbeat> MonitorLoadTest(DateTime startTime)
+        private void TryCreateLoadGenerators()
         {
-            _monitor.Heartbeat += Heartbeat;
-
-            var heartbeats = _monitor.Start(startTime, _configuration.Duration);
-
-            _monitor.Heartbeat -= Heartbeat;
-
-            return heartbeats;
+            try
+            {
+                CreateLoadGenerators();
+            }
+            catch (Exception ex)
+            {
+                throw new NLoadException("Failed to create load generators.", ex);
+            }
         }
 
-        private void Warmup(DateTime startTime)
+        private void TryStartLoadGenerators()
+        {
+            try
+            {
+                StartLoadGenerators();
+            }
+            catch (Exception ex)
+            {
+                throw new NLoadException("Failed to start load generators.", ex);
+            }
+        }
+
+        private void TryWarmup()
+        {
+            try
+            {
+                Warmup();
+            }
+            catch (Exception ex)
+            {
+                throw new NLoadException("Failed to warmup load test.", ex);
+            }
+        }
+
+        private List<Heartbeat> TryMonitorHeartbeat()
+        {
+            return MonitorHeartbeat();
+        }
+
+        private void TryShutdown()
+        {
+            try
+            {
+                Shutdown();
+            }
+            catch (Exception ex)
+            {
+                throw new NLoadException("Failed to shutdown load test.", ex);
+            }
+        }
+
+        #endregion
+
+        #region Helpers
+
+        /// <summary>
+        /// Start Load Test
+        /// </summary>
+        private void Start()
+        {
+            _context.StartEvent.Set();
+        }
+
+        /// <summary>
+        /// Create Load Generators.
+        /// </summary>
+        private void CreateLoadGenerators()
+        {
+            _loadGenerators = new List<LoadGenerator>(_configuration.NumberOfThreads);
+
+            for (var i = 0; i < _configuration.NumberOfThreads; i++)
+            {
+                var testRunner = new LoadGenerator(this, _testType, _context, _cancellationToken);
+
+                _loadGenerators.Add(testRunner);
+            }
+        }
+
+        /// <summary>
+        /// Start Load Generators.
+        /// </summary>
+        private void StartLoadGenerators()
+        {
+            _loadGenerators.ForEach(testRunner => testRunner.Start());
+        }
+
+        /// <summary>
+        /// Warmup Load Test
+        /// </summary>
+        private void Warmup()
         {
             while (TotalThreads < _configuration.NumberOfThreads && !_cancellationToken.IsCancellationRequested)
             {
@@ -204,7 +290,7 @@ namespace NLoad
                     Heartbeat(this, new Heartbeat
                     {
                         TotalIterations = _totalIterations,
-                        TotalRuntime = DateTime.Now - startTime,
+                        TotalRuntime = DateTime.Now - _startTime,
                         TotalThreads = TotalThreads
                     });
                 }
@@ -213,15 +299,46 @@ namespace NLoad
             }
         }
 
+        /// <summary>
+        /// Monitor load test heartbeat every one second
+        /// </summary>
+        /// <returns></returns>
+        private List<Heartbeat> MonitorHeartbeat()
+        {
+            _monitor.Heartbeat += Heartbeat;
+
+            var heartbeats = _monitor.Start(_startTime, _configuration.Duration);
+
+            _monitor.Heartbeat -= Heartbeat;
+
+            return heartbeats;
+        }
+
+        /// <summary>
+        /// Shutdown Load Test
+        /// </summary>
+        private void Shutdown()
+        {
+            _context.QuitEvent.Set();
+
+            while (_loadGenerators.Any(w => w.IsBusy)) //todo: replace with Task.WaitAll
+            {
+                Thread.Sleep(1);
+            }
+        }
+
+        /// <summary>
+        /// Build Load Test Result
+        /// </summary>
         private LoadTestResult LoadTestResult(TimeSpan elapsed, List<Heartbeat> heartbeats)
         {
-            var testRuns = _testRunners.Where(k => k.Result != null && k.Result.TestRuns != null)
-                                       .SelectMany(k => k.Result.TestRuns)
-                                       .ToList();
+            var testRuns = _loadGenerators.Where(k => k.Result != null && k.Result.TestRuns != null)
+                .SelectMany(k => k.Result.TestRuns)
+                .ToList();
 
             var result = new LoadTestResult
             {
-                TestRunnersResults = _testRunners.Where(k => k.Result != null).Select(k => k.Result),
+                TestRunnersResults = _loadGenerators.Where(k => k.Result != null).Select(k => k.Result),
                 TotalIterations = _totalIterations,
                 TotalRuntime = elapsed,
                 TotalErrors = _totalErrors,
@@ -246,31 +363,6 @@ namespace NLoad
             return result;
         }
 
-        private void StartTestRunners()
-        {
-            _testRunners.ForEach(testRunner => testRunner.Start());
-        }
-
-        private void CreateTestRunners()
-        {
-            _testRunners = new List<LoadGenerator>(_configuration.NumberOfThreads);
-
-            for (var i = 0; i < _configuration.NumberOfThreads; i++)
-            {
-                var testRunner = new LoadGenerator(this, _testType, _loadTestContext, _cancellationToken);
-
-                _testRunners.Add(testRunner);
-            }
-        }
-
-        private void Shutdown()
-        {
-            _loadTestContext.QuitEvent.Set();
-
-            while (_testRunners.Any(w => w.IsBusy)) //todo: replace with Task.WaitAll
-            {
-                Thread.Sleep(1);
-            }
-        }
+        #endregion
     }
 }
