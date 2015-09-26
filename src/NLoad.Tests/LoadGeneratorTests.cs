@@ -11,7 +11,7 @@ namespace NLoad.Tests
         [TestMethod]
         public void ShouldSetResultWhenCompleted()
         {
-            var loadTest = new Mock<ILoadTest>();
+            var loadTest = new Mock<LoadTest>();
 
             var context = new LoadTestContext();
 

@@ -130,10 +130,7 @@ namespace NLoad
         {
             try
             {
-                if (Starting != null)
-                {
-                    Starting(this, new EventArgs());
-                }
+                FireStartingEvent();
 
                 _startTime = DateTime.Now;
 
@@ -143,7 +140,7 @@ namespace NLoad
 
                 TryWarmup();
 
-                var stopWatch = Stopwatch.StartNew();
+                var totalRuntimeStopWatch = Stopwatch.StartNew();
 
                 TryStart();
 
@@ -151,14 +148,13 @@ namespace NLoad
 
                 TryShutdown();
 
-                stopWatch.Stop();
+                totalRuntimeStopWatch.Stop();
 
-                if (Finished != null)
-                {
-                    Finished(this, new EventArgs());
-                }
+                FireFinishedEvent();
 
-                return LoadTestResult(stopWatch.Elapsed, heartbeats);
+                var result = CreateLoadTestResult(totalRuntimeStopWatch.Elapsed, heartbeats);
+
+                return result;
             }
             catch (Exception e)
             {
@@ -166,21 +162,6 @@ namespace NLoad
 
                 throw new NLoadException("An error occurred while running load test. See inner exception for details.", e);
             }
-        }
-
-        public void IncrementTotalIterations()
-        {
-            Interlocked.Increment(ref _totalIterations);
-        }
-
-        public void IncrementTotalErrors()
-        {
-            Interlocked.Increment(ref _totalErrors);
-        }
-
-        public void IncrementTotalThreads()
-        {
-            Interlocked.Increment(ref _threadCount);
         }
 
         #region Error Handling
@@ -330,7 +311,7 @@ namespace NLoad
         /// <summary>
         /// Build Load Test Result
         /// </summary>
-        private LoadTestResult LoadTestResult(TimeSpan elapsed, List<Heartbeat> heartbeats)
+        private LoadTestResult CreateLoadTestResult(TimeSpan elapsed, List<Heartbeat> heartbeats)
         {
             var testRuns = _loadGenerators.Where(k => k.Result != null && k.Result.TestRuns != null)
                 .SelectMany(k => k.Result.TestRuns)
@@ -361,6 +342,37 @@ namespace NLoad
             }
 
             return result;
+        }
+
+        private void FireStartingEvent()
+        {
+            if (Starting != null)
+            {
+                Starting(this, new EventArgs());
+            }
+        }
+
+        private void FireFinishedEvent()
+        {
+            if (Finished != null)
+            {
+                Finished(this, new EventArgs());
+            }
+        }
+
+        internal void IncrementTotalIterations()
+        {
+            Interlocked.Increment(ref _totalIterations);
+        }
+
+        internal void IncrementTotalErrors()
+        {
+            Interlocked.Increment(ref _totalErrors);
+        }
+
+        internal void IncrementTotalThreads()
+        {
+            Interlocked.Increment(ref _threadCount);
         }
 
         #endregion
