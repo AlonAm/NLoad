@@ -21,12 +21,12 @@ namespace NLoad
         private long _threadCount;
         private long _totalErrors;
         private long _totalIterations;
-
+        
         private DateTime _startTime;
 
         private readonly Type _testType;
 
-        private readonly HeartbeatMonitor _heartbeatMonitor;
+        private readonly HeartRateMonitor _heartRateMonitor;
 
         private readonly LoadTestContext _context;
 
@@ -35,6 +35,8 @@ namespace NLoad
         private List<LoadGenerator> _loadGenerators;
 
         private CancellationToken _cancellationToken;
+
+        readonly Stopwatch _totalRuntimeStopWatch = new Stopwatch();
 
         #endregion
 
@@ -66,7 +68,7 @@ namespace NLoad
 
             _context = new LoadTestContext();
 
-            _heartbeatMonitor = new HeartbeatMonitor(this);
+            _heartRateMonitor = new HeartRateMonitor(this);
         }
 
         public LoadTest(Type testType, LoadTestConfiguration configuration, CancellationToken cancellationToken)
@@ -74,7 +76,7 @@ namespace NLoad
         {
             _cancellationToken = cancellationToken;
 
-            _heartbeatMonitor.CancellationToken = _cancellationToken;
+            _heartRateMonitor.CancellationToken = _cancellationToken;
 
             _cancellationToken.Register(() =>
             {
@@ -104,19 +106,18 @@ namespace NLoad
 
                 TryWarmup();
 
-                var totalRuntimeStopWatch = Stopwatch.StartNew();
+                MeasureTotalRuntime();
 
                 TryStart();
 
-                var heartbeats = TryMonitorHeartbeat();
+                TryMonitorHeartRate();
 
                 TryShutdown();
 
-                totalRuntimeStopWatch.Stop();
-
                 FireFinishedEvent();
 
-                var result = CreateLoadTestResult(totalRuntimeStopWatch.Elapsed, heartbeats); //todo: move to builder
+                var result = new LoadTestResultBuilder(this, _loadGenerators, _heartRateMonitor)
+                                        .Build();
 
                 return result;
             }
@@ -126,6 +127,22 @@ namespace NLoad
 
                 throw new NLoadException("An error occurred while running load test.", ex);
             }
+        }
+
+        private void MeasureTotalRuntime()
+        {
+            _totalRuntimeStopWatch.Restart();
+
+            Finished += StopMeasuringTotalRuntime;
+        }
+
+        private void StopMeasuringTotalRuntime(object sender, EventArgs e)
+        {
+            _totalRuntimeStopWatch.Stop();
+
+            TotalRuntime = _totalRuntimeStopWatch.Elapsed;
+
+            Finished -= StopMeasuringTotalRuntime;
         }
 
         #region Properties
@@ -160,6 +177,12 @@ namespace NLoad
             {
                 return Interlocked.Read(ref _threadCount);
             }
+        }
+
+        public TimeSpan TotalRuntime
+        {
+            get;
+            private set;
         }
 
         #endregion
@@ -207,9 +230,16 @@ namespace NLoad
             }
         }
 
-        private List<Heartbeat> TryMonitorHeartbeat()
+        private void TryMonitorHeartRate()
         {
-            return MonitorHeartbeat();
+            try
+            {
+                MonitorHeartRate();
+            }
+            catch (Exception ex)
+            {
+                throw new NLoadException("Failed to monitor load test heart rate.", ex);
+            }
         }
 
         private void TryShutdown()
@@ -284,15 +314,13 @@ namespace NLoad
         /// Monitor load test heartbeat every one second
         /// </summary>
         /// <returns></returns>
-        private List<Heartbeat> MonitorHeartbeat()
+        private void MonitorHeartRate()
         {
-            _heartbeatMonitor.Heartbeat += Heartbeat;
+            _heartRateMonitor.Heartbeat += Heartbeat;
 
-            var heartbeats = _heartbeatMonitor.Start(_startTime, _configuration.Duration);
+            _heartRateMonitor.Start(_startTime, _configuration.Duration);
 
-            _heartbeatMonitor.Heartbeat -= Heartbeat;
-
-            return heartbeats;
+            _heartRateMonitor.Heartbeat -= Heartbeat;
         }
 
         /// <summary>
@@ -306,44 +334,6 @@ namespace NLoad
             {
                 Thread.Sleep(1);
             }
-        }
-
-        /// <summary>
-        /// Build Load Test Result
-        /// </summary>
-        private LoadTestResult CreateLoadTestResult(TimeSpan elapsed, List<Heartbeat> heartbeats)
-        {
-            //todo: move to builder
-
-            var testRuns = _loadGenerators.Where(k => k.Result != null && k.Result.TestRuns != null)
-                .SelectMany(k => k.Result.TestRuns)
-                .ToList();
-
-            var result = new LoadTestResult
-            {
-                TestRunnersResults = _loadGenerators.Where(k => k.Result != null).Select(k => k.Result),
-                TotalIterations = _totalIterations,
-                TotalRuntime = elapsed,
-                TotalErrors = _totalErrors,
-                Heartbeat = heartbeats,
-                TestRuns = testRuns
-            };
-
-            if (testRuns.Any())
-            {
-                result.MaxResponseTime = testRuns.Max(k => k.ResponseTime);
-                result.MinResponseTime = testRuns.Min(k => k.ResponseTime);
-                result.AverageResponseTime = new TimeSpan(Convert.ToInt64((testRuns.Average(k => k.ResponseTime.Ticks))));
-            }
-
-            if (heartbeats.Any())
-            {
-                result.MaxThroughput = heartbeats.Where(k => !double.IsNaN(k.Throughput)).Max(k => k.Throughput);
-                result.MinThroughput = heartbeats.Where(k => !double.IsNaN(k.Throughput)).Min(k => k.Throughput);
-                result.AverageThroughput = heartbeats.Where(k => !double.IsNaN(k.Throughput)).Average(k => k.Throughput);
-            }
-
-            return result;
         }
 
         private void FireStartingEvent()

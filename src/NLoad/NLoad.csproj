@@ -36,13 +36,16 @@
   <ItemGroup>
     <Compile Include="Events\Heartbeat.cs" />
     <Compile Include="LoadTest\ILoadTestBuilder.cs" />
-    <Compile Include="LoadTest\HeartbeatMonitor.cs" />
+    <Compile Include="LoadTest\HeartRateMonitor.cs" />
     <Compile Include="LoadTest\ILoadTest.cs" />
-    <Compile Include="LoadTest\LoadTest.cs" />
+    <Compile Include="LoadTest\LoadTest.cs">
+      <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
+    </Compile>
     <Compile Include="LoadTest\LoadTestBuilder.cs" />
     <Compile Include="LoadTest\LoadTestConfiguration.cs" />
     <Compile Include="Exceptions\NLoadException.cs" />
     <Compile Include="LoadTest\LoadTestResult.cs" />
+    <Compile Include="LoadTest\LoadTestResultBuilder.cs" />
     <Compile Include="NLoad.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="LoadTest\LoadTestContext.cs" />

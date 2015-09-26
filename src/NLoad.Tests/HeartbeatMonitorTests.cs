@@ -22,13 +22,13 @@ namespace NLoad.Tests
             loadTest.Setup(k => k.TotalErrors).Returns(1);
             loadTest.Setup(k => k.Configuration).Returns(config);
 
-            var heartRateMonitor = new HeartbeatMonitor(loadTest.Object);
+            var heartRateMonitor = new HeartRateMonitor(loadTest.Object);
 
-            var heartbeats = heartRateMonitor.Start(DateTime.Now, TimeSpan.FromSeconds(2));
+            heartRateMonitor.Start(DateTime.Now, TimeSpan.FromSeconds(2));
 
-            Assert.IsNotNull(heartbeats);
+            Assert.IsNotNull(heartRateMonitor.Heartbeats);
 
-            Assert.IsTrue(heartbeats.Any());
+            Assert.IsTrue(heartRateMonitor.Heartbeats.Any());
         }
     }
 }

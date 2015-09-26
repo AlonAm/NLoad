@@ -18,5 +18,7 @@ namespace NLoad
         ILoadTestBuilder OnHeartbeat(EventHandler<Heartbeat> handler);
 
         ILoadTestBuilder WithCancellationToken(CancellationToken cancellationToken);
+
+        ILoadTestBuilder StartImmediately(bool startImmediately);
     }
 }
