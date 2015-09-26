@@ -22,9 +22,11 @@ namespace NLoad
         private long _totalErrors;
         private long _totalIterations;
 
+        private DateTime _startTime;
+
         private readonly Type _testType;
 
-        private readonly LoadTestMonitor _monitor;
+        private readonly HeartbeatMonitor _heartbeatMonitor;
 
         private readonly LoadTestContext _context;
 
@@ -33,8 +35,6 @@ namespace NLoad
         private List<LoadGenerator> _loadGenerators;
 
         private CancellationToken _cancellationToken;
-
-        DateTime _startTime;
 
         #endregion
 
@@ -66,7 +66,7 @@ namespace NLoad
 
             _context = new LoadTestContext();
 
-            _monitor = new LoadTestMonitor(this);
+            _heartbeatMonitor = new HeartbeatMonitor(this);
         }
 
         public LoadTest(Type testType, LoadTestConfiguration configuration, CancellationToken cancellationToken)
@@ -74,7 +74,7 @@ namespace NLoad
         {
             _cancellationToken = cancellationToken;
 
-            _monitor.CancellationToken = _cancellationToken;
+            _heartbeatMonitor.CancellationToken = _cancellationToken;
 
             _cancellationToken.Register(() =>
             {
@@ -86,6 +86,47 @@ namespace NLoad
         }
 
         #endregion
+
+        /// <summary>
+        /// Run Load Test
+        /// </summary>
+        public LoadTestResult Run()
+        {
+            try
+            {
+                FireStartingEvent();
+
+                _startTime = DateTime.Now;
+
+                TryCreateLoadGenerators();
+
+                TryStartLoadGenerators();
+
+                TryWarmup();
+
+                var totalRuntimeStopWatch = Stopwatch.StartNew();
+
+                TryStart();
+
+                var heartbeats = TryMonitorHeartbeat();
+
+                TryShutdown();
+
+                totalRuntimeStopWatch.Stop();
+
+                FireFinishedEvent();
+
+                var result = CreateLoadTestResult(totalRuntimeStopWatch.Elapsed, heartbeats); //todo: move to builder
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                if (ex is OperationCanceledException) throw;
+
+                throw new NLoadException("An error occurred while running load test.", ex);
+            }
+        }
 
         #region Properties
 
@@ -122,47 +163,6 @@ namespace NLoad
         }
 
         #endregion
-
-        /// <summary>
-        /// Run Load Test
-        /// </summary>
-        public LoadTestResult Run()
-        {
-            try
-            {
-                FireStartingEvent();
-
-                _startTime = DateTime.Now;
-
-                TryCreateLoadGenerators();
-
-                TryStartLoadGenerators();
-
-                TryWarmup();
-
-                var totalRuntimeStopWatch = Stopwatch.StartNew();
-
-                TryStart();
-
-                var heartbeats = TryMonitorHeartbeat();
-
-                TryShutdown();
-
-                totalRuntimeStopWatch.Stop();
-
-                FireFinishedEvent();
-
-                var result = CreateLoadTestResult(totalRuntimeStopWatch.Elapsed, heartbeats);
-
-                return result;
-            }
-            catch (Exception e)
-            {
-                if (e is OperationCanceledException) throw;
-
-                throw new NLoadException("An error occurred while running load test. See inner exception for details.", e);
-            }
-        }
 
         #region Error Handling
 
@@ -286,11 +286,11 @@ namespace NLoad
         /// <returns></returns>
         private List<Heartbeat> MonitorHeartbeat()
         {
-            _monitor.Heartbeat += Heartbeat;
+            _heartbeatMonitor.Heartbeat += Heartbeat;
 
-            var heartbeats = _monitor.Start(_startTime, _configuration.Duration);
+            var heartbeats = _heartbeatMonitor.Start(_startTime, _configuration.Duration);
 
-            _monitor.Heartbeat -= Heartbeat;
+            _heartbeatMonitor.Heartbeat -= Heartbeat;
 
             return heartbeats;
         }
@@ -313,6 +313,8 @@ namespace NLoad
         /// </summary>
         private LoadTestResult CreateLoadTestResult(TimeSpan elapsed, List<Heartbeat> heartbeats)
         {
+            //todo: move to builder
+
             var testRuns = _loadGenerators.Where(k => k.Result != null && k.Result.TestRuns != null)
                 .SelectMany(k => k.Result.TestRuns)
                 .ToList();

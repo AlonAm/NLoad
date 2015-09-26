@@ -6,7 +6,7 @@ using System.Linq;
 namespace NLoad.Tests
 {
     [TestClass]
-    public class LoadTestMonitorTests
+    public class HeartbeatMonitorTests
     {
         [TestMethod]
         public void MonitorHeartRate()
@@ -22,7 +22,7 @@ namespace NLoad.Tests
             loadTest.Setup(k => k.TotalErrors).Returns(1);
             loadTest.Setup(k => k.Configuration).Returns(config);
 
-            var heartRateMonitor = new LoadTestMonitor(loadTest.Object);
+            var heartRateMonitor = new HeartbeatMonitor(loadTest.Object);
 
             var heartbeats = heartRateMonitor.Start(DateTime.Now, TimeSpan.FromSeconds(2));
 

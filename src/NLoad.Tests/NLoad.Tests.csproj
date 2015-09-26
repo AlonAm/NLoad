@@ -65,7 +65,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="LoadGeneratorTests.cs" />
     <Compile Include="TestRunResultTests.cs" />
-    <Compile Include="LoadTestMonitorTests.cs" />
+    <Compile Include="HeartbeatMonitorTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\NLoad\NLoad.csproj">

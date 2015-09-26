@@ -4,13 +4,13 @@ using System.Threading;
 
 namespace NLoad
 {
-    public class LoadTestMonitor
+    public class HeartbeatMonitor
     {
         private readonly ILoadTest _loadTest;
 
         public event EventHandler<Heartbeat> Heartbeat;
 
-        public LoadTestMonitor(ILoadTest loadTest)
+        public HeartbeatMonitor(ILoadTest loadTest)
         {
             if (loadTest == null)
                 throw new ArgumentNullException("loadTest");
