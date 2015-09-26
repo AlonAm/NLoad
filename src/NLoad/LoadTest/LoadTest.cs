@@ -21,7 +21,7 @@ namespace NLoad
         private long _threadCount;
         private long _totalErrors;
         private long _totalIterations;
-        
+
         private DateTime _startTime;
 
         private readonly Type _testType;
@@ -104,7 +104,10 @@ namespace NLoad
 
                 TryStartLoadGenerators();
 
-                TryWarmup();
+                if (_configuration.StartImmediately == false)
+                {
+                    TryWaitUntilThreadsCreated();
+                }
 
                 MeasureTotalRuntime();
 
@@ -220,11 +223,11 @@ namespace NLoad
             }
         }
 
-        private void TryWarmup()
+        private void TryWaitUntilThreadsCreated()
         {
             try
             {
-                Warmup();
+                WaitUntilThreadsCreated();
             }
             catch (Exception ex)
             {
@@ -296,9 +299,9 @@ namespace NLoad
         }
 
         /// <summary>
-        /// Warmup Load Test
+        /// WaitUntilThreadsCreated Load Test
         /// </summary>
-        private void Warmup()
+        private void WaitUntilThreadsCreated()
         {
             while (TotalThreads < _configuration.NumberOfThreads && !_cancellationToken.IsCancellationRequested)
             {
