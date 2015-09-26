@@ -68,6 +68,13 @@ namespace NLoad
             return this;
         }
 
+        public ILoadTestBuilder StartImmediately(bool startImmediately = true)
+        {
+            _configuration.StartImmediately = startImmediately;
+
+            return this;
+        }
+
         public ILoadTestBuilder OfType(Type testType)
         {
             _testType = testType;

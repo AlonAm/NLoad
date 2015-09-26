@@ -22,16 +22,21 @@ namespace NLoad
         private long _totalErrors;
         private long _totalIterations;
 
+        private DateTime _startTime;
+
         private readonly Type _testType;
-        private readonly LoadTestMonitor _monitor;
-        //private readonly ManualResetEvent _quitEvent;
-        //private readonly ManualResetEvent _startEvent;
-        private readonly LoadTestContext _loadTestContext;
+
+        private readonly HeartRateMonitor _heartRateMonitor;
+
+        private readonly LoadTestContext _context;
+
         private readonly LoadTestConfiguration _configuration;
 
-        private List<LoadGenerator> _testRunners;
+        private List<LoadGenerator> _loadGenerators;
+
         private CancellationToken _cancellationToken;
 
+        readonly Stopwatch _totalRuntimeStopWatch = new Stopwatch();
 
         #endregion
 
@@ -51,19 +56,19 @@ namespace NLoad
 
         public LoadTest(Type testType, LoadTestConfiguration configuration)
         {
-            if (testType == null) 
+            if (testType == null)
                 throw new ArgumentNullException("testType");
 
-            if (configuration == null) 
+            if (configuration == null)
                 throw new ArgumentNullException("configuration");
 
             _testType = testType;
 
             _configuration = configuration;
 
-            _loadTestContext = new LoadTestContext();
+            _context = new LoadTestContext();
 
-            _monitor = new LoadTestMonitor(this);
+            _heartRateMonitor = new HeartRateMonitor(this);
         }
 
         public LoadTest(Type testType, LoadTestConfiguration configuration, CancellationToken cancellationToken)
@@ -71,7 +76,7 @@ namespace NLoad
         {
             _cancellationToken = cancellationToken;
 
-            _monitor.CancellationToken = _cancellationToken;
+            _heartRateMonitor.CancellationToken = _cancellationToken;
 
             _cancellationToken.Register(() =>
             {
@@ -83,6 +88,67 @@ namespace NLoad
         }
 
         #endregion
+
+        /// <summary>
+        /// Run Load Test
+        /// </summary>
+        public LoadTestResult Run()
+        {
+            try
+            {
+                FireStartingEvent();
+
+                _startTime = DateTime.Now;
+
+                TryCreateLoadGenerators();
+
+                TryStartLoadGenerators();
+
+                if (_configuration.StartImmediately == false)
+                {
+                    TryWaitUntilThreadsCreated();
+                }
+
+                MeasureTotalRuntime();
+
+                TryStart();
+
+                TryMonitorHeartRate();
+
+                TryShutdown();
+
+                FireFinishedEvent();
+
+                var result = new LoadTestResultBuilder(this, _loadGenerators, _heartRateMonitor)
+                    .Build();
+
+                return result;
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new NLoadException("An error occurred while running load test.", ex);
+            }
+        }
+
+        private void MeasureTotalRuntime()
+        {
+            _totalRuntimeStopWatch.Restart();
+
+            Finished += StopMeasuringTotalRuntime;
+        }
+
+        private void StopMeasuringTotalRuntime(object sender, EventArgs e)
+        {
+            _totalRuntimeStopWatch.Stop();
+
+            TotalRuntime = _totalRuntimeStopWatch.Elapsed;
+
+            Finished -= StopMeasuringTotalRuntime;
+        }
 
         #region Properties
 
@@ -118,84 +184,124 @@ namespace NLoad
             }
         }
 
+        public TimeSpan TotalRuntime
+        {
+            get;
+            private set;
+        }
+
         #endregion
 
-        public LoadTestResult Run()
+        #region Error Handling
+
+        private void TryStart()
+        {
+            Start();
+        }
+
+        private void TryCreateLoadGenerators()
         {
             try
             {
-                if (Starting != null)
-                {
-                    Starting(this, new EventArgs());
-                }
-
-                var startTime = DateTime.Now;
-
-                CreateTestRunners();
-
-                StartTestRunners();
-
-                Warmup(startTime);
-
-                var stopWatch = Stopwatch.StartNew();
-
-                StartLoadTest();
-
-                var heartbeats = MonitorLoadTest(startTime);
-
-                Shutdown();
-
-                stopWatch.Stop();
-
-                if (Finished != null)
-                {
-                    Finished(this, new EventArgs());
-                }
-
-                return LoadTestResult(stopWatch.Elapsed, heartbeats);
+                CreateLoadGenerators();
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                if (e is OperationCanceledException) throw;
-
-                throw new NLoadException("An error occurred while running load test. See inner exception for details.", e);
+                throw new NLoadException("Failed to create load generators.", ex);
             }
         }
 
-        public void IncrementTotalIterations()
+        private void TryStartLoadGenerators()
         {
-            Interlocked.Increment(ref _totalIterations);
+            try
+            {
+                StartLoadGenerators();
+            }
+            catch (Exception ex)
+            {
+                throw new NLoadException("Failed to start load generators.", ex);
+            }
         }
 
-        public void IncrementTotalErrors()
+        private void TryWaitUntilThreadsCreated()
         {
-            Interlocked.Increment(ref _totalErrors);
+            try
+            {
+                WaitUntilThreadsCreated();
+            }
+            catch (Exception ex)
+            {
+                throw new NLoadException("Failed to warmup load test.", ex);
+            }
         }
 
-        public void IncrementTotalThreads()
+        private void TryMonitorHeartRate()
         {
-            Interlocked.Increment(ref _threadCount);
+            try
+            {
+                MonitorHeartRate();
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new NLoadException("Failed to monitor load test heart rate.", ex);
+            }
         }
 
-        // helpers
-
-        private void StartLoadTest()
+        private void TryShutdown()
         {
-            _loadTestContext.StartEvent.Set();
+            try
+            {
+                Shutdown();
+            }
+            catch (Exception ex)
+            {
+                throw new NLoadException("Failed to shutdown load test.", ex);
+            }
         }
 
-        private List<Heartbeat> MonitorLoadTest(DateTime startTime)
+        #endregion
+
+        #region Helpers
+
+        /// <summary>
+        /// Start Load Test
+        /// </summary>
+        private void Start()
         {
-            _monitor.Heartbeat += Heartbeat;
-
-            var heartbeats = _monitor.Start(startTime, _configuration.Duration);
-
-            _monitor.Heartbeat -= Heartbeat;
-
-            return heartbeats;
+            _context.StartEvent.Set();
         }
 
-        private void Warmup(DateTime startTime)
+        /// <summary>
+        /// Create Load Generators.
+        /// </summary>
+        private void CreateLoadGenerators()
+        {
+            _loadGenerators = new List<LoadGenerator>(_configuration.NumberOfThreads);
+
+            for (var i = 0; i < _configuration.NumberOfThreads; i++)
+            {
+                var testRunner = new LoadGenerator(this, _testType, _context, _cancellationToken);
+
+                _loadGenerators.Add(testRunner);
+            }
+        }
+
+        /// <summary>
+        /// Start Load Generators.
+        /// </summary>
+        private void StartLoadGenerators()
+        {
+            _loadGenerators.ForEach(testRunner => testRunner.Start());
+        }
+
+        /// <summary>
+        /// WaitUntilThreadsCreated Load Test
+        /// </summary>
+        private void WaitUntilThreadsCreated()
         {
             while (TotalThreads < _configuration.NumberOfThreads && !_cancellationToken.IsCancellationRequested)
             {
@@ -204,7 +310,7 @@ namespace NLoad
                     Heartbeat(this, new Heartbeat
                     {
                         TotalIterations = _totalIterations,
-                        TotalRuntime = DateTime.Now - startTime,
+                        TotalRuntime = DateTime.Now - _startTime,
                         TotalThreads = TotalThreads
                     });
                 }
@@ -213,64 +319,63 @@ namespace NLoad
             }
         }
 
-        private LoadTestResult LoadTestResult(TimeSpan elapsed, List<Heartbeat> heartbeats)
+        /// <summary>
+        /// Monitor load test heartbeat every one second
+        /// </summary>
+        /// <returns></returns>
+        private void MonitorHeartRate()
         {
-            var testRuns = _testRunners.Where(k => k.Result != null && k.Result.TestRuns != null)
-                                       .SelectMany(k => k.Result.TestRuns)
-                                       .ToList();
+            _heartRateMonitor.Heartbeat += Heartbeat;
 
-            var result = new LoadTestResult
-            {
-                TestRunnersResults = _testRunners.Where(k => k.Result != null).Select(k => k.Result),
-                TotalIterations = _totalIterations,
-                TotalRuntime = elapsed,
-                TotalErrors = _totalErrors,
-                Heartbeat = heartbeats,
-                TestRuns = testRuns
-            };
+            _heartRateMonitor.Start(_startTime, _configuration.Duration);
 
-            if (testRuns.Any())
-            {
-                result.MaxResponseTime = testRuns.Max(k => k.ResponseTime);
-                result.MinResponseTime = testRuns.Min(k => k.ResponseTime);
-                result.AverageResponseTime = new TimeSpan(Convert.ToInt64((testRuns.Average(k => k.ResponseTime.Ticks))));
-            }
-
-            if (heartbeats.Any())
-            {
-                result.MaxThroughput = heartbeats.Where(k => !double.IsNaN(k.Throughput)).Max(k => k.Throughput);
-                result.MinThroughput = heartbeats.Where(k => !double.IsNaN(k.Throughput)).Min(k => k.Throughput);
-                result.AverageThroughput = heartbeats.Where(k => !double.IsNaN(k.Throughput)).Average(k => k.Throughput);
-            }
-
-            return result;
+            _heartRateMonitor.Heartbeat -= Heartbeat;
         }
 
-        private void StartTestRunners()
-        {
-            _testRunners.ForEach(testRunner => testRunner.Start());
-        }
-
-        private void CreateTestRunners()
-        {
-            _testRunners = new List<LoadGenerator>(_configuration.NumberOfThreads);
-
-            for (var i = 0; i < _configuration.NumberOfThreads; i++)
-            {
-                var testRunner = new LoadGenerator(this, _testType, _loadTestContext, _cancellationToken);
-
-                _testRunners.Add(testRunner);
-            }
-        }
-
+        /// <summary>
+        /// Shutdown Load Test
+        /// </summary>
         private void Shutdown()
         {
-            _loadTestContext.QuitEvent.Set();
+            _context.QuitEvent.Set();
 
-            while (_testRunners.Any(w => w.IsBusy)) //todo: replace with Task.WaitAll
+            while (_loadGenerators.Any(w => w.IsBusy)) //todo: replace with Task.WaitAll
             {
                 Thread.Sleep(1);
             }
         }
+
+        private void FireStartingEvent()
+        {
+            if (Starting != null)
+            {
+                Starting(this, new EventArgs());
+            }
+        }
+
+        private void FireFinishedEvent()
+        {
+            if (Finished != null)
+            {
+                Finished(this, new EventArgs());
+            }
+        }
+
+        internal void IncrementTotalIterations()
+        {
+            Interlocked.Increment(ref _totalIterations);
+        }
+
+        internal void IncrementTotalErrors()
+        {
+            Interlocked.Increment(ref _totalErrors);
+        }
+
+        internal void IncrementTotalThreads()
+        {
+            Interlocked.Increment(ref _threadCount);
+        }
+
+        #endregion
     }
 }

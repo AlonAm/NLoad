@@ -4,14 +4,6 @@ namespace NLoad
     {
         LoadTestResult Run();
 
-
-        void IncrementTotalIterations();
-
-        void IncrementTotalErrors();
-        
-        void IncrementTotalThreads();
-
-
         LoadTestConfiguration Configuration { get; }
 
         long TotalIterations { get; }

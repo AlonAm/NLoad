@@ -4,29 +4,34 @@ using System.Threading;
 
 namespace NLoad
 {
-    public class LoadTestMonitor
+    /// <summary>
+    /// Load Test Heart Rate Monitor
+    ///  </summary>
+    public class HeartRateMonitor
     {
         private readonly ILoadTest _loadTest;
 
         public event EventHandler<Heartbeat> Heartbeat;
 
-        public LoadTestMonitor(ILoadTest loadTest)
+        public HeartRateMonitor(ILoadTest loadTest)
         {
             if (loadTest == null)
+            {
                 throw new ArgumentNullException("loadTest");
+            }
 
             _loadTest = loadTest;
         }
 
         public CancellationToken CancellationToken { get; set; }
 
-        public List<Heartbeat> Start(DateTime startTime, TimeSpan duration)
+        public void Start(DateTime startTime, TimeSpan duration)
         {
             var running = true;
 
             var start = DateTime.UtcNow;
 
-            var heartbeats = new List<Heartbeat>();
+            Heartbeats = new List<Heartbeat>();
 
             while (running)
             {
@@ -34,18 +39,18 @@ namespace NLoad
 
                 var now = DateTime.UtcNow;
 
-                var elapsed = now - start;
+                var runtime = now - start;
 
                 var iterations = _loadTest.TotalIterations;
 
-                var throughput = iterations / elapsed.TotalSeconds;
+                var throughput = iterations / runtime.TotalSeconds;
 
                 if (double.IsNaN(throughput) || double.IsInfinity(throughput)) continue;
 
                 var heartbeat = new Heartbeat
                 {
                     Timestamp = now,
-                    Runtime = elapsed, // Run Duration
+                    Runtime = runtime,
                     TotalRuntime = DateTime.Now - startTime,
                     Throughput = throughput,
                     TotalIterations = iterations,
@@ -53,11 +58,11 @@ namespace NLoad
                     TotalThreads = _loadTest.TotalThreads
                 };
 
-                heartbeats.Add(heartbeat);
+                Heartbeats.Add(heartbeat);
 
                 OnHeartbeat(heartbeat);
 
-                if (elapsed >= duration)
+                if (runtime >= duration)
                 {
                     running = false;
                 }
@@ -66,8 +71,6 @@ namespace NLoad
                     Thread.Sleep(1000);
                 }
             }
-
-            return heartbeats;
         }
 
         private void OnHeartbeat(Heartbeat heartbeat)
@@ -79,5 +82,7 @@ namespace NLoad
                 handler(this, heartbeat); //todo: add try catch?
             }
         }
+
+        public List<Heartbeat> Heartbeats { get; set; }
     }
 }

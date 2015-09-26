@@ -17,6 +17,7 @@ namespace NLoad
             NumberOfThreads = 1;
             Duration = TimeSpan.Zero;
             DelayBetweenThreadStart = TimeSpan.Zero;
+            StartImmediately = false;
         }
 
         /// <summary>
@@ -38,5 +39,10 @@ namespace NLoad
         /// The time delay between threads.
         /// </summary>
         public TimeSpan DelayBetweenThreadStart { get; set; }
+
+        /// <summary>
+        /// Start load test immediately or wait until threads created.
+        /// </summary>
+        public bool StartImmediately { get; set; }
     }
 }

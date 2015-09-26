@@ -8,11 +8,11 @@ namespace NLoad
     public class LoadGenerator
     {
         private readonly Type _testType;
-        private readonly ILoadTest _loadTest;
+        private readonly LoadTest _loadTest;
         private readonly LoadTestContext _context;
         private readonly CancellationToken _cancellationToken;
 
-        public LoadGenerator(ILoadTest loadTest, Type testType, LoadTestContext context, CancellationToken cancellationToken)
+        public LoadGenerator(LoadTest loadTest, Type testType, LoadTestContext context, CancellationToken cancellationToken)
         {
             _loadTest = loadTest;
             _testType = testType;
