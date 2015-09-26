@@ -117,14 +117,16 @@ namespace NLoad
                 FireFinishedEvent();
 
                 var result = new LoadTestResultBuilder(this, _loadGenerators, _heartRateMonitor)
-                                        .Build();
+                    .Build();
 
                 return result;
             }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
             catch (Exception ex)
             {
-                if (ex is OperationCanceledException) throw;
-
                 throw new NLoadException("An error occurred while running load test.", ex);
             }
         }
@@ -235,6 +237,10 @@ namespace NLoad
             try
             {
                 MonitorHeartRate();
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
             }
             catch (Exception ex)
             {
