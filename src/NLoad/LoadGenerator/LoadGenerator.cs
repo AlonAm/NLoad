@@ -11,7 +11,7 @@ namespace NLoad
         private readonly LoadTest _loadTest;
         private readonly LoadTestContext _context;
         private readonly CancellationToken _cancellationToken;
-
+        private int _isBusy;
         public LoadGenerator(LoadTest loadTest, Type testType, LoadTestContext context, CancellationToken cancellationToken)
         {
             _loadTest = loadTest;
@@ -20,19 +20,22 @@ namespace NLoad
             _cancellationToken = cancellationToken;
         }
 
-        public bool IsBusy { get; private set; }
+        public bool IsBusy
+        {
+            get { return _isBusy != 0; }
+        }
 
         public LoadGeneratorResult Result { get; private set; }
 
         public void Start()
         {
-            IsBusy = true;
+            if (Interlocked.CompareExchange(ref _isBusy, 1, 0) != 0) return;
 
             Task.Run(() => Start(_context), _cancellationToken)
                             .ContinueWith(task =>
                             {
                                 Result = task.IsFaulted || task.IsCanceled ? new LoadGeneratorResult() : task.Result;
-                                IsBusy = false;
+                                Interlocked.Exchange(ref _isBusy, 0);
                             },
                             _cancellationToken);
         }
