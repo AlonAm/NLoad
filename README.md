@@ -10,7 +10,7 @@ Install-Package NLoad
 
 ### Getting Started
 
-Implement the ITest interface. For example:
+1. Implement a class that inherits the ITest interface. For example:
 
 ```csharp
 public class MyTest : ITest
@@ -30,7 +30,7 @@ public class MyTest : ITest
 ```
 This class will be created and initialized multiple times during the load test.
 
-Create and configure a load test:
+2. Create and configure a load test:
 
 ```csharp
 var loadTest = NLoad.Test<MyTest>()
@@ -40,13 +40,13 @@ var loadTest = NLoad.Test<MyTest>()
 		.Build();
 ```
 
-Run it
+3. Run it
 
 ```csharp
 var result = loadTest.Run();
 ```
 
-#### Load Test Result
+### Load Test Result
 
 * Total Errors
 * Total Runtime
@@ -54,7 +54,7 @@ var result = loadTest.Run();
 * Min/Max/Average Throughput
 * Min/Max/Average Response Time
 
-#### Events
+### Events
 
 Event| Description        
 -----|------------
@@ -62,3 +62,7 @@ Heartbeat | Fired every one second
 Starting | Fired when the load test is starting
 Finished | Fired when the load test completes
 Aborted | Fired when the load test is aborted
+
+### License
+
+Apache 2.0
