@@ -13,7 +13,7 @@ Install-Package NLoad
 
 ### Getting Started
 
-Implement a class that inherits the ITest interface. For example:
+Implement a class that inherits the [ITest](https://github.com/AlonAm/NLoad/blob/master/src/NLoad/Scenario/ITest.cs) interface. For example:
 
 ```csharp
 public class MyTest : ITest
