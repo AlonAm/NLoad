@@ -1,6 +1,6 @@
 #NLoad
 
-NLoad is a free and open source load testing framework for .NET used for testing Websites, WCF Services or small bits of code to identify and eliminate bottlenecks at an early stage of development.
+NLoad is a free and open source load testing framework for .NET used for testing Websites, WCF Services or small bits of code to identify and eliminate bottlenecks and concurrency issues at an early stage of development.
 
 ### Installation
 To install NLoad via [NuGet](http://www.nuget.org/packages/NLoad), run the following command in the Package Manager Console
