@@ -45,3 +45,20 @@ Run it
 ```csharp
 var result = loadTest.Run();
 ```
+
+#### Load Test Result
+
+* Total Errors
+* Total Runtime
+* Total Iterations
+* Min/Max/Average Throughput
+* Min/Max/Average Response Time
+
+#### Events
+
+Event| Description        
+-----|------------
+Heartbeat | Fired every one second
+Starting | Fired when the load test is starting
+Finished | Fired when the load test completes
+Aborted | Fired when the load test is aborted
