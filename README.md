@@ -10,7 +10,7 @@ Install-Package NLoad
 
 ### Getting Started
 
-1. Implement a class that inherits the ITest interface. For example:
+Implement a class that inherits the ITest interface. For example:
 
 ```csharp
 public class MyTest : ITest
@@ -30,7 +30,7 @@ public class MyTest : ITest
 ```
 This class will be created and initialized multiple times during the load test.
 
-2. Create and configure a load test:
+Create and configure a load test:
 
 ```csharp
 var loadTest = NLoad.Test<MyTest>()
@@ -40,7 +40,7 @@ var loadTest = NLoad.Test<MyTest>()
 		.Build();
 ```
 
-3. Run it
+Run it
 
 ```csharp
 var result = loadTest.Run();
