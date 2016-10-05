@@ -1,5 +1,8 @@
 #NLoad
 
+[![NuGet](https://img.shields.io/nuget/v/NLoad.svg?maxAge=2592000)]()
+[![Build status](https://ci.appveyor.com/api/projects/status/beofqq7vuegb4ax7?svg=true)](https://ci.appveyor.com/project/AlonAmsalem/nload)
+
 NLoad is a free and open source load testing framework for .NET used for testing Websites, WCF Services or small bits of code to identify and eliminate bottlenecks and concurrency issues at an early stage of development.
 
 ### Installation
