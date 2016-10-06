@@ -3,7 +3,7 @@
 [![NuGet](https://img.shields.io/nuget/v/NLoad.svg?maxAge=2592000)]()
 [![Build status](https://ci.appveyor.com/api/projects/status/beofqq7vuegb4ax7?svg=true)](https://ci.appveyor.com/project/AlonAmsalem/nload)
 
-NLoad is a simple and easy to use load testing framework for .NET that helps testing Websites, WCF Services or small bits of code at an early stage of development to identify and eliminate bottlenecks and concurrency issues.
+NLoad is a simple and easy to use load testing framework for .NET that helps testing Websites, WCF Services or small bits of code to identify and eliminate bottlenecks and concurrency issues an early stage of development.
 
 ### Installation
 To install NLoad via [NuGet](http://www.nuget.org/packages/NLoad), run the following command in the Package Manager Console
