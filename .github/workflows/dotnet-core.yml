@@ -8,18 +8,30 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v2
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: 3.1.101
+        dotnet-version: 3.1
     - name: Install dependencies
-      run: dotnet restore
+      run: |
+        cd src
+        dotnet restore
     - name: Build
-      run: dotnet build --configuration Release --no-restore
+      run: |
+        cd src
+        dotnet build --configuration Release --no-restore
     - name: Test
-      run: dotnet test --no-restore --verbosity normal
+      run: |
+        cd src
+        dotnet test --logger trx --no-restore --verbosity normal
+    - name: Test Report
+        uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: test-results
+          path: "**/*.trx"                            
+          reporter: dotnet-trx
+          fail-on-error: true
