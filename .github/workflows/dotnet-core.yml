@@ -8,25 +8,28 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
-    - uses: actions/checkout@v2
-    - name: Setup .NET Core
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: 3.1
+     - name: Checkout the code
+      uses: actions/checkout@v3
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v1
+    - name: Setup NuGet
+      uses: NuGet/setup-nuget@v1.0.2
+      env:
+        ACTIONS_ALLOW_UNSECURE_COMMANDS: true
+    - name: Setup VSTest Path
+      uses: darenm/Setup-VSTest@v1.2
+      env:
+        ACTIONS_ALLOW_UNSECURE_COMMANDS: true
     - name: Install dependencies
-      run: |
-        cd src
-        dotnet restore
+      run: nuget restore ./src/NLoad.sln
     - name: Build
-      run: |
-        cd src
-        dotnet build --configuration Release --no-restore
+      run: msbuild.exe ./src/NLoad.sln
     - name: Test
       run: |
-        cd src
-        dotnet test --logger trx --no-restore --verbosity normal
+        vstest.console.exe "./src/NLoad.App.Tests/bin/Debug/Infrastructure.Test/bin/Debug/NLoad.App.Tests.dll" /Logger:trx
+        vstest.console.exe "./src/NLoad.Tests/bin/Debug/netcoreapp2.1/Infrastructure.Test/bin/Debug/NLoad.Tests.dll" /Logger:trx
     - name: Test Report
       uses: dorny/test-reporter@v1
       if: always()
