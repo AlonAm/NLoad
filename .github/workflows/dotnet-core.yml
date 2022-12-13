@@ -28,10 +28,10 @@ jobs:
         cd src
         dotnet test --logger trx --no-restore --verbosity normal
     - name: Test Report
-        uses: dorny/test-reporter@v1
-        if: always()
-        with:
-          name: test-results
-          path: "**/*.trx"                            
-          reporter: dotnet-trx
-          fail-on-error: true
+      uses: dorny/test-reporter@v1
+      if: always()
+      with:
+        name: test-results
+        path: "**/*.trx"                            
+        reporter: dotnet-trx
+        fail-on-error: true
