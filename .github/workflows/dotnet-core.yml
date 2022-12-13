@@ -29,7 +29,7 @@ jobs:
     - name: Test
       run: |
         vstest.console.exe "./src/NLoad.App.Tests/bin/Debug/NLoad.App.Tests.dll" /Logger:trx
-        vstest.console.exe "./src/NLoad.Tests/bin/Debug/NLoad.Tests.dll" /Logger:trx
+        vstest.console.exe "./src/NLoad.Tests/bin/Debug/netcoreapp2.1/NLoad.Tests.dll" /Logger:trx
     - name: Test Report
       uses: dorny/test-reporter@v1
       if: always()
