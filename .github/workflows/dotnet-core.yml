@@ -30,11 +30,3 @@ jobs:
       run: |
         vstest.console.exe "./src/NLoad.App.Tests/bin/Debug/NLoad.App.Tests.dll" /Logger:trx
         vstest.console.exe "./src/NLoad.Tests/bin/Debug/net7.0/NLoad.Tests.dll" /Logger:trx
-    - name: Test Report
-      uses: dorny/test-reporter@v1
-      if: always()
-      with:
-        name: test-results
-        path: "**/*.trx"                            
-        reporter: dotnet-trx
-        fail-on-error: false
