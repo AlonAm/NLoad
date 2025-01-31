@@ -30,4 +30,4 @@ jobs:
     - name: Test
       run: |
         vstest.console.exe "./src/NLoad.App.Tests/bin/Debug/NLoad.App.Tests.dll" /Logger:trx
-        vstest.console.exe "./src/NLoad.Tests/bin/Debug/net7.0/NLoad.Tests.dll" /Logger:trx
+        vstest.console.exe "./src/NLoad.Tests/bin/Debug/net8.0/NLoad.Tests.dll" /Logger:trx
